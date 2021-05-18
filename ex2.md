@@ -116,6 +116,13 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
 
 </details>
 
+> <details>
+>    <summary>Threat detection</summary>
+>
+> Threat detection staat standaard aan op de `firewall`, maar in de alerting modus. Dit kan aangepast worden naar `none` of `alert and block`. De alerts worden weggeschreven naar de `Log Analytics Workspace`.
+
+</details>
+
 ## Inbound management verkeer repareren
 
 Om de asymetrische routering te repareren, moet de inbound verkeer via de firewall lopen. We gaan dus via de firewall RDP verkeer NATten naar de management server.
