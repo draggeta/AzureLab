@@ -89,6 +89,7 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
 
 Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het internet geanalyseerd moet worden voor threats. Ook hiervoor kan de `AZF` gebruikt worden.
 
+1. Configureer `Threat detection` zodat het daadwerkelijk verkeer blokkeert.
 1. Pas de spoke `UDR` aan. Voeg een 0.0.0.0/0 route toe via de `AZF`.
 1. Voeg een nieuwe Network Rule collection toe zodat outbound verkeer toegestaan is op de `AZF`. Gebruik hiervoor `IP groups` en `service tags`.
 1. Controleer de externe IPs van de web servers.
@@ -131,6 +132,8 @@ Om de asymetrische routering te repareren, moet de inbound verkeer via de firewa
 1. Verwijder de publieke IP van de management server.
 1. Controleer of inbound verkeer werkt. Gebruik hiervoor de externe IP van de `AZF`.
 1. Controleer de nu gebruikte externe IP.
+1. Test de `threat detection` door de volgende website te bezoeken vanuit de management VM:
+    * `https://testmaliciousdomain.eastus.cloudapp.azure.com`
 
 > <details>
 >    <summary>NAT rule collections</summary>
