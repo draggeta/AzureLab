@@ -33,8 +33,7 @@ De `AZF` wordt nu gebruikt als DNS server/proxy.
 
 Nu blijkt dat de financiële en risk assesment APIs toch met elkaar gegevens moeten kunnen uitwisselen. Dit moet direct en een message queue is dus geen optie. Om verkeer tussen de spokes via de core mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en de `AZF`.
 
-> <details>
->    <summary>Standaard route tabellen in Azure</summary>
+> <details><summary>Standaard route tabellen in Azure</summary>
 >
 > Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor een deel van de RFC1918 prefixes (10.0.0.0/8, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
 >
@@ -49,22 +48,20 @@ Nu blijkt dat de financiële en risk assesment APIs toch met elkaar gegevens moe
     * Verkeer tussen spokes
     * Gebruik de `Effective routes` functionaliteit van een `NIC` of `Next hop` functionaliteit van de `Network Watcher`
 
-> <details>
->    <summary>Next hop/effective routes</summary>
->
-> De [`Next hop`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
+    > <details><summary>Next hop/effective routes</summary>
+    >
+    > De [`Next hop`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
 
-</details>
+    </details>
 
-4. Test het verbinden van een spoke VM naar een andere spoke VM. Werkt dit?
+1. Test het verbinden van een spoke VM naar een andere spoke VM. Werkt dit?
     * `curl http://<ip>`
 
-> <details>
->    <summary>Antwoord</summary>
->
-> Dit werkt nog niet, omdat de AZF niet een router, maar een firewall is. Het verkeer moet dus worden toegestaan.
+    > <details><summary>Antwoord</summary>
+    >
+    > Dit werkt nog niet, omdat de AZF niet een router, maar een firewall is. Het verkeer moet dus worden toegestaan.
 
-</details>
+    </details>
 
 ## IP groups en network rules
 
@@ -75,14 +72,13 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
     * Maak gebruik van `IP groups` om de sources en destinations aan te geven
     * Verkeer tussen spokes zou nu moeten werken.
 
-> <details>
->    <summary>Rule collection verificatie</summary>
->
-> De `Azure Firewall` heeft geen optie om te controleren of verkeer is toegestaan. Er moet dus in de logs worden gedoken. Als de `diagnostics settings` geconfigureerd zijn met een `Log Analytics Workspace`, kan gebruik worden gemaakt van de [`Logs` functionaliteit](https://docs.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) van een `AZF` om toegestane en gedropte verkeer te bekijken.
->
-> Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://docs.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en is nog in preview.
+    > <details><summary>Rule collection verificatie</summary>
+    >
+    > De `Azure Firewall` heeft geen optie om te controleren of verkeer is toegestaan. Er moet dus in de logs worden gedoken. Als de `diagnostics settings` geconfigureerd zijn met een `Log Analytics Workspace`, kan gebruik worden gemaakt van de [`Logs` functionaliteit](https://docs.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) van een `AZF` om toegestane en gedropte verkeer te bekijken.
+    >
+    > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://docs.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en is nog in preview.
 
-</details>
+    </details>
 
 
 ## Aanpassing routering richting internet
@@ -90,37 +86,35 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
 Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het internet geanalyseerd moet worden voor threats. Ook hiervoor kan de `AZF` gebruikt worden.
 
 1. Configureer `Threat detection` zodat het daadwerkelijk verkeer blokkeert.
+    
+    > <details><summary>Threat detection</summary>
+    >
+    > Threat detection staat standaard aan op de `firewall`, maar in de alerting modus. Dit kan aangepast worden naar `none` of `alert and block`. De alerts worden weggeschreven naar de `Log Analytics Workspace`.
+
+    </details>
+
 1. Pas de spoke `UDR` aan. Voeg een 0.0.0.0/0 route toe via de `AZF`.
 1. Voeg een nieuwe Network Rule collection toe zodat outbound verkeer toegestaan is op de `AZF`. Gebruik hiervoor `IP groups` en `service tags`.
 1. Controleer de externe IPs van de web servers.
     * linux: `curl https://api.ipify.org`
     * windows: `irm https://api.ipify.org`
-> **Note:** Zie Rule collection verificatie voor informatie.
-4. Maak ook een `UDR` aan voor de hub. Deze moet ook een default route richting de `AZF` hebben. Koppel de `UDR` aan de management server `subnet`.
+    > **Note:** Zie Rule collection verificatie voor informatie.
+1. Maak ook een `UDR` aan voor de hub. Deze moet ook een default route richting de `AZF` hebben. Koppel de `UDR` aan de management server `subnet`.
     * Heb je nog verbinding? Waarom wel/niet?
 
-> <details>
->    <summary>Antwoord</summary>
->
-> Er is sprake van asymetrische routering. Verkeer komt binnen via de [PIP]('' "Public IP"), maar gaat langs de AZF naar buiten. 
->
-> De `AZF` doet [automatisch SNAT](https://docs.microsoft.com/en-us/azure/firewall/snat-private-range) voor destination IPs buiten RFC1918.
+    > <details><summary>Antwoord</summary>
+    >
+    > Er is sprake van asymetrische routering. Verkeer komt binnen via de [PIP]('' "Public IP"), maar gaat langs de AZF naar buiten. 
+    >
+    > De `AZF` doet [automatisch SNAT](https://docs.microsoft.com/en-us/azure/firewall/snat-private-range) voor destination IPs buiten RFC1918.
 
-</details>
+    </details>
 
-> <details>
->    <summary>Service tags en UDRs</summary>
+> <details><summary>Service tags en UDRs</summary>
 >
 > `Service tags` zijn lijsten van IP adressen die een dienst kan gebruiken. De lijst wordt bijgehouden door Microsoft. `Service tags` zijn te gebruiken in `network security groups` en `Azure Firewalls`. 
 > 
 > `User defined routes` vallen buiten de boot. Dit onhandig, omdat bepaalde Azure diensten specifieke routes nodig hebben voor management verkeer. `Service tags` zijn ten tijden van schrijven wel in preview. Wanneer deze uitkomen, versimpelen deze de `UDR` configuratie.
-
-</details>
-
-> <details>
->    <summary>Threat detection</summary>
->
-> Threat detection staat standaard aan op de `firewall`, maar in de alerting modus. Dit kan aangepast worden naar `none` of `alert and block`. De alerts worden weggeschreven naar de `Log Analytics Workspace`.
 
 </details>
 
@@ -129,18 +123,17 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
 Om de asymetrische routering te repareren, moet de inbound verkeer via de firewall lopen. We gaan dus via de firewall RDP verkeer NATten naar de management server.
 
 1. Maak een NAT rule collection op de `AZF` aan voor inbound RDP of SSH (Windows of Linux) richting de management server.
+
+    > <details><summary>NAT rule collections</summary>
+    >
+    > `NAT rule collections` maken onder water voor elke match een [tijdelijke `network rule` aan](https://docs.microsoft.com/en-us/azure/firewall/rule-processing#nat-rules). Hierdoor is het niet nodig om handmatig `network rules` te genereren.
+
+    </details>
+
 1. Verwijder de publieke IP van de management server.
 1. Controleer of inbound verkeer werkt. Gebruik hiervoor de externe IP van de `AZF`.
 1. Controleer de nu gebruikte externe IP.
 1. Test de `threat detection` door de volgende website te bezoeken vanuit de management VM:
     * `https://testmaliciousdomain.eastus.cloudapp.azure.com`
-
-> <details>
->    <summary>NAT rule collections</summary>
->
-> `NAT rule collections` maken onder water voor elke match een [tijdelijke `network rule` aan](https://docs.microsoft.com/en-us/azure/firewall/rule-processing#nat-rules). Hierdoor is het niet nodig om handmatig `network rules` te genereren.
-
-</details>
-<br>
 
 > **Optioneel:** configureer een [DNS record](https://docs.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
