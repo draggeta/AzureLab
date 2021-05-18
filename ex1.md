@@ -1,4 +1,4 @@
-# Dag 1
+# Dag 1 - Basis netwerken
 
 Jouw afdeling wil twee web applicaties in de cloud gaan draaien. Elke applicatie moet in een aparte `virtual network` terecht komen. Er moet ook een management (hub) `virtual network` en server komen waar vandaan de twee applicaties beheerd kunnen worden.
 Alle servers moeten gehardened worden door middel van `network security groups`. De enige server die direct vanuit het internet benaderbaar moet zijn, is de management server. 
