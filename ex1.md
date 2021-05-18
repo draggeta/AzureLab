@@ -13,7 +13,7 @@ Het netwerk moet bestaan uit twee spokes gekoppeld aan een hub netwerk waar vand
 
 1. Bouw een core `Virtual Network` met een /16 IP.
 1. Rol de twee spoke `Virtual Networks` uit, elk met een eigen /16.
-1. Gebruik `VNET Peering` om de spoke netwerken aan de core `Virtual Network` te koppelen. 
+1. Nadat de VNET is aangemaakt, kan je onder de Virtual Network `VNET Peering` selecteren en een [peering toevoegen](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) om de spoke netwerken aan de core `Virtual Network` te koppelen. 
     * Sta verkeer naar remote netwerken toe.
     * Sta verkeer van andere netwerken toe.
 
