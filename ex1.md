@@ -83,9 +83,9 @@ Rol een kleine management server uit. De server moet vanuit het internet bereikb
 
 Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen APIs aanbieden voor financiele gegevens en risk assessments. De APIs horen publiekelijk beschikbaar te zijn in de toekomst. Inbound SSH verkeer mag alleen vanuit de management server.
 
-> **NOTE:** gebruik Standard SSD of Standard HDD schijven. Gebruik geen Premium.  
+> **NOTE:** gebruik `Standard_SSD` of `Standard_HDD` schijven. Gebruik geen `premium` disks.  
 
-> **NOTE:** Kies voor de size van de web server Standard_B1s.
+> **NOTE:** Kies voor de size van de web server `Standard_B1s`.
 
 1. Deploy twee Ubuntu 18.04 VMs, elk in een van de twee spokes. De VMs doen dienst als web servers.
     * Geef de VMs geen `public IP`.
