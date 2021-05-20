@@ -1,6 +1,6 @@
 # Dag 2 - Firewalling
 
-De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met threat detection, wordt hiervoor de `Azure Firewall` gebruikt.
+De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met `threat intelligence`/threat detection, wordt hiervoor de `Azure Firewall` gebruikt.
 
 > **Note:** Start de VM's nog niet op. We gaan de DNS instellingen aanpassen. Deze worden alleen bij het starten van een VM meegenomen door DHCP.
 
@@ -16,7 +16,7 @@ De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat
     * DNS > Enabled
     * DNS Servers > Custom: `1.1.1.1` en `8.8.8.8`
     * DNS Proxy > Enabled
-1. Configureer de `AZF` interne IP als de [DNS server voor de VNETs](https://docs.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
+1. Configureer de `AZF` interne/private IP als de [DNS server voor de VNETs](https://docs.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
     * Per VNET moet dit ingesteld worden.
     * Kan ook per NIC, maar daar heeft niemand tijd voor.
 1. Configureer de `AZF` `Diagnostics settings`. Log alles naar de `Log Analytics Workspace` en `storage account`. Stel een retentie van 90 dagen in.
@@ -37,7 +37,7 @@ Nu blijkt dat de financiële en risk assesment APIs toch met elkaar gegevens moe
 >
 > Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor een deel van de RFC1918 prefixes (10.0.0.0/8, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
 >
-> Directe `VNET peers` voegen elkaars `address spaces` toe. Geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het core netwerk.
+> Directe `VNET peers` voegen elkaars `address spaces` toe. Geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het core netwerk. Zelfs met een `user defined route` werkt dit niet. 
 
 </details>
 
@@ -85,11 +85,11 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
 
 Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het internet geanalyseerd moet worden voor threats. Ook hiervoor kan de `AZF` gebruikt worden.
 
-1. Configureer `Threat detection` zodat het daadwerkelijk verkeer blokkeert.
+1. Configureer `threat intelligence` zodat het daadwerkelijk verkeer blokkeert.
     
-    > <details><summary>Threat detection</summary>
+    > <details><summary>Threat intelligence</summary>
     >
-    > Threat detection staat standaard aan op de `firewall`, maar in de alerting modus. Dit kan aangepast worden naar `none` of `alert and block`. De alerts worden weggeschreven naar de `Log Analytics Workspace`.
+    > `Threat intelligence` staat standaard aan op de `firewall`, maar in de alerting modus. Dit kan aangepast worden naar `none` of `alert and block`. De alerts worden weggeschreven naar de `Log Analytics Workspace`.
 
     </details>
 
@@ -133,7 +133,7 @@ Om de asymetrische routering te repareren, moet de inbound verkeer via de firewa
 1. Verwijder de publieke IP van de management server.
 1. Controleer of inbound verkeer werkt. Gebruik hiervoor de externe IP van de `AZF`.
 1. Controleer de nu gebruikte externe IP.
-1. Test de `threat detection` door de volgende website te bezoeken vanuit de management VM:
+1. Test de `threat intelligence` door de volgende website te bezoeken vanuit de management VM:
     * `https://testmaliciousdomain.eastus.cloudapp.azure.com`
 
 > **Optioneel:** configureer een [DNS record](https://docs.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
