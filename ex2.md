@@ -41,8 +41,8 @@ Nu blijkt dat de financiële en risk assesment APIs toch met elkaar gegevens moe
 
 </details>
 
-1. Maak een `UDR` aan met als destination jouw superscope (bijv. 10.8.0.0/14) en als next-hop de IP van de `AZF`.
-1. Koppel deze aan alle `subnets` met een VM in de spokes
+1. Maak een `UDR` voor de spoke netwerken aan met als destination jouw superscope (bijv. 10.8.0.0/14) en als next-hop de IP van de `AZF`.
+1. Koppel de `UDR` aan de spoke `subnets`.
 1. Controleer hoe de verkeersstromen lopen:
     * Verkeer tussen spokes en hub
     * Verkeer tussen spokes
@@ -51,6 +51,14 @@ Nu blijkt dat de financiële en risk assesment APIs toch met elkaar gegevens moe
     > <details><summary>Next hop/effective routes</summary>
     >
     > De [`Next hop`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
+
+    </details>
+
+    > <details><summary>ARP, traceroute en ping</summary>
+    >
+    > Azure virtual networking is geen standaard netwerken. Het is allemaal nep. Layer 1 en 2 bestaan niet. Pakketten worden van de ene `NIC` naar een andere `NIC` gekopieerd. De default gateway bestaat dus niet echt en is alleen aanwezig zodat VMs normaal functioneren.
+    >
+    > Controleer de ARP tabel. Hier zie je dat de MAC-adres van de default gateway opvallend is. De gateway is ook niet te pingen. Verder werkt traceroute niet zoals je verwacht. In een `VNET` laat de traceroute alle default gateways niet zien. `network virtual appliances` zijn wel zichtbaar.
 
     </details>
 
@@ -68,8 +76,8 @@ Nu blijkt dat de financiële en risk assesment APIs toch met elkaar gegevens moe
 De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanmaken van regels kunnen IP adressen direct worden ingevoerd, maar het is handiger om gebruik te maken van `IP groups`. `IP groups` zijn niks anders dan objecten in andere firewalls.
 
 1. Maak voor de spoke VMs elk een `IP group`.
-1. Maak een Network rule collection op de firewall aan die verkeer tussen de spokes toe staan.
-    * Maak gebruik van `IP groups` om de sources en destinations aan te geven
+1. Maak een `network rule collection` op de firewall aan die verkeer tussen de spokes toe staan.
+    * Maak gebruik van `IP groups` om de sources en destinations aan te geven.
     * Verkeer tussen spokes zou nu moeten werken.
 
     > <details><summary>Rule collection verificatie</summary>
@@ -79,7 +87,6 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
     > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://docs.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en is nog in preview.
 
     </details>
-
 
 ## Aanpassing routering richting internet
 
@@ -94,7 +101,7 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
     </details>
 
 1. Pas de spoke `UDR` aan. Voeg een 0.0.0.0/0 route toe via de `AZF`.
-1. Voeg een nieuwe Network Rule collection toe zodat outbound verkeer toegestaan is op de `AZF`. Gebruik hiervoor `IP groups` en `service tags`.
+1. Voeg een nieuwe `network rule collection` toe zodat outbound verkeer toegestaan is vanuit de spokes op de `AZF`. 
 1. Controleer de externe IPs van de web servers.
     * linux: `curl https://api.ipify.org`
     * windows: `irm https://api.ipify.org`
@@ -112,7 +119,7 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
 
 > <details><summary>Service tags en UDRs</summary>
 >
-> `Service tags` zijn lijsten van IP adressen die een dienst kan gebruiken. De lijst wordt bijgehouden door Microsoft. `Service tags` zijn te gebruiken in `network security groups` en `Azure Firewalls`. 
+> `Service tags` zijn lijsten van IP adressen die een dienst kan gebruiken. De lijst wordt bijgehouden door Microsoft. `Service tags` zijn te gebruiken in `network security groups` en `Azure Firewalls`.
 > 
 > `User defined routes` vallen buiten de boot. Dit onhandig, omdat bepaalde Azure diensten specifieke routes nodig hebben voor management verkeer. `Service tags` zijn ten tijden van schrijven wel in preview. Wanneer deze uitkomen, versimpelen deze de `UDR` configuratie.
 
@@ -120,7 +127,7 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
 
 ## Inbound management verkeer repareren
 
-Om de asymetrische routering te repareren, moet de inbound verkeer via de firewall lopen. We gaan dus via de firewall RDP verkeer NATten naar de management server.
+Om de asymmetrische routering te repareren, moet de inbound verkeer via de firewall lopen. We gaan dus via de firewall RDP verkeer NATten naar de management server.
 
 1. Maak een NAT rule collection op de `AZF` aan voor inbound RDP of SSH (Windows of Linux) richting de management server.
 
@@ -130,10 +137,13 @@ Om de asymetrische routering te repareren, moet de inbound verkeer via de firewa
 
     </details>
 
+1. Voeg een nieuwe `network rule collection` toe zodat outbound verkeer toegestaan is vanuit de hub. Gebruik hier optioneel gebruik van een `IP group`.
 1. Verwijder de publieke IP van de management server.
 1. Controleer of inbound verkeer werkt. Gebruik hiervoor de externe IP van de `AZF`.
 1. Controleer de nu gebruikte externe IP.
 1. Test de `threat intelligence` door de volgende website te bezoeken vanuit de management VM:
     * `https://testmaliciousdomain.eastus.cloudapp.azure.com`
+
+> **Note:** de bovenstaande URL werkt niet meer.
 
 > **Optioneel:** configureer een [DNS record](https://docs.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
