@@ -18,6 +18,7 @@ De zones per afdeling:
 
 1. [Maak](https://docs.microsoft.com/en-us/azure/dns/private-dns-getstarted-portal) een `private DNS zone` aan.
 1. [Koppel](https://docs.microsoft.com/en-us/azure/dns/private-dns-virtual-network-links) de DNS Zone aan elke VNET waar [`auto registration`](https://docs.microsoft.com/en-us/azure/dns/private-dns-autoregistration) plaats moet vinden (hub en beide spokes).
+    * Via de private DNS zone > Virtual network links > Add
     * Schakel `auto registration` in
 
     > <details><summary>Auto-registration</summary>
@@ -79,6 +80,13 @@ De applicatie in spoke 01 moet redundant worden uitgevoerd. Een [`load balancer`
 1. `LB` adressen komen niet automatisch in DNS. Maak handmatig een DNS record aan voor het `LB` IP.
 1. Test de interne werking op basis van IP en DNS
 1. Maak een nieuwe `NAT rule collection` aan en sta inbound tcp/80 verkeer richting de `LB` IP toe. Indien de `NSGs` het toe staan, zou de website ook extern benaderbaar moeten zijn.
+    > <details><summary>Health probe status</summary>
+    >
+    > In de Azure portal is er geen makkelijke manier om de health status van de achterliggende servers te zien. De beste methode is om de metrics van de load balancer te gebruiken. Bij het openen van de metrics, kan voor de 'Metric' `Health Probe Status` gekozen worden. 
+    > 
+    > Om vervolgens per apparaat de health status te zien, kan gebruik worden gemaakt van `splitting`. Na het klikken op `Apply Splitting` kan als value `Backend IP Address` gekozen worden. Dan zie je de status en geschiedenis van elke server in een backend pool.
+
+    </details>
 
 ## Private Links 
 
