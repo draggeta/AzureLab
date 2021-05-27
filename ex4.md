@@ -25,7 +25,7 @@ De ASNs per afdeling:
     * Vul geen address spaces in. BGP zal de routes uitwisselen.
 1. Maak een Connection aan. Een Connection is de verbinding tussen jouw VNG en een LNG. Hier worden alle VPN instellingen ingesteld.
     * Connection Type: Site-to-site
-    * PSK: `BY-Verzekeringen`
+    * PSK: `BY_Verzekeringen`
     * Enable BGP: `true`
 1. Wacht tot de VPN up komt
     * Gebruik `VPN troubleshoot` en `VPN Connection Packet Capture` onder de Connection om de verbinding te troubleshooten indien het niet werkt.
