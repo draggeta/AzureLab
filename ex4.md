@@ -42,7 +42,6 @@ De ASNs per afdeling:
 
     </details>
 
-> **Note:** 
 ## Spoke VPN Toegang
 
 Voer de onderstaande acties uit voor alle peerings in de core VNET.
@@ -57,7 +56,7 @@ Voer de onderstaande acties uit voor al jouw spoke VNETs.
 
     > <details><summary>Route server</summary>
     >
-    > Als het goed is zijn er alleen core routes geleerd door de VNG. Dit heeft te maken met het feit dat peerings niet direct gebruik kunnen maken van een Virtual Network Gateway of ExpressRoute Gateway. Om dit te kunnen, moet de peering aangepast worden aan beide zijde.
+    > De route server optie is nog in preview. De route server is een Azure dienst die BGP sessies op kan zetten om zo routes uit te wisselen. Dit is te gebruiken om bijvoorbeeld routes tussen een SD-WAN wolk en VNETs uit te wisselen.
 
     </details>
 
@@ -90,9 +89,11 @@ BY verzekeringen groeit hard en in Spoke A bij alle afdelingen beginnen de IP ad
 1. VNET > Address space
 1. Voeg de /17 toe aan de address space > Save
 
-> **Note:** Dit lukt niet. Lees de melding om te zien waarom niet. 
->
-> Het komt erop neer dat de VNET Peering verwijderd moet worden voordat aanpassingen gedaan kunnen worden aan een address space. Er is een private preview voor de funtionaliteit om address space aanpassingen te kunnen doen zonder de peerings te verbreken.
+    > <details><summary>Route server</summary>
+    >
+    > Het komt erop neer dat de VNET Peering verwijderd moet worden voordat aanpassingen gedaan kunnen worden aan een address space. Er is een private preview voor de funtionaliteit om address space aanpassingen te kunnen doen zonder de peerings te verbreken.
+
+    </details>
 
 1. VNET > Peerings
 1. Verwijder de peering. 
