@@ -12,7 +12,7 @@ De ASNs per afdeling:
 | Rob | 65525 |
 | Ruud | 65529 |
 | Tamim | 65533 |
-| STH | 65514 |
+| STH | 65516 |
 
 ## Inschakelen BGP
 
