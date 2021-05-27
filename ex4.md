@@ -21,7 +21,7 @@ De ASNs per afdeling:
 1. Maak een Local Network Gateway aan. De Local Network Gateway is het apparaat aan de andere kant waar je een VPN verbinding mee wilt maken.
     * Configureer als IP de IP van de STH: `40.68.217.9`
     * Gebruik 65516 als ASN voor de "Secure Transit Hub"
-    * Gebruik 10.120.250.254 als de BGP Peer IP
+    * Gebruik 10.108.2.254 als de BGP Peer IP
     * Vul geen address spaces in. BGP zal de routes uitwisselen.
 1. Maak een Connection aan. Een Connection is de verbinding tussen jouw VNG en een LNG. Hier worden alle VPN instellingen ingesteld.
     * Connection Type: Site-to-site
