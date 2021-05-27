@@ -2,7 +2,7 @@
 
 Zoals te verwachten was, moeten de afdelingen toch met elkaar kunnen communiceren. Om de afzonderlijke afdelingen aan elkaar te knopen heeft BY Verzekeringen een apart netwerk gemaakt dat als knooppunt dient: de Secure Transit Hub (STH). 
 
-BY wil geen handwerk in het bekend maken van routes. Gebruik hiervoor BGP. Elke afdeling wordt als een eigen Autonomous Systen gezien. Hierbij worden de [toegestane ASNs](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#what-asns-autonomous-system-numbers-can-i-use) gebruikt.
+BY wil geen handwerk in het bekend maken van routes. Gebruik hiervoor BGP. Elke afdeling wordt als een eigen Autonomous System gezien. Hierbij worden de [toegestane ASNs](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#what-asns-autonomous-system-numbers-can-i-use) gebruikt.
 
 De ASNs per afdeling:
 
