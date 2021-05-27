@@ -30,7 +30,7 @@ De ASNs per afdeling:
 1. Wacht tot de VPN up komt
     * Gebruik `VPN troubleshoot` en `VPN Connection Packet Capture` onder de Connection om de verbinding te troubleshooten indien het niet werkt.
 1. Controleer de peerings en de geleerde routes op de VNG
-# TODO: Betere beschrijving!
+<!-- # TODO: Betere beschrijving! -->
 1. Verifieer dat je vanuit jouw core netwerk een ander apparaat in een apparaat in een ander core netwerk kan pingen
 1. Kun je pingen vanuit een spoke apparaat naar een apparaat in een andere afdeling?
     * `traceroute` vanuit VMs
