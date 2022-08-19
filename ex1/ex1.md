@@ -170,7 +170,7 @@ Wat gaat er hier mis en waarom?
 
 ## Logging en archivering
 
-De Hollandsche Bank eist dat BY verkeer dat langs komt kan analyseren voor 30 dagen en archiveert voor 90 dagen. Hiervoor kan gebruik worden gemaakt van de `Diagnostics settings` en/of de `NSG flow logs` van de `NSGs`.
+De Hollandsche Bank eist dat BY verkeer dat langs komt kan analyseren voor 30 dagen en archiveert voor 90 dagen. Hiervoor kan gebruik worden gemaakt van de `Diagnostics settings` en/of de `NSG flow logs` van de `NSGs`. Aangezien dit een lab is, voeren we dit alleen uit voor de primaire regio.
 
 1. Deploy een `Storage account`. De `storage account` gaat gebruikt worden voor log archivering.
     * `Standard` SKU, niet `premium`. 
