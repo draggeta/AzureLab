@@ -2,7 +2,7 @@
 
 ## Inleiding
 
-Je werkt voor BY, een nieuwe verzekeraar. BY heeft geen eigen hardware en is in de startup fase niet van plan om uitgaven te doen aan kapitaal. Daarom beginnen ze direct in de cloud. Jij werkt voor een afdeling die zelf hun eigen infrastructuur gaat regelen in Azure.
+Je werkt voor BY, een nieuwe verzekeraar. BY heeft geen eigen hardware en is in de startup fase niet van plan om uitgaven te doen aan kapitaal. Daarom beginnen ze direct in de cloud. Jij werkt als netwerk engineer voor een afdeling die zelf hun eigen infrastructuur gaat regelen in Azure.
 
 ## Vereisten
 
@@ -16,10 +16,10 @@ De labs vereisen `contributor` of `owner` rechten op de subscription. Indien je 
 
 De code samples voor Windows zijn grotendeels bedoeld voor in `PowerShell` (Windows en Core). De Linux code samples werken in ieder geval in `Bash`.
 
-Windows supports SSH natively since Windows 10/Windows Server 2016. From the CLI, you can log in to a server by running the command:
+Windows ondersteunt SSH sinds Windows 10/Windows Server 2016. Vanuit de CLI, kan je inloggen op een server met de onderstaande command:
 
 ```powershell
-ssh <username>@<ip>
+ssh <username>@<ip/fqdn>
 ssh admin@10.0.0.1
 ```
 
@@ -50,7 +50,7 @@ BY verwacht dat de `resource groups` zinnig zijn ingedeeld.
 
 ### Regio
 
-Dit lab gaat uit van resources uitgerold in `West Europe`. Dit is arbitrair gekozen. Het belangrijkste is dat alles wordt uitgerold in dezelfde regio, ongeacht welke wordt gekozen.
+Dit lab gaat uit van resources uitgerold in `West Europe`. Dit is arbitrair gekozen. Het belangrijkste is dat (bijna) alles wordt uitgerold in dezelfde regio, ongeacht welke wordt gekozen. Er zijn een paar uitzonderingen op de regels.
 
 ### IP ranges
 
@@ -58,10 +58,14 @@ Elke afdeling heeft een /14 toegewezen gekregen. Hieruit worden drie `virtual ne
 
 | naam | supernet |
 | --- | --- |
-| Rene | 10.112.0.0/14 |
-| Rob | 10.124.0.0/14 |
-| Ruud | 10.136.0.0/14 |
-| Tamim | 10.148.0.0/14 |
+| 1 | 10.112.0.0/14 |
+| 2 | 10.116.0.0/14 |
+| 3 | 10.120.0.0/14 |
+| 4 | 10.124.0.0/14 |
+| 5 | 10.128.0.0/14 |
+| 6 | 10.132.0.0/14 |
+| 7 | 10.136.0.0/14 |
+| 8 | 10.140.0.0/14 |
 
 ### Virtual networks
 
