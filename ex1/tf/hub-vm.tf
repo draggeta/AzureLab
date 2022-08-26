@@ -1,3 +1,10 @@
+resource "azurerm_subnet" "hub_management" {
+  name                 = "management"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.5.0/24"]
+}
+
 resource "azurerm_public_ip" "hub_management" {
   name                = "mgt01-nic-01-pi4-01"
   resource_group_name = azurerm_resource_group.hub.name

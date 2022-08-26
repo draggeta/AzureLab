@@ -1,0 +1,98 @@
+#cloud-config
+
+snap:
+  commands:
+    00: snap install frr
+    01: snap connect frr:network-control core:network-control
+    02: snap alias frr.vtysh vtysh
+
+package_upgrade: true
+
+write_files:
+  # Enable ipv4 forwarding, required on CIS hardened machines
+  - path: /etc/sysctl.d/enabled_ipv4_forwarding.conf
+    content: |
+      net.ipv4.conf.all.forwarding=1
+  # configure addresses on loopback interface to simulate hosts on SD-wan
+  - path: /etc/netplan/10-loopback.yaml
+    permissions: "0644"
+    content: |
+      network:
+        version: 2
+        ethernets:
+          lo:
+            addresses:
+              - 10.192.0.1/24
+              - 10.192.1.1/24
+              - 10.192.2.1/24
+              - 10.192.3.1/24
+              - 10.192.4.1/24
+              - 10.192.5.1/24
+              - 10.192.6.1/24
+              - 10.192.7.1/24
+              - 10.193.128.1/24
+              - 10.193.129.1/24
+              - 10.193.130.1/24
+              - 10.193.131.1/24
+              - 10.193.132.1/24
+              - 10.193.133.1/24
+              - 10.193.134.1/24
+              - 10.193.135.1/24
+  # configures frr to simulate an SD-WAN box with BGP
+  - path: /tmp/frr.conf
+    permissions: "0644"
+    content: |
+      configure terminal
+      frr defaults traditional
+      log syslog informational
+      no ipv6 forwarding
+      !
+      ! ip router-id ${router_id}
+      !
+      ip prefix-list ROUTESRV-PL seq 10 permit 10.192.0.0/21 ge 24
+      ip prefix-list ROUTESRV-PL seq 20 permit 10.193.128.0/21 ge 24
+      ip prefix-list REDIS-PL seq 10 permit 10.192.0.0/21 ge 24
+      ip prefix-list REDIS-PL seq 20 permit 10.193.128.0/21 ge 24
+      !
+      route-map ROUTESRV-RM-OUT permit 1
+        match ip address prefix-list ROUTESRV-PL
+      !
+      route-map ROUTESRV-RM-OUT deny 2
+      !
+      route-map ROUTESRV-RM-IN deny 1
+      !
+      route-map REDIS-RM permit 1
+        match ip address prefix-list REDIS-PL
+      !
+      router bgp 65002
+        neighbor ROUTESRV peer-group
+        neighbor ROUTESRV remote-as 65515
+        neighbor ROUTESRV ebgp-multihop 5
+        neighbor ROUTESRV advertisement-interval 0
+        neighbor ROUTESRV timers 10 30
+        ! neighbor ${rs_peer_1} peer-group ROUTESRV
+        ! neighbor ${rs_peer_2} peer-group ROUTESRV
+        !
+        address-family ipv4 unicast
+        redistribute connected route-map REDIS-RM
+        neighbor ROUTESRV route-map ROUTESRV-RM-IN in
+        neighbor ROUTESRV route-map ROUTESRV-RM-OUT out
+        neighbor ROUTESRV soft-reconfiguration inbound
+        exit-address-family
+      exit
+      !
+      exit
+      !
+      write memory
+
+runcmd:
+  - frr.vtysh --echo --command "$(cat /tmp/frr.conf)"
+  - frr.vtysh --writeconfig
+  - netplan --debug apply
+
+power_state:
+  delay: now
+  mode: reboot
+  message: rebooting
+  timeout: 120
+  condition: true

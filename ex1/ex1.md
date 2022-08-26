@@ -100,7 +100,7 @@ Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen
     * Geef de VMs geen `public IP`.
     * Geef de VMs geen `network security group`. Deze gaan we apart toevoegen.
     * Schakel `Auto-shutdown` in en zet deze op 00:00 in jouw lokale tijdzone.
-    * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Hiermee gaan we de servers configureren.
+    * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Plak onderstaande script in dit vak. Hiermee gaan we de servers configureren.
       * Custom scripts zijn ook te gebruiken voor het bootstrappen van bijv. netwerk apparatuur.
 
 1. Controleer hoe de verkeersstromen lopen:
@@ -115,6 +115,8 @@ apt-get update -y && apt-get upgrade -y
 apt-get install -y nginx jq
 LOC=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq '.compute.location')
 echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee -a /var/www/html/index.html
+sudo mkdir -p /var/www/html/health/
+echo "{\"health\": \"ok\"}" | sudo tee -a /var/www/html/health/index.html
 ```
 
 ## NSG/ASG
