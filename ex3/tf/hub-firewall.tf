@@ -31,6 +31,7 @@ resource "azurerm_firewall_policy" "hub_firewall" {
 
   dns {
     proxy_enabled = true
+    servers       = ["1.1.1.1", "8.8.8.8"]
   }
 
   threat_intelligence_mode = "Deny"

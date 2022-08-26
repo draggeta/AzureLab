@@ -70,17 +70,32 @@ Voor deze configuratie maken we een enkele interne load balancer, omdat de SD-WA
     * Vink `HA Ports` aan. HA ports zijn alleen beschikbaar op Standard interne load balancers en Gateway load balancers. Hierdoor wordt al het verkeer doorgezet naar de backend pool.
     * Maak een nieuwe health probe aan
         * Veel `NVAs` hebben een manier om hun health te laten proben. Dit is maar een Linux VM en de beste service is SSH op poort TCP/22
-    * Schakel `Floating IP` in. Dit zorgt ervoor dat de load balancer de destination IP doorgeeft aan de `NVA` in plaats van het te NATten.
+    * Schakel `Floating IP` in. 
+    > <details><summary>Floating IP/Direct Server Return</summary>
+    >
+    > Azure kent het concept van een floating IP niet. Gratuitous ARPs kunnen niet in een VNET. Zelfs normale ARPs worden niet gebroadcast maar gevijnsd door de onderliggende hypervisors. Een ander IP adres configureren in de `VM` dan dat geconfigureerd is op de `NIC` via de portal, maakt het mogelijk onbereikbaar.
+    >
+    > Om dit toch mogelijk te maken, kan een `load balancer` gebruikt worden met floating IP/Direct Server Return aan. Hiermee voert de LB geen DNAT uit. De frontend IP wordt as-is doorgegeven aan de achterliggende `VMs`. 
+    >
+    > Dit betekent dat de `VMs` de IPs moeten accepteren. Voor een firewall kan dit in de vorm zijn van een VIP. In een Windows Failover Cluster is dit een cluster IP.
+
+    </details>
 
 Het is belangrijk om diagnostics in te schakelen voor load balancers. Zonder diagnostics settings is het moeilijk om te zien of de load balancer correct werkt (e.g. is een server up/down in de backend pool).
 
 1. Schakel na het aanmaken van de load balancer, diagnostics settings in.
     * Houd je aan de eisen van de Hollandsche Bank: 30 dagen doorzoekbaar (`log analytics`) en 90 dagen archivering (`storage account`).
+    > <details><summary>Health probe status</summary>
+    >
+    > In de Azure portal is er geen makkelijke manier om de health status van de achterliggende servers te zien. De beste methode is om de metrics van de load balancer te gebruiken. Bij het openen van de metrics, kan voor de 'Metric' `Health Probe Status` gekozen worden. 
+    > 
+    > Om vervolgens per apparaat de health status te zien, kan gebruik worden gemaakt van `splitting`. Na het klikken op `Apply Splitting` kan als value `Backend IP Address` gekozen worden. Dan zie je de status en geschiedenis van elke server in een backend pool.
+
+    </details>
 
 De `UDRs` verwijzen naar de directe IP van een NVA. Om goed HA in te richten, moet het verkeer via de load balanced IP lopen.
 1. Pas alle `UDRs` aan zodat het verkeer via de loadbalancer verloopt.
 1. Test verkeer naar de achterliggende IPs door pings uit te voeren.
-
 
 > <details><summary>Active/Active cluster</summary>
 >

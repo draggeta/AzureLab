@@ -16,6 +16,7 @@ De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat
     * DNS > Enabled
     * DNS Servers > Default
     * DNS Proxy > Enabled
+    * Gebruik Google DNS en Cloudflare DNS als DNS servers in plaats van de VNET default DNS.
 1. Configureer de `AZF` interne/private IP als de [DNS server voor de VNETs](https://docs.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
     * Per VNET moet dit ingesteld worden.
     * Kan ook per NIC, maar daar heeft niemand tijd voor.

@@ -40,6 +40,13 @@ resource "azurerm_linux_virtual_machine" "spoke_a_web" {
 
   boot_diagnostics {}
 
+  depends_on = [
+    azurerm_firewall.hub_firewall,
+    azurerm_firewall_policy_rule_collection_group.hub_firewall_default,
+    azurerm_virtual_network_peering.hub_to_spoke_a,
+    azurerm_virtual_network_peering.spoke_a_to_hub
+  ]
+
   custom_data = base64encode(<<EOF
 #!/bin/bash
 
@@ -47,9 +54,9 @@ resource "azurerm_linux_virtual_machine" "spoke_a_web" {
 apt-get update -y && apt-get upgrade -y
 apt-get install -y nginx jq
 LOC=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq '.compute.location')
-echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee -a /var/www/html/index.html
+echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee /var/www/html/index.html
 sudo mkdir -p /var/www/html/health/
-echo "{\"health\": \"ok\"}" | sudo tee -a /var/www/html/health/index.html
+echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
 EOF
   )
 

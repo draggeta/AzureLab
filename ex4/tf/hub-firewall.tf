@@ -31,7 +31,6 @@ resource "azurerm_firewall_policy" "hub_firewall" {
 
   dns {
     proxy_enabled = true
-    servers       = ["1.1.1.1", "8.8.8.8"]
   }
 
   threat_intelligence_mode = "Deny"
@@ -228,6 +227,16 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
       enabled = true
     }
   }
+  log {
+    category = "AZFWFatFlow"
+    enabled  = false
+
+    retention_policy {
+      days    = 0
+      enabled = false
+    }
+  }
+
 
   metric {
     category = "AllMetrics"

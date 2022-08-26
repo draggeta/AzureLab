@@ -47,9 +47,9 @@ resource "azurerm_linux_virtual_machine" "spoke_b_web" {
 apt-get update -y && apt-get upgrade -y
 apt-get install -y nginx jq
 LOC=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq '.compute.location')
-echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee -a /var/www/html/index.html
+echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee /var/www/html/index.html
 sudo mkdir -p /var/www/html/health/
-echo "{\"health\": \"ok\"}" | sudo tee -a /var/www/html/health/index.html
+echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
 EOF
   )
 
