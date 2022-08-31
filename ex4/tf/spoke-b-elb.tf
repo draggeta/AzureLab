@@ -48,6 +48,7 @@ resource "azurerm_lb_rule" "spoke_b_web_lb" {
   loadbalancer_id = azurerm_lb.spoke_b_web_lb.id
 
   frontend_ip_configuration_name = azurerm_lb.spoke_b_web_lb.frontend_ip_configuration[0].name
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.spoke_b_web_lb.id]
   probe_id                       = azurerm_lb_probe.spoke_b_web_lb.id
 
   frontend_port         = 80

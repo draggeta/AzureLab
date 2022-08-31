@@ -100,19 +100,24 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     * Session persistance: naar eigen keus
 
 1. Configureer `diagnostics settings` conform de DHB standaarden.
-1. Bezoek de webserver/API via de management server.
-    * Afhankelijk van de gekozen type session persistence kan je verschillende hosts tegen komen of steeds dezelfde.
-1. Maak handmatig een DNS record aan voor het `LB` IP. Dit kan een A of CNAME record zijn.
-1. Test de interne werking op basis van IP en DNS
-    > <details><summary>Health probe status</summary>
+1. Bezoek de webserver/API via de management server. Lukt dit? Waarom wel/niet?
+    > <details><summary>External load balancers</summary>
     >
-    > In de Azure portal is er geen makkelijke manier om de health status van de achterliggende servers te zien. De beste methode is om de metrics van de load balancer te gebruiken. Bij het openen van de metrics, kan voor de 'Metric' `Health Probe Status` gekozen worden. 
+    > De Azure ELB's doen aan DNAT, maar geen SNAT. De reden hiervoor is dat het, in tegenstelling tot de AGW, geen interne IP-adres heeft. Wanneer jouw server dit verkeer ontvangt, zal het dus het antwoord terugsturen via zijn beste route. In dit geval, is dat de default route via de Azure Firewall. Dit is duidelijk een voorbeeld van asymmetrisch verkeer.
     > 
-    > Om vervolgens per apparaat de health status te zien, kan gebruik worden gemaakt van `splitting`. Na het klikken op `Apply Splitting` kan als value `Backend IP Address` gekozen worden. Dan zie je de status en geschiedenis van elke server in een backend pool.
+    > Het is op te lossen [door het verkeer als volgt](https://docs.microsoft.com/en-us/azure/firewall/integrate-lb#public-load-balancer) te laten lopen: 
+    > * Azure Firewall PIP
+    > * DNAT richting ELB PIP
+    > * ELB load balancet verkeer naar server
+    > * Server heeft UDR voor AZF PIP direct naar het internet
+    >   * Dit NAT de server IP terug naar LB IP
+    >   * AZF NAT het weer naar zijn IP en stuurt het door naar de client
+    > 
+    > Dit is best onzinnig om verschillende redenen.
 
     </details>
 
-1. Wat is het verschil tussen inbound en outbound verkeer vanaf de spoke A webserver?
+1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver. Controleer of dit werkt.
 
 ## Traffic Manager
 
@@ -133,7 +138,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     </details>
 1. Ga naar Traffic Manager > Endpoints en voeg een nieuwe endpoint toe.
     * Gebruik Azure endpoints en kies de AGW IP.
-1. Herhaal dit voor de ELB.
+1. Herhaal dit voor de AZF PIP.
 1. Test nu het browsen naar de website vanuit een externe client door gebruik te maken van jouw DNS name, te vinden bij 'Overview'.
     * Schakel de VM in spoke A uit en controleer of je in spoke B uit komt.
 1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.

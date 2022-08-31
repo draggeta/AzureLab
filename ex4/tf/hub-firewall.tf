@@ -73,6 +73,15 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_firewall_default" 
       translated_address  = azurerm_network_interface.hub_management.private_ip_address
       translated_port     = "3389"
     }
+    rule {
+      name                = "Allow-rdp-management"
+      protocols           = ["TCP", "UDP"]
+      source_addresses    = ["0.0.0.0/0"]
+      destination_address = azurerm_public_ip.hub_firewall.ip_address
+      destination_ports   = ["80"]
+      translated_address  = azurerm_public_ip.spoke_b_web_lb.ip_address
+      translated_port     = "80"
+    }
   }
 
   network_rule_collection {
