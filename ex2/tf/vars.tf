@@ -41,6 +41,6 @@ variable "credentials" {
   description = "Username and password for the VM"
   default = {
     username = "adminuser"
-    password = "Els3v1er7!"
+    password = "AzureLabs10IT!"
   }
 }
