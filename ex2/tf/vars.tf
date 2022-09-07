@@ -21,13 +21,13 @@ variable "secondary_location" {
 variable "prefix" {
   type        = string
   description = "Resource name prefix"
-  default     = "tfr-euw-tst"
+  default     = "euw-tst"
 }
 
 variable "secondary_prefix" {
   type        = string
   description = "Resource name prefix"
-  default     = "tfr-eun-tst"
+  default     = "eun-tst"
 }
 
 variable "org" {
