@@ -6,7 +6,7 @@ BY Verzekeringen heeft ook SD-WAN uitgerold over alle branch offices. Hun oploss
 | locatie | subnetten | 
 | --- | --- | 
 | Nederland | 10.192.0.0/22 |
-| Duitsland | 10.192.4.0/22 |
+| Ierland | 10.192.4.0/22 |
 
 ## NVA uitrollen
 
@@ -101,7 +101,7 @@ De `UDRs` verwijzen naar de directe IP van een NVA. Om goed HA in te richten, mo
 >
 > Een standard load balancer werkt prima voor een active/passive cluster. Wanneer active/active clusters nodig zijn, kan er asymmetrisch verkeer optreden bij north-south verkeer.
 >
-> Dit is op te lossen door SNAT op de NVA te doen of een cluster mechanisme te gebruiken om verkeer altijd naar de juiste node te leiden.
+> Dit is op te lossen door naast DNAT, ook SNAT op de NVA te doen of een cluster mechanisme te gebruiken om verkeer altijd naar de juiste node te leiden.
 >
 > Beide opties hebben nadelen. Een fijnere optie kan zijn om de [`Gateway load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/gateway-overview) te gebruiken. Deze type load balancer zorgt ervoor dat north-south verkeer altijd symmetrisch loopt. Jammer genoeg heeft het (nog) geen ondersteuning voor east-west verkeer.
 

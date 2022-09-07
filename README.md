@@ -2,7 +2,7 @@
 
 ## Inleiding
 
-Je werkt voor BY, een nieuwe verzekeraar. BY heeft geen eigen hardware en is in de startup fase niet van plan om uitgaven te doen aan kapitaal. Daarom beginnen ze direct in de cloud. Jij werkt als netwerk engineer voor een afdeling die zelf hun eigen infrastructuur gaat regelen in Azure.
+Je werkt voor BY, een nieuwe verzekeraar. BY heeft geen eigen hardware en is in de startup fase niet van plan om uitgaven te doen aan kapitaal. Daarom beginnen ze direct in de cloud. Jij werkt als netwerk engineer voor de verzekeraar en moet direct aan de slag om een initiele netwerk op te zetten en deze door te ontwikkelen.
 
 ## Vereisten
 
@@ -54,18 +54,7 @@ Dit lab gaat uit van resources uitgerold in `West Europe`. Dit is arbitrair geko
 
 ### IP ranges
 
-Elke afdeling heeft een /14 toegewezen gekregen. Hieruit worden drie `virtual networks` met een /16 grootte uitgerold.
-
-| naam | supernet |
-| --- | --- |
-| 1 | 10.112.0.0/14 |
-| 2 | 10.116.0.0/14 |
-| 3 | 10.120.0.0/14 |
-| 4 | 10.124.0.0/14 |
-| 5 | 10.128.0.0/14 |
-| 6 | 10.132.0.0/14 |
-| 7 | 10.136.0.0/14 |
-| 8 | 10.140.0.0/14 |
+Voor de cloud is besloten om 10.128.0.0/14 te gebruiken. Hieruit worden drie `virtual networks` met een /16 grootte uitgerold.
 
 ### Virtual networks
 
@@ -73,9 +62,9 @@ Hieronder een verdeling van de superscope naar [`VNETs`](a "virtual networks").
 
 | Virtual Network | scope | 
 | --- | --: |
-| Core | 1<sup>ste</sup> /16 |
-| Spoke A | 2<sup>e</sup> /16 |
-| Spoke B | 3<sup>e</sup> /16 |
+| Hub | 10.128.0.0/16 |
+| Spoke A | 10.129.0.0/16 |
+| Spoke B | 10.130.0.0/16 |
 
 ### Subnets
 

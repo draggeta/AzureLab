@@ -41,17 +41,17 @@ De `AZF` wordt nu gebruikt als DNS server/proxy.
 
 ## Aanpassen interne routering
 
-Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Dit moet direct en een message queue als intermediate is geen optie. Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA ): de `AZF`.
+Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Dit moet direct en een message queue als intermediate is geen optie. BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
 
 > <details><summary>Standaard route tabellen in Azure</summary>
 >
-> Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor een deel van de RFC1918 prefixes (10.0.0.0/8, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
+> Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
 >
-> Directe `VNET peers` voegen elkaars `address spaces` toe. Geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het core netwerk. Zelfs met een `user defined route` werkt dit niet. 
+> Directe `VNET peers` voegen elkaars `address spaces` toe. Geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk. Zelfs met een `user defined route` werkt dit niet. 
 
 </details>
 
-1. Maak een `UDR` voor de spoke netwerken aan met als destination jouw superscope (bijv. 10.8.0.0/14) en als next-hop de IP van de `AZF`.
+1. Maak een `UDR` voor de spoke netwerken aan met als destination jouw superscope (bijv. 10.128.0.0/14) en als next-hop de IP van de `AZF`.
 1. Koppel de `UDR` aan de spoke `subnets`.
     > <details><summary>Koppelen UDRs</summary>
     >
@@ -100,7 +100,7 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
     >
     > De `Azure Firewall` heeft geen optie om te controleren of verkeer is toegestaan. Er moet dus in de logs worden gedoken. Als de `diagnostics settings` geconfigureerd zijn met een `Log Analytics Workspace`, kan gebruik worden gemaakt van de [`Logs` functionaliteit](https://docs.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) van een `AZF` om toegestane en gedropte verkeer te bekijken.
     >
-    > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://docs.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en is nog in preview.
+    > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://docs.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en examen.
 
     </details>
 
@@ -127,7 +127,7 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
 
     > <details><summary>Antwoord</summary>
     >
-    > Er is sprake van asymetrische routering. Verkeer komt binnen via de [PIP]('' "Public IP"), maar gaat langs de AZF naar buiten. 
+    > Er is sprake van asymmetrische routering. Verkeer komt binnen via de [PIP]('' "Public IP"), maar gaat langs de AZF naar buiten. 
     >
     > De `AZF` doet [automatisch SNAT](https://docs.microsoft.com/en-us/azure/firewall/snat-private-range) voor destination IPs buiten RFC1918.
 

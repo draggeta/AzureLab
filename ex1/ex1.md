@@ -1,6 +1,6 @@
 # Dag 1 - Basis netwerken
 
-Jouw afdeling wil web applicaties in de cloud gaan draaien. Elke applicatie moet in een aparte `virtual network` terecht komen. Er moet ook een management (hub) `virtual network` en server komen waar vandaan de applicaties beheerd kunnen worden.
+BY wil web applicaties in de cloud gaan draaien. De webapplicatie moet geografisch redundant neergezet worden. Er moet ook een management (hub) `virtual network` en server komen waar vandaan de applicaties beheerd kunnen worden.
 Alle servers moeten gehardened worden door middel van `network security groups`. De enige server die direct vanuit het internet benaderbaar moet zijn, is de management server. 
 
 ## Uitrollen hub/management netwerk
@@ -15,7 +15,7 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
 
 1. Bouw een core `virtual network` met een /16 IP.
 
-1. Deploy een Ubuntu 20.04/22.04 of Windows Server 2019  management server. 
+1. Deploy een Ubuntu 20.04/22.04 of Windows Server 2022 management server. 
     * Maak geen gebruik van `availability zones` of `availability sets`.
     * Geef de VM geen `public IP`. Deze gaan we handmatig toevoegen.
     * Geef de VM geen `network security group`. Deze gaan we handmatig toevoegen. 
@@ -38,7 +38,7 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
     * Blokkeer interne inbound verkeer niet!
     > <details><summary>Network Security Groups</summary>
     >
-    > NSG rules kunnen gebruik maken van `tags` om bepaalde sources en destinations aan te duiden. Een van de interessante tags is de `VirtualNetwork` tag. Deze tag staat niet alleen verkeer vanuit jouw `VNET` toe, maar ook alle direct gepeerde `VNETs` en alle netwerken die door een `virtual network gateway` of `ExpressRoute gateway` worden geleerd.
+    > NSG rules kunnen gebruik maken van `tags` om bepaalde sources en destinations aan te duiden. Een van de interessante tags is de `VirtualNetwork` tag. Deze tag staat niet alleen verkeer vanuit jouw `VNET` toe, maar ook alle direct gepeerde `VNETs` en alle netwerken die door een `virtual network gateway`, `ExpressRoute gateway` of `route server` worden geleerd.
 
     </details>  
 
@@ -57,7 +57,7 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
 >
 > Bij problemen kan er gebruik worden gemaakt van de [`IP flow verify`](https://docs.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem#use-ip-flow-verify) of [`NSG diagnostic`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-network-configuration-diagnostics-overview) functionaliteit van de [`Network Watcher`](https://docs.microsoft.com/en-us/azure/network-watcher/) om de `NSGs` te troubleshooten. 
 >* `IP flow verify` geeft aan of de `NSGs` gekoppeld aan de VM het verkeer toe staan
-> * `NSG diagnostic` controleert alle `NSGs` in het pad. Het is een betere tool dan `IP flow verify`, maar vereist rechten om alle `NSGs` in het pad te kunnen lezen.
+> * `NSG diagnostic` controleert alle `NSGs` in het pad. Het is een betere tool dan `IP flow verify`, maar vereist rechten om alle `NSGs` in het pad te kunnen lezen. Het geeft niet weer of het verkeer door een NVA mag. Ook niet de `Azure firewall`.
 
 </details>
 
@@ -185,4 +185,4 @@ De Hollandsche Bank eist dat BY verkeer dat langs komt kan analyseren voor 30 da
     * Traffic Analytics status: On
     * Processing interval: Every 10 mins
 
-> **Note:** Over ongeveer 10-15 minuten kan gebruik worden gemaakt van de `Traffic Analytics` functionaliteit van de `Network Watcher`. Aangezien het einde dag is, kan hier prima de volgende keer naar gekeken worden.
+> **Note:** Over ongeveer 10-15 minuten kan gebruik worden gemaakt van de `Traffic Analytics` functionaliteit van de `Network Watcher`. 

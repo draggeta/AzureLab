@@ -32,7 +32,7 @@ Er is gekozen voor de DNS zone `by.cloud`.
     >
     > De `VNET` DNS server is alleen bereikbaar vanuit de VNET. VM's kunnen dus niet de DNS server van een ander `VNET` gebruiken. Ook kun je niet vanuit een on-prem omgeving `private DNS zones` te resolven. 
     >
-    > Om dit te kunnen in een productie omgeving, moet het resolven van de `private DNS zones` via een forwarder lopen in de `VNET`.
+    > Om dit te kunnen in een productie omgeving, moet het resolven van de `private DNS zones` via een DNS forwarder/proxy lopen in een gekoppelde `VNET`.
     >
     >**De enige reden dat de zone gekoppeld is aan de spokes, is dus voor de auto registratie, niet DNS resolving.**
 
@@ -50,7 +50,7 @@ De applicatie in spoke A moet extern benaderbaar worden. We hebben hiervoor enke
 
 De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen met het testdraaien van de [`AGW`](https://docs.microsoft.com/en-us/azure/application-gateway/overview) en zijn L7 (WAF) beveiliging. 
 
-> **NOTE:** We gaan geef WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder en kan wat tijd kosten.
+> **NOTE:** We gaan geef WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder, is duurder en kan wat tijd kosten.
 
 > **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen.
 
@@ -110,7 +110,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     > * DNAT richting ELB PIP
     > * ELB load balancet verkeer naar server
     > * Server heeft UDR voor AZF PIP direct naar het internet
-    >   * Dit NAT de server IP terug naar LB IP
+    >   * Azure SDN NAT de server IP terug naar LB IP
     >   * AZF NAT het weer naar zijn IP en stuurt het door naar de client
     > 
     > Dit is best onzinnig om verschillende redenen.
