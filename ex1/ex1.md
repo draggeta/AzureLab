@@ -7,9 +7,9 @@ Alle servers moeten gehardened worden door middel van `network security groups`.
 
 > **NOTE:** Elke `virtual network` komt in een eigen resource group terecht. Dit helpt met het overzicht.
 
-> **NOTE:** Gebruik `Standard_SSD` of `Standard_HDD` schijven. Gebruik geen `premium` disks.  
+> **NOTE:** Gebruik `Standard_SSD` of `Standard_HDD` schijven. Gebruik geen `premium` disks.
 
-> **NOTE:** Kies voor de size van de management server `Standard_B2ms`. 
+> **NOTE:** Kies voor de size van de management server `Standard_B2ms`.
 
 Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders servers benaderen en beheren. Vervolgens rollen we een kleine kleine management server uit. De server moet vanuit het internet bereikbaar zijn, maar alleen voor werknemers. Er is nog geen client VPN oplossing aanwezig en het heeft geen prioriteit vanuit de business. Daarnaast moeten de kosten gedrukt worden. Schakel apparaten automatisch uit wanneer ze niet nodig zijn.
 
@@ -158,7 +158,7 @@ Wat gaat er hier mis en waarom?
 
     > <details><summary>Standaard route tabellen in Azure</summary>
     >
-    > Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor een deel van de RFC1918 prefixes (10.0.0.0/8, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
+    > Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
     >
     > Directe `VNET peers` voegen elkaars `address spaces` toe. Van een peer geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk.
 

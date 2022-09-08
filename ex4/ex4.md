@@ -82,8 +82,6 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 
 1. Wat is het verschil tussen inbound en outbound verkeer vanaf de spoke A webserver?
 
-
-
 ## Load Balancing
 
 De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways zijn duur en die als standby hebben draaien kost teveel. Voor de backup site is daarom gekozen voor een publieke load balancer. Een [`load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) moet de load kunnen verdelen en bij uitval moet de uitgevallen server uit de pool gehaald worden.
@@ -121,7 +119,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 
 ## Traffic Manager
 
-[`Traffic Manager`](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal verkeer kan afhandelen. Het is bedoeld voor load balancing tussen datacentra. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer tussen de regio's verdeelt.
+[`Traffic Manager`](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal verkeer kan afhandelen. Het is vooral handig voor load balancing tussen datacentra. BY wil dat verkeer altijd in `West Europe` binnenkomt, tenzij er een probleem is in deze regio. In die gevallen moet het verkeer naar `North Europe`. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer over de regio's verdeelt.
 
 1. Maak een nieuwe `Traffic Manager profile` aan.
     * [Routing method](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods): Priority
