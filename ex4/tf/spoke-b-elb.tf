@@ -26,7 +26,7 @@ resource "azurerm_lb_probe" "spoke_b_web_lb" {
   name            = "probe-http"
 
   protocol            = "Http"
-  request_path        = "/health"
+  request_path        = "/health/"
   port                = 80
   number_of_probes    = 2
   interval_in_seconds = 5
@@ -59,9 +59,9 @@ resource "azurerm_lb_rule" "spoke_b_web_lb" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "spoke_b_web_lb" {
-  log_analytics_destination_type = "AzureDiagnostics" # Dedicated
-  name                           = "${azurerm_lb.spoke_b_web_lb.name}-logdata-01"
-  target_resource_id             = azurerm_lb.spoke_b_web_lb.id
+  # log_analytics_destination_type = "AzureDiagnostics" # Dedicated
+  name               = "${azurerm_lb.spoke_b_web_lb.name}-logdata-01"
+  target_resource_id = azurerm_lb.spoke_b_web_lb.id
 
   log_analytics_workspace_id = azurerm_log_analytics_workspace.net_watch_pri.id
   storage_account_id         = azurerm_storage_account.net_watch_sec.id

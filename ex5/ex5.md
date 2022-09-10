@@ -88,9 +88,19 @@ Get-AzRouteServerPeerLearnedRoute @remotepeer
 ### Verwijderen UDRs/load balancer
 
 Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewisseld, kunnen de onderstaande stappen uitgevoerd worden:
+
 1. Verwijder de SD-WAN routes uit de `route tables` 
 1. Verwijder de interne load balancer
-1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden
+1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden vanuit de management server
+1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden vanuit de API servers. Er is een kans dat dit niet lukt. Kan je bedenken waarom?
+
+> <details><summary>VNET peering en resource gebruik</summary>
+>
+> De VNET peerings hebben allerlei opties. Een van de opties is om gebruik te maken van de Route Server/VPN gateway van de gepeerde netwerk. Als dit uit staat, zullen de spokes de routes niet geleerd hebben.
+
+</details>
+
+
 
 ## Azure Bastion
 

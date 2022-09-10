@@ -57,7 +57,8 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 1. Configureer de `load balancer`.
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VM(s) erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`
+    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
+    > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
 
     > <details><summary>Floating IP/Direct Server Return</summary>
     >
@@ -93,7 +94,8 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 1. Configureer de `load balancer`.
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VMs erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health` API endpoint.
+    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint.
+    > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
     * Maak een load balancing rule aan.
     * Session persistance: naar eigen keus
 
@@ -123,6 +125,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 
 1. Maak een nieuwe `Traffic Manager profile` aan.
     * [Routing method](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods): Priority
+    * Zet de probing interval op 10 secondes (scheelt met testen).
     > <details><summary>Routing Methods</summary>
     >
     > De routing methods bepalen wie op welke instance terecht komt.
@@ -137,6 +140,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 1. Ga naar Traffic Manager > Endpoints en voeg een nieuwe endpoint toe.
     * Gebruik Azure endpoints en kies de AGW IP.
 1. Herhaal dit voor de AZF PIP.
+    * Geef het een lagere prioriteit (hogere metric) dan de AGW IP
 1. Test nu het browsen naar de website vanuit een externe client door gebruik te maken van jouw DNS name, te vinden bij 'Overview'.
     * Schakel de VM in spoke A uit en controleer of je in spoke B uit komt.
 1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.

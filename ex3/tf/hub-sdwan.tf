@@ -115,9 +115,9 @@ resource "azurerm_lb_rule" "hub_sdwan" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "hub_sdwan" {
-  log_analytics_destination_type = "AzureDiagnostics" # Dedicated
-  name                           = "${azurerm_lb.hub_sdwan.name}-logdata-01"
-  target_resource_id             = azurerm_lb.hub_sdwan.id
+  # log_analytics_destination_type = "AzureDiagnostics" # Dedicated
+  name               = "${azurerm_lb.hub_sdwan.name}-logdata-01"
+  target_resource_id = azurerm_lb.hub_sdwan.id
 
   log_analytics_workspace_id = azurerm_log_analytics_workspace.net_watch_pri.id
   storage_account_id         = azurerm_storage_account.net_watch_pri.id

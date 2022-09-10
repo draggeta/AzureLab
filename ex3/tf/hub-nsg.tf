@@ -22,7 +22,7 @@ resource "azurerm_network_security_group" "hub_management" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_ranges    = [22]
-    source_address_prefixes    = [data.http.ip.response_body]
+    source_address_prefixes    = [data.http.ip.response_body, azurerm_subnet.hub_firewall_subnet.address_prefixes[0]]
     destination_address_prefix = "VirtualNetwork"
   }
   security_rule {

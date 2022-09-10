@@ -48,7 +48,7 @@ resource "azurerm_subnet_route_table_association" "hub_management" {
 }
 
 resource "azurerm_route_table" "spoke_a" {
-  name                = "${var.secondary_prefix}-${var.org}-udr-spoke-01"
+  name                = "${var.prefix}-${var.org}-udr-spoke-01"
   location            = azurerm_resource_group.spoke_a.location
   resource_group_name = azurerm_resource_group.spoke_a.name
 
@@ -103,7 +103,7 @@ resource "azurerm_route_table" "spoke_b" {
 
   route {
     name           = "firewall-public-ip"
-    address_prefix = azurerm_public_ip.hub_firewall.ip_address
+    address_prefix = "${azurerm_public_ip.hub_firewall.ip_address}/32"
     next_hop_type  = "Internet"
   }
 }

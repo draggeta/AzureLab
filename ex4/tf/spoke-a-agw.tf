@@ -3,6 +3,8 @@ resource "azurerm_public_ip" "spoke_a_agw" {
   resource_group_name = azurerm_resource_group.spoke_a.name
   location            = azurerm_resource_group.spoke_a.location
   allocation_method   = "Dynamic"
+
+  # domain_name_label = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"
 }
 
 resource "azurerm_application_gateway" "spoke_a_agw" {
@@ -49,7 +51,7 @@ resource "azurerm_application_gateway" "spoke_a_agw" {
     name                                      = "pb-health"
     protocol                                  = "Http"
     pick_host_name_from_backend_http_settings = true
-    path                                      = "/health"
+    path                                      = "/health/"
     timeout                                   = 1
     interval                                  = 5
     unhealthy_threshold                       = 1
@@ -84,9 +86,9 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
 }
 
 resource "azurerm_monitor_diagnostic_setting" "spoke_a_agw" {
-  log_analytics_destination_type = "AzureDiagnostics" # Dedicated
-  name                           = "${azurerm_application_gateway.spoke_a_agw.name}-logdata-01"
-  target_resource_id             = azurerm_application_gateway.spoke_a_agw.id
+  # log_analytics_destination_type = "AzureDiagnostics" # Dedicated
+  name               = "${azurerm_application_gateway.spoke_a_agw.name}-logdata-01"
+  target_resource_id = azurerm_application_gateway.spoke_a_agw.id
 
   log_analytics_workspace_id = azurerm_log_analytics_workspace.net_watch_pri.id
   storage_account_id         = azurerm_storage_account.net_watch_pri.id
