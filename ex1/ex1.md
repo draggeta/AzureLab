@@ -103,21 +103,21 @@ Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen
     * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Plak onderstaande script in dit vak. Hiermee gaan we de servers configureren.
       * Custom scripts zijn ook te gebruiken voor het bootstrappen van bijv. netwerk apparatuur.
 
+    ```bash
+    #!/bin/bash
+
+    # license: https://raw.githubusercontent.com/Azure-Samples/compute-automation-configurations/master/automate_nginx.sh
+    apt-get update -y && apt-get upgrade -y
+    apt-get install -y nginx jq
+    LOC=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq '.compute.location')
+    echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee /var/www/html/index.html
+    sudo mkdir -p /var/www/html/health/
+    echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
+    ```
+
 1. Controleer hoe de verkeersstromen lopen:
     * Verkeer tussen spokes en hub
     * Verkeer richting internet vanuit de webservers
-
-```bash
-#!/bin/bash
-
-# license: https://raw.githubusercontent.com/Azure-Samples/compute-automation-configurations/master/automate_nginx.sh
-apt-get update -y && apt-get upgrade -y
-apt-get install -y nginx jq
-LOC=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq '.compute.location')
-echo "{\"service\": \"Finance API\", \"location\": $LOC, \"server\": \"$HOSTNAME\"}" | sudo tee /var/www/html/index.html
-sudo mkdir -p /var/www/html/health/
-echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
-```
 
 ## NSG/ASG
 
@@ -137,7 +137,7 @@ De applicatie servers zijn nu vanuit elke resource te benaderen die een pad naar
 Wat gaat er hier mis en waarom?
 > <details><summary>ASG beperkingen</summary>
 >
-> Indien in een regel een `ASG` gebruikt wordt, moeten andere ASGs (indien aanwezig) in dezelfde regel alleen VMs bevatten die zich in dezelfde VNET bevinden als de eerst gebruikte ASG. Dit is een redelijke beperking. Voor verkeer tussen VNETs, zijn ASGs geen goede keuze.
+> Indien in een regel een `ASG` gebruikt wordt, moeten andere ASGs (indien aanwezig) in dezelfde regel alleen VMs bevatten die zich in dezelfde VNET bevinden als de eerst gebruikte ASG. Dit is een van [de (grote) beperking](https://docs.microsoft.com/en-us/azure/virtual-network/application-security-groups#allow-database-businesslogic) van `ASGs`. Voor verkeer tussen VNETs, zijn ASGs geen goede keuze.
 
 </details>
 
