@@ -61,11 +61,12 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_firewall_default" 
   # }
 
   nat_rule_collection {
-    name     = "nat_rule_collection-default"
+    name     = "nat-inbound"
     priority = 300
     action   = "Dnat"
+
     rule {
-      name                = "Allow-rdp-management"
+      name                = "allow-rdp-management"
       protocols           = ["TCP", "UDP"]
       source_addresses    = [data.http.ip.response_body]
       destination_address = azurerm_public_ip.hub_firewall.ip_address
@@ -73,9 +74,10 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_firewall_default" 
       translated_address  = azurerm_network_interface.hub_management.private_ip_address
       translated_port     = "3389"
     }
+
     rule {
-      name                = "Allow-rdp-management"
-      protocols           = ["TCP", "UDP"]
+      name                = "allow-http-spoke-b"
+      protocols           = ["TCP"]
       source_addresses    = ["0.0.0.0/0"]
       destination_address = azurerm_public_ip.hub_firewall.ip_address
       destination_ports   = ["80"]
@@ -85,24 +87,44 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_firewall_default" 
   }
 
   network_rule_collection {
-    name     = "network-rule-collection-default"
+    name     = "allow-internal"
     priority = 500
     action   = "Allow"
+
     rule {
-      name                  = "Allow-internet"
-      protocols             = ["TCP", "UDP", "ICMP", "Any"]
-      source_addresses      = ["10.128.0.0/14"]
-      destination_addresses = ["0.0.0.0/0"]
-      destination_ports     = ["*"]
-    }
-    rule {
-      name                  = "Allow-spoke-to-spoke"
-      protocols             = ["TCP", "UDP", "ICMP", "Any"]
+      name                  = "allow-spoke-to-spoke"
+      protocols             = ["Any"]
       source_ip_groups      = [azurerm_ip_group.spoke_a_web.id, azurerm_ip_group.spoke_b_web.id]
       destination_ip_groups = [azurerm_ip_group.spoke_a_web.id, azurerm_ip_group.spoke_b_web.id]
       destination_ports     = ["*"]
-      # source_addresses      = ["10.128.0.0/14"]
-      # destination_addresses = ["10.128.0.0/14"]
+    }
+  }
+
+  network_rule_collection {
+    name     = "deny-internal"
+    priority = 510
+    action   = "Deny"
+
+    rule {
+      name                  = "deny-internal"
+      protocols             = ["Any"]
+      source_ip_groups      = [azurerm_ip_group.supernet.id]
+      destination_ip_groups = [azurerm_ip_group.rfc1918.id]
+      destination_ports     = ["*"]
+    }
+  }
+
+  network_rule_collection {
+    name     = "allow-internet"
+    priority = 520
+    action   = "Allow"
+
+    rule {
+      name                  = "allow-internet"
+      protocols             = ["Any"]
+      source_ip_groups      = [azurerm_ip_group.supernet.id]
+      destination_addresses = ["0.0.0.0/0"]
+      destination_ports     = ["*"]
     }
   }
 }
@@ -138,7 +160,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 0
+      days    = 7
       enabled = true
     }
   }
@@ -166,8 +188,18 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 0
+      days    = 7
       enabled = true
+    }
+  }
+
+  log {
+    category = "AZFWFatFlow"
+    enabled  = true
+
+    retention_policy {
+      days    = 7
+      enabled = false
     }
   }
 
@@ -185,7 +217,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 0
+      days    = 7
       enabled = true
     }
   }
@@ -195,7 +227,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 0
+      days    = 7
       enabled = true
     }
   }
@@ -204,7 +236,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 0
+      days    = 7
       enabled = true
     }
   }
@@ -236,23 +268,13 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
       enabled = true
     }
   }
-  log {
-    category = "AZFWFatFlow"
-    enabled  = false
-
-    retention_policy {
-      days    = 0
-      enabled = false
-    }
-  }
-
 
   metric {
     category = "AllMetrics"
     enabled  = false
 
     retention_policy {
-      days    = 0
+      days    = 7
       enabled = false
     }
   }

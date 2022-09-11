@@ -8,11 +8,41 @@ snap:
 
 package_upgrade: true
 
+packages:
+  - nginx
+
 write_files:
   # Enable ipv4 forwarding, required on CIS hardened machines
   - path: /etc/sysctl.d/enabled_ipv4_forwarding.conf
     content: |
       net.ipv4.conf.all.forwarding=1
+  # Intranet
+  - path: /var/www/html/index.html
+    content: |
+      <!doctype html>
+      <html>
+      <head>
+          <style type="text/css">
+              body {
+                  font-size: 1.1em;
+                  line-height: 1.5em;
+                  max-width: 45em;
+                  margin: auto;
+                  padding: 0 2%;
+              }
+              img {
+                  max-width: 100%;
+                  display: block;
+                  margin: .75em auto;
+              }
+          </style>
+          <title>BY Intranet</title>
+      </head>
+      <body>
+          <h1>BY Intranet</h1>
+          <p>Welcome to the BY Intranet. Register <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">here</a>!</p>
+      </body>
+      </html>
   # configure addresses on loopback interface to simulate hosts on SD-wan
   - path: /etc/netplan/10-loopback.yaml
     permissions: "0644"
@@ -47,8 +77,6 @@ write_files:
       log syslog informational
       no ipv6 forwarding
       !
-      ! ip router-id ${router_id}
-      !
       ip prefix-list ROUTESRV-PL seq 10 permit 10.192.0.0/21 ge 24
       ip prefix-list ROUTESRV-PL seq 20 permit 10.193.128.0/21 ge 24
       ip prefix-list REDIS-PL seq 10 permit 10.192.0.0/21 ge 24
@@ -70,8 +98,6 @@ write_files:
         neighbor ROUTESRV ebgp-multihop 5
         neighbor ROUTESRV advertisement-interval 0
         neighbor ROUTESRV timers 10 30
-        ! neighbor ${rs_peer_1} peer-group ROUTESRV
-        ! neighbor ${rs_peer_2} peer-group ROUTESRV
         !
         address-family ipv4 unicast
         redistribute connected route-map REDIS-RM

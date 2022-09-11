@@ -1,17 +1,16 @@
-# resource "azurerm_resource_group" "net_watch" {
-#   name     = "NetworkWatcherRG"
-#   location = var.primary_location
-# }
+resource "azurerm_resource_group" "net_watch_data" {
+  name     = "${var.prefix}-${var.org}-network-watcher-01"
+  location = var.primary_location
+}
+
 data "azurerm_resource_group" "net_watch" {
   name = "NetworkWatcherRG"
 }
 
 # Log collection components
 resource "azurerm_storage_account" "net_watch_pri" {
-  name = "${replace(var.prefix, "-", "")}${var.org}logdata01"
-  # resource_group_name = azurerm_resource_group.net_watch.name
-  # location            = azurerm_resource_group.net_watch.location
-  resource_group_name = data.azurerm_resource_group.net_watch.name
+  name                = "${replace(var.prefix, "-", "")}${var.org}logdata01"
+  resource_group_name = azurerm_resource_group.net_watch_data.name
   location            = var.primary_location
 
   account_tier             = "Standard"
@@ -20,11 +19,9 @@ resource "azurerm_storage_account" "net_watch_pri" {
 }
 
 resource "azurerm_log_analytics_workspace" "net_watch_pri" {
-  name = "${var.prefix}-${var.org}-log-data-01"
-  # location            = azurerm_resource_group.net_watch.location
-  # resource_group_name = azurerm_resource_group.net_watch.name
-  location            = data.azurerm_resource_group.net_watch.location
-  resource_group_name = data.azurerm_resource_group.net_watch.name
+  name                = "${var.prefix}-${var.org}-log-data-01"
+  resource_group_name = azurerm_resource_group.net_watch_data.name
+  location            = var.primary_location
   retention_in_days   = 30
   daily_quota_gb      = 10
 }
@@ -97,15 +94,12 @@ resource "azurerm_network_watcher_flow_log" "net_watch_pri_spoke_a" {
   }
 }
 
-
-
-
 # Log collection components
 resource "azurerm_storage_account" "net_watch_sec" {
   name = "${replace(var.secondary_prefix, "-", "")}${var.org}logdata01"
   # resource_group_name = azurerm_resource_group.net_watch.name
   # location            = azurerm_resource_group.net_watch.location
-  resource_group_name = data.azurerm_resource_group.net_watch.name
+  resource_group_name = azurerm_resource_group.net_watch_data.name
   location            = var.secondary_location
 
   account_tier             = "Standard"

@@ -89,7 +89,7 @@ Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten ku
 
 ## IP groups en network rules
 
-De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanmaken van regels kunnen IP adressen direct worden ingevoerd, maar het is handiger om gebruik te maken van `IP groups`. `IP groups` zijn niks anders dan objecten in andere firewalls.
+De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanmaken van regels kunnen IP adressen direct worden ingevoerd, maar het is (soms) handiger om gebruik te maken van `IP groups`. `IP groups` zijn niks anders dan objecten in andere firewalls.
 
 1. Maak voor de spoke VM subnet elk een `IP group`.
 1. Maak een `rule collection group` op de firewall policy aan en maak daar in weer een `network rule collection` in aan die verkeer tussen de spokes toe staan. Dit is standaard L4 firewalling.
@@ -117,7 +117,8 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
     </details>
 
 1. Pas de spoke `UDR` aan. Voeg een 0.0.0.0/0 route toe via de `AZF`.
-1. Voeg een nieuwe `network rule` toe zodat outbound verkeer toegestaan is vanuit de supernet op de `AZF`. 
+1. Voeg een nieuwe `network rule collection/network rule` toe zodat outbound verkeer richting het internet toegestaan is vanuit de supernet op de `AZF`. 
+    * Let op dat je niet alle interne verkeer open zet. Mogelijk moeten er meer regels/collections toegevoegd worden.
 1. Controleer de externe IPs van de web servers. Dit zou gelijk moeten zijn aan (een van) de `public IP(s)` gekoppeld aan de firewall
     * linux: `curl https://api.ipify.org`
     * windows: `irm https://api.ipify.org`

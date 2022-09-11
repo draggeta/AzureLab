@@ -1,5 +1,5 @@
 
-# Dag 3 - SD-WAN implementatie
+# Dag 3 - SD-WAN implementatie en NAT Gateway
 
 BY Verzekeringen heeft ook SD-WAN uitgerold over alle branch offices. Hun oplossing werkt niet samen met `Azure Virtual WAN`. Om deze reden moet er een `network virtual appliance` (`NVA`) uitgerold worden en moeten de netwerken zo aangepast worden dat de onderstaande netwerken via de appliance gerouteerd worden.
 
@@ -14,7 +14,7 @@ BY Verzekeringen heeft ook SD-WAN uitgerold over alle branch offices. Hun oploss
 
 We gaan een SD-WAN NVA uitrollen in het hub netwerk.
 
-1. Maak een subnet voor de NVAs aan in het hub netwerk. Koppel een NSG aan de NVA die alle verkeer toe staat.
+1. Maak een subnet voor de NVAs aan in het hub netwerk. Koppel een NSG aan de NVA die **alle** verkeer toe staat, niet alleen `VirtualNetwork` naar `VirtualNetwork`
     > <details><summary>NSGs en NVAs</summary>
     >
     > De meeste NVAs kunnen ook firewallen. Het is vaak niet nodig om de data poorten te firewallen. Subnetten/interfaces waar HA en management verkeer overheen lopen moeten wel gefilterd worden.
@@ -35,6 +35,7 @@ We gaan een SD-WAN NVA uitrollen in het hub netwerk.
     > VMs in Azure mogen over het algemeen niet routen. Om dit mogelijk te maken moet op de netwerkkaarten die routeren [`IP forwarding`](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#user-defined) op `Enabled` staan onder `IP configurations`.
 
     </details>
+1. Om TCP te testen, is er ook een intranetpagina geconfigureerd op de appliance. Probeer ook de HTTP pagina op de SD-WAN IP-reeksen te bekijken.
 
 ## Load balancing voor HA
 Onder normale omstandigheden wordt er gebruik gemaakt van een high available opstelling. In Azure is het niet mogelijk om met (gratuitous) ARPs IP-adressen te verhuizen tussen hosts. De twee opties zijn:
@@ -93,7 +94,32 @@ Het is belangrijk om diagnostics in te schakelen voor load balancers. Zonder dia
 
     </details>
 
-De `UDRs` verwijzen naar de directe IP van een NVA. Om goed HA in te richten, moet het verkeer via de load balanced IP lopen.
+1. Controleer de internet verbinding van de SD-WAN appliance.
+    * `curl https://api.ipify.org`
+
+> <details><summary>Interne load balancers en outbound connectivity</summary>
+>
+> Indien alleen een standard internet load balancer (niet basic) aan een VM gekoppeld wordt, v[erliest het de mogelijkheid om met het internet te verbinden](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-troubleshoot#no-outbound-connectivity-from-standard-internal-load-balancers-ilb). Dit is een veiligheidsinstelling van Azure. Om het toch outbound connectivity te hebben, kan er gekozen worden om een externe load balancer of een public IP toe te voegen. De betere oplossing is echter een NAT Gateway. 
+
+</details>
+
+## NAT Gateway
+
+We gaan een NAT Gateway (NGW) uitrollen en deze koppelen aan de SD-WAN subnet. `NGWs` hebben het [voordeel](https://docs.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) dat ze NAT translaties aanmaken op basis van source en destination IPs en poorten, en protocol. Hierdoor kan per `public IP` meer dan de verwachtte 65535 translaties/sessies worden opgezet.
+
+Het is simpel om een gateway bij elkaar te klikken, maar indien nodig kan naar de [documentatie](https://docs.microsoft.com/en-us/azure/virtual-network/nat-gateway/quickstart-create-nat-gateway-portal) gerefereerd worden. 
+1. Let bij het uitrollen van de `NGW` op de volgende punten:
+    * Zone redundancy
+    * Idle timeout: Hoe lang een sessie zonder verkeer actief wordt gehouden
+2. Controleer de outbound connectivity van de SD-WAN appliance.
+    * `curl https://api.ipify.org`
+    * Vergelijk dit met de `NGW` IP.
+
+## Routeren richting SD-WAN LB
+
+De SD-WAN appliance heeft weer outbound connectivity, maar het verkeer loopt nu nog direct via de VM, in plaats van via de `ILB` die de high-availability verzorgt.
+
+De `UDRs` verwijzen naar de directe IP van de NVA. Om goed HA in te richten, moet het verkeer via de load balanced IP lopen.
 1. Pas alle `UDRs` aan zodat het verkeer via de loadbalancer verloopt.
 1. Test verkeer naar de achterliggende IPs door pings uit te voeren.
 

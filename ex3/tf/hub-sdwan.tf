@@ -5,10 +5,27 @@ resource "azurerm_subnet" "hub_sdwan" {
   address_prefixes     = ["10.128.6.0/24"]
 }
 
+resource "azurerm_subnet_nat_gateway_association" "hub_ngw_to_hub_sdwan" {
+  subnet_id      = azurerm_subnet.hub_sdwan.id
+  nat_gateway_id = azurerm_nat_gateway.hub_ngw.id
+}
+
 resource "azurerm_network_security_group" "hub_sdwan" {
   name                = "${azurerm_virtual_network.hub.name}-sdwan-nsg-01"
   location            = azurerm_resource_group.hub.location
   resource_group_name = azurerm_resource_group.hub.name
+
+  security_rule {
+    name                       = "AllowAny"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 
   tags = var.tags
 }
@@ -67,11 +84,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
   custom_data = base64encode(
     templatefile(
       "data/cloud-init.yml",
-      {
-        router_id = azurerm_network_interface.hub_sdwan.private_ip_address,
-        rs_peer_1 = "10.128.2.4",
-        rs_peer_2 = "10.128.2.5"
-      }
+      {}
     )
   )
 
@@ -126,11 +139,10 @@ resource "azurerm_lb_rule" "hub_sdwan" {
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.hub_sdwan.id]
   probe_id                       = azurerm_lb_probe.hub_sdwan.id
 
-  frontend_port         = 0
-  backend_port          = 0
-  protocol              = "All"
-  enable_floating_ip    = true
-  disable_outbound_snat = true
+  frontend_port      = 0
+  backend_port       = 0
+  protocol           = "All"
+  enable_floating_ip = true
 }
 
 resource "azurerm_monitor_diagnostic_setting" "hub_sdwan" {
