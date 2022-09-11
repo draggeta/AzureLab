@@ -53,8 +53,7 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke_a" {
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
 
-  # `allow_gateway_transit` must be set to false for vnet Global Peering
-  allow_gateway_transit = true
+  allow_gateway_transit = false
 }
 
 # enable global peering between the two virtual network
@@ -66,6 +65,5 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke_b" {
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
 
-  # `allow_gateway_transit` must be set to false for vnet Global Peering
-  allow_gateway_transit = true
+  allow_gateway_transit = false
 }

@@ -5,8 +5,21 @@ resource "azurerm_subnet" "hub_sdwan" {
   address_prefixes     = ["10.128.6.0/24"]
 }
 
+resource "azurerm_network_security_group" "hub_sdwan" {
+  name                = "${azurerm_virtual_network.hub.name}-sdwan-nsg-01"
+  location            = azurerm_resource_group.hub.location
+  resource_group_name = azurerm_resource_group.hub.name
+
+  tags = var.tags
+}
+
+resource "azurerm_subnet_network_security_group_association" "hub_sdwan_to_hub_sdwan" {
+  subnet_id                 = azurerm_subnet.hub_sdwan.id
+  network_security_group_id = azurerm_network_security_group.hub_sdwan.id
+}
+
 resource "azurerm_network_interface" "hub_sdwan" {
-  name                = "sdwan02-nic-01"
+  name                = "sdwan01-nic-01"
   location            = azurerm_resource_group.hub.location
   resource_group_name = azurerm_resource_group.hub.name
 
@@ -22,7 +35,7 @@ resource "azurerm_network_interface" "hub_sdwan" {
 }
 
 resource "azurerm_linux_virtual_machine" "hub_sdwan" {
-  name                  = "sdwan02"
+  name                  = "sdwan01"
   location              = azurerm_resource_group.hub.location
   resource_group_name   = azurerm_resource_group.hub.name
   network_interface_ids = [azurerm_network_interface.hub_sdwan.id]
@@ -38,13 +51,13 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
   }
 
   os_disk {
-    name    = "sdwan02-os-disk"
+    name    = "sdwan01-os-disk"
     caching = "ReadWrite"
     # create_option        = "FromImage"
     storage_account_type = "StandardSSD_LRS"
   }
 
-  computer_name                   = "sdwan02"
+  computer_name                   = "sdwan01"
   disable_password_authentication = false
   admin_username                  = var.credentials["username"]
   admin_password                  = var.credentials["password"]
@@ -61,6 +74,11 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
       }
     )
   )
+
+  depends_on = [
+    azurerm_firewall.hub_firewall,
+    azurerm_firewall_policy_rule_collection_group.hub_firewall_default,
+  ]
 
   tags = var.tags
 }
@@ -105,6 +123,7 @@ resource "azurerm_lb_rule" "hub_sdwan" {
   loadbalancer_id = azurerm_lb.hub_sdwan.id
 
   frontend_ip_configuration_name = azurerm_lb.hub_sdwan.frontend_ip_configuration[0].name
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.hub_sdwan.id]
   probe_id                       = azurerm_lb_probe.hub_sdwan.id
 
   frontend_port         = 0

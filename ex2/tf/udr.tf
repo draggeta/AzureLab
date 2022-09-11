@@ -17,7 +17,7 @@ resource "azurerm_subnet_route_table_association" "hub_management" {
 }
 
 resource "azurerm_route_table" "spoke_a" {
-  name                = "${var.secondary_prefix}-${var.org}-udr-spoke-01"
+  name                = "${var.prefix}-${var.org}-udr-spoke-01"
   location            = azurerm_resource_group.spoke_a.location
   resource_group_name = azurerm_resource_group.spoke_a.name
 

@@ -8,6 +8,7 @@ resource "azurerm_virtual_network" "spoke_b" {
   location            = azurerm_resource_group.spoke_b.location
   resource_group_name = azurerm_resource_group.spoke_b.name
   address_space       = ["10.130.0.0/16"]
+  dns_servers         = [azurerm_firewall.hub_firewall.ip_configuration[0].private_ip_address]
 
   tags = var.tags
 }
@@ -29,4 +30,5 @@ resource "azurerm_virtual_network_peering" "spoke_b_to_hub" {
   allow_forwarded_traffic      = true
 
   allow_gateway_transit = false
+  use_remote_gateways   = true
 }

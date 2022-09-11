@@ -15,7 +15,7 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
 
 1. Bouw een core `virtual network` met een /16 IP.
 
-1. Deploy een Ubuntu 20.04/22.04 of Windows Server 2022 management server. 
+1. Deploy een Windows Server 2022 management server. 
     * Maak geen gebruik van `availability zones` of `availability sets`.
     * Geef de VM geen `public IP`. Deze gaan we handmatig toevoegen.
     * Geef de VM geen `network security group`. Deze gaan we handmatig toevoegen. 

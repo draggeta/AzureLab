@@ -26,6 +26,7 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
 
     > **NOTE:** De route server is niet extern benaderbaar en is niet hetgeen wat routeert. Het is een BGP route reflector. De `public IP` wordt gebruikt voor communicatie met het Azure platform.
 1. Configureer de peering vanuit de `route server` zijde. De SD-WAN appliance (niet de interne load balancer ervoor) kan als peer gebruikt worden.
+    * Gebruik `65002` als ASN
 1. Controleer de route tabellen voor enkele subnets. Wat valt op?
 
 ### SD-WAN BGP neighbors
@@ -62,14 +63,14 @@ write memory
 Controleer of de peerings up komen:
 
 ```cisco
-!!!!!!!!!!!!!!!!!!!!!
+show bgp summary
 show bgp neighbors
 ```
 
 En of er routes worden uitgewisseld:
 ```cisco
-!!!!!!!!!!!!!!!!!!!!!
-show bgp neighbors database
+show bgp ipv4 neighbors ${rs_peer} advertised-routes
+show bgp ipv4 neighbors ${rs_peer} received-routes
 ```
 
 Vanuit de `route server` zijde kunnen de[ geleerde en geadverteerde routes](https://docs.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-powershell#troubleshooting) via PowerShell achterhaald worden (in bijvoorbeelde de [`Cloud Shell`](https://docs.microsoft.com/en-us/azure/cloud-shell/overview)). De output van de commands kan even op zich laten wachten.
@@ -96,7 +97,7 @@ Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewissel
 
 > <details><summary>VNET peering en resource gebruik</summary>
 >
-> De VNET peerings hebben allerlei opties. Een van de opties is om gebruik te maken van de Route Server/VPN gateway van de gepeerde netwerk. Als dit uit staat, zullen de spokes de routes niet geleerd hebben.
+> De VNET peerings hebben allerlei opties. Een van de opties is om gebruik te maken van de Route Server/VPN gateway van de gepeerde netwerk. Als dit uit staat, zullen de spokes de routes niet geleerd hebben. Ook als in de hub het niet toegestaan is dat peers zijn gateway/route server gebruiken kan het falen.
 
 </details>
 
