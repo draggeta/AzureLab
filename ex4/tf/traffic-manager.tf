@@ -1,5 +1,5 @@
 resource "azurerm_traffic_manager_profile" "tm" {
-  name                   = random_id.server.hex
+  name                   = "${azurerm_resource_group.hub.name}-tm-01"
   resource_group_name    = azurerm_resource_group.hub.name
   traffic_routing_method = "Priority"
 

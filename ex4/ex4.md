@@ -117,7 +117,9 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 
     </details>
 
-1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver. Controleer of dit werkt.
+Kies een van de twee opties om het op te lossen:
+1. Richt het verkeer in conform de microsoft documentatie.
+1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver.
 
 ## Traffic Manager
 

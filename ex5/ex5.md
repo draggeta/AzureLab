@@ -95,12 +95,15 @@ Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewissel
 1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden vanuit de management server
 1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden vanuit de API servers. Er is een kans dat dit niet lukt. Kan je bedenken waarom?
 
-> <details><summary>VNET peering en resource gebruik</summary>
->
-> De VNET peerings hebben allerlei opties. Een van de opties is om gebruik te maken van de Route Server/VPN gateway van de gepeerde netwerk. Als dit uit staat, zullen de spokes de routes niet geleerd hebben. Ook als in de hub het niet toegestaan is dat peers zijn gateway/route server gebruiken kan het falen.
+    > <details><summary>VNET peering en resource gebruik</summary>
+    >
+    > De VNET peerings hebben allerlei opties. Een van de opties is om gebruik te maken van de Route Server/VPN gateway van de gepeerde     netwerk. Als dit uit staat, zullen de spokes de routes niet geleerd hebben. Ook als in de hub het niet toegestaan is dat peers zijn     gateway/route server gebruiken kan het falen.
+    >
+    > Echter, de default route is de Azure Firewall. Indien hier een allow-any-any is geconfigureerd, kan stateless verkeer mogelijk wel lukken. De AZF zal namelijk verkeer voor deze subnetten ontvangen en doorzetten naar zijn default gateway. Deze kent de BGP routes en stuurt het verkeer door naar de SD-WAN appliance. De SD-WAN appliance kent de API server subnetten door de peering en zal het verkeer direct terugsturen. TCP verkeer faalt (AZF ziet maar een kant van de sessie), maar ICMP zal prima lukken.
 
-</details>
-
+    </details>
+1. Pas de VNET peers aan zodat de NICs van de API servers de SD-WAN routes kennen.
+    * Verifieer dit met de `Network Watcher` of de `effective routes` functionaliteit van de `NICs`.
 
 
 ## Azure Bastion
@@ -109,7 +112,9 @@ BY's security afdeling vindt het idee van RDP over het internet maar niks. Na ee
 
 ### Uitrollen Azure Bastion
 
-Voor BY is alleen RDP naar Windows apparaten en SSH naar Linux apparaten benodigd. Hierdoor kan gebruik worden gemaakt van de Basic SKU. [Rol de `bastion` uit](https://docs.microsoft.com/en-us/azure/bastion/quickstart-host-portal#createvmset) in de hub.
+Voor BY is alleen RDP naar Windows apparaten en SSH naar Linux apparaten benodigd. Hierdoor kan gebruik worden gemaakt van de Basic SKU. De Standard SKU heeft veel meer opties zoals: SSH tunneling, file copy, scaling etc. 
+
+[Rol de `bastion` uit](https://docs.microsoft.com/en-us/azure/bastion/quickstart-host-portal#createvmset) in de hub.
 
 Probeer na het uitrollen te [verbinden met de VMs](https://docs.microsoft.com/en-us/azure/bastion/quickstart-host-portal#connect):
 * management server
@@ -118,7 +123,7 @@ Probeer na het uitrollen te [verbinden met de VMs](https://docs.microsoft.com/en
 
 ### Connectiviteit repareren
 
-Er zal aardig wat niet werken. Veel management verkeer staat alleen de management server toe. De volgende onderdelen moeten worden aangepast zodat de bastion **SUBNET** bij de resources kan:
+Er zal aardig wat niet werken. In de oude situatie mocht beheer alleen vanuit de management server. De volgende onderdelen moeten worden aangepast zodat de bastion **SUBNET** bij de resources kan:
 1. management server NSG
 1. spoke A NSG
 1. spoke B NSG
@@ -128,4 +133,5 @@ Er zal aardig wat niet werken. Veel management verkeer staat alleen de managemen
 
 Ruim de regels op die niet meer nodig zijn nu beheer toegang door de Bastion wordt geregeld:
 1. NSG en AZF ACEs en NAT regels die RDP vanaf het internet naar de management server faciliteren
-1. NSG ACEs die SSH verkeer vanuit de management server naar de spoke VMs en SD-WAN NVA toe staan.
+1. Zorg ervoor dat de management server nog steeds op beheer poorten kan verbinden
+1. Controleer dat de management server niet meer benaderbaar is vanaf het internet.

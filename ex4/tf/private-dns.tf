@@ -35,11 +35,17 @@ resource "azurerm_private_dns_cname_record" "spoke_a" {
   ttl                 = 300
   record              = azurerm_public_ip.spoke_a_agw.fqdn
 }
-
 resource "azurerm_private_dns_cname_record" "spoke_b" {
   name                = "api-sec"
   zone_name           = azurerm_private_dns_zone.priv_dns.name
   resource_group_name = azurerm_resource_group.hub.name
   ttl                 = 300
   record              = azurerm_public_ip.spoke_b_web_lb.fqdn
+}
+resource "azurerm_private_dns_cname_record" "tm" {
+  name                = "api"
+  zone_name           = azurerm_private_dns_zone.priv_dns.name
+  resource_group_name = azurerm_resource_group.hub.name
+  ttl                 = 30
+  record              = azurerm_traffic_manager_profile.tm.fqdn
 }

@@ -15,19 +15,8 @@ resource "azurerm_network_security_group" "hub_management" {
   resource_group_name = azurerm_resource_group.hub.name
 
   security_rule {
-    name                       = "AllowSshInbound"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_ranges    = [22]
-    source_address_prefixes    = [data.http.ip.response_body, azurerm_subnet.hub_firewall_subnet.address_prefixes[0]]
-    destination_address_prefix = "VirtualNetwork"
-  }
-  security_rule {
     name                       = "AllowRdpInbound"
-    priority                   = 200
+    priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "*"

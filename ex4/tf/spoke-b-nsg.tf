@@ -26,36 +26,25 @@ resource "azurerm_network_security_group" "spoke_b_web" {
     destination_application_security_group_ids = [azurerm_application_security_group.spoke_b_web.id]
   }
   security_rule {
-    name                       = "AllowRdpInbound"
-    priority                   = 200
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_ranges    = [3389]
-    source_address_prefixes    = [azurerm_network_interface.hub_management.private_ip_address]
+    name                                       = "AllowHttpInbound"
+    priority                                   = 200
+    direction                                  = "Inbound"
+    access                                     = "Allow"
+    protocol                                   = "Tcp"
+    source_port_range                          = "*"
+    destination_port_ranges                    = [80]
+    source_address_prefix                      = "*"
     destination_application_security_group_ids = [azurerm_application_security_group.spoke_b_web.id]
   }
   security_rule {
-    name                       = "AllowHttpInbound"
-    priority                   = 300
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_ranges    = [80]
-    source_address_prefix      = "*"
-    destination_application_security_group_ids = [azurerm_application_security_group.spoke_b_web.id]
-  }
-  security_rule {
-    name                       = "DenyAnyInbound"
-    priority                   = 3000
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
+    name                                       = "DenyAnyInbound"
+    priority                                   = 3000
+    direction                                  = "Inbound"
+    access                                     = "Deny"
+    protocol                                   = "*"
+    source_port_range                          = "*"
+    destination_port_range                     = "*"
+    source_address_prefix                      = "*"
     destination_application_security_group_ids = [azurerm_application_security_group.spoke_b_web.id]
   }
 

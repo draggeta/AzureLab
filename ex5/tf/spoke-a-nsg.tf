@@ -22,23 +22,12 @@ resource "azurerm_network_security_group" "spoke_a_web" {
     protocol                                   = "Tcp"
     source_port_range                          = "*"
     destination_port_ranges                    = [22]
-    source_address_prefixes                    = [azurerm_network_interface.hub_management.private_ip_address]
-    destination_application_security_group_ids = [azurerm_application_security_group.spoke_a_web.id]
-  }
-  security_rule {
-    name                                       = "AllowRdpInbound"
-    priority                                   = 200
-    direction                                  = "Inbound"
-    access                                     = "Allow"
-    protocol                                   = "Tcp"
-    source_port_range                          = "*"
-    destination_port_ranges                    = [3389]
-    source_address_prefixes                    = [azurerm_network_interface.hub_management.private_ip_address]
+    source_address_prefixes                    = [azurerm_subnet.hub_bastion_subnet.address_prefixes[0], azurerm_network_interface.hub_management.private_ip_address]
     destination_application_security_group_ids = [azurerm_application_security_group.spoke_a_web.id]
   }
   security_rule {
     name                                       = "AllowHttpInbound"
-    priority                                   = 300
+    priority                                   = 200
     direction                                  = "Inbound"
     access                                     = "Allow"
     protocol                                   = "Tcp"
