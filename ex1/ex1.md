@@ -82,7 +82,6 @@ Het netwerk moet bestaan uit twee spokes gekoppeld aan een hub netwerk waar vand
 
 </details>
 
-
 ## Uitrollen applicatie server
 
 Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen APIs aanbieden voor financiele gegevens en risk assessments. De APIs horen publiekelijk beschikbaar te zijn in de toekomst. Inbound SSH verkeer mag alleen vanuit de management server.
@@ -96,7 +95,7 @@ Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen
     * Geef de VMs geen `public IP`.
     * Geef de VMs geen `network security group`. Deze gaan we apart toevoegen.
     * Schakel `Auto-shutdown` in en zet deze op 00:00 in jouw lokale tijdzone.
-    * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Plak onderstaande script in dit vak. Hiermee gaan we de servers configureren.
+    * Bij de `Advanced` tab tijdens de configuratie kan een script worden ingevoerd. Plak onderstaande script in de **USER DATA**, niet **CUSTOM DATA**. Hiermee gaan we de servers configureren.
       * Custom scripts zijn ook te gebruiken voor het bootstrappen van bijv. netwerk apparatuur.
 
     ```bash
