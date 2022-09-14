@@ -1,10 +1,13 @@
 # Dag 2 - Firewalling
 
+![DNS resolution](./data/dns_inspection.svg)
+
 De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met `threat intelligence`/threat detection, wordt hiervoor de `Azure Firewall` gebruikt.
 
 > **Note:** Start de VM's nog niet op als ze uit staan. We gaan de DNS instellingen aanpassen. Deze worden alleen bij het (her)starten van een VM meegenomen door DHCP, of na een renew in jouw besturingssysteem.
 
 ## Uitrol AZF
+
 1. Deploy een [`Azure Firewall`](https://docs.microsoft.com/en-us/azure/firewall/overview). De reden hiervoor is dat er meteen een makkelijke NVA aanwezig is die ook als 'custom' DNS server/proxy kan dienen
     * Let op, een `AZF` heeft nog extra componenten nodig zoals een `subnet`. De subnet moet `AzureFirewallSubnet` heten en voor de deployment worden aangemaakt.
     * Standard tier
@@ -39,7 +42,11 @@ De `AZF` wordt nu gebruikt als DNS server/proxy.
 
 ## Aanpassen interne routering
 
-Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Dit moet direct en een message queue als intermediate is geen optie. BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
+Zoals gewoonlijk, veranderen eisen na verloop van tijd. Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Een message queue is geen optie. De ontwikkelde communicatie moet direct tussen de hosts.
+
+BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
+
+![NVA Routing](./data/internal_routing.svg)
 
 > <details><summary>Standaard route tabellen in Azure</summary>
 >
@@ -105,6 +112,8 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
 ## Aanpassing routering richting internet
 
 Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het internet geanalyseerd moet worden voor threats. Ook hiervoor kan de `AZF` gebruikt worden.
+
+![Inspecting internet traffic](./data/internet_firewall.svg)
 
 1. Configureer `threat intelligence` zodat het daadwerkelijk verkeer blokkeert.
     

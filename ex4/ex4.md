@@ -1,11 +1,13 @@
 
 # Dag 4 - Load balancing en DNS
 
-De omgeving vordert en interne IP adressen onthouden wordt vervelend. Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel.
+De omgeving vordert en interne IP adressen onthouden wordt vervelend. Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel. Een oplossing hiervoor is DNS. Voor interne resolving gaan we gebruik maken van een private DNS zone.
+
+![Private DNS resolving](./data/private_dns.svg)
 
 ## Private DNS Zones
 
-We gaan een [`private DNS zone`](https://docs.microsoft.com/en-us/azure/dns/private-dns-privatednszone) maken waar we VMs en andere resources in kunnen registeren. De registratie van VMs moet automatisch zodat de kans op fouten kleiner is.
+We gaan een [`private DNS zone`](https://docs.microsoft.com/en-us/azure/dns/private-dns-privatednszone) maken waar we VMs en andere resources in kunnen registeren. De registratie van VMs moet automatisch zodat de kans op fouten kleiner is. Wel moeten alle requests nog steeds door de `AZF` geinspecteerd blijven worden.
 
 Er is gekozen voor de DNS zone `by.cloud`.
 
@@ -48,13 +50,15 @@ De applicatie in spoke A moet extern benaderbaar worden. We hebben hiervoor enke
 * Gebruik maken van een externe/publieke `load balancer`
 * Gebruik maken van een `application gateway` (`AGW`)
 
-De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen met het testdraaien van de [`AGW`](https://docs.microsoft.com/en-us/azure/application-gateway/overview) en zijn L7 (WAF) beveiliging. 
+De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen met het testdraaien van de [`AGW`](https://docs.microsoft.com/en-us/azure/application-gateway/overview) en zijn L7 (WAF) beveiliging.
 
-> **NOTE:** We gaan geef WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder, is duurder en kan wat tijd kosten.
+![Load balancing](./data/load_balancing.svg)
+
+> **NOTE:** We gaan geen WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder, is duurder en kan wat tijd kosten.
 
 > **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen.
 
-1. Configureer de `load balancer`.
+1. Configureer de `application gateway`.
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VM(s) erin
     * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 

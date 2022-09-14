@@ -11,6 +11,8 @@ Het gaat goed met BY Verzekeringen. Naast Nederland en Ierland, worden nu ook ka
 
 Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch in een VNET te injecteren, is de [`route server`](https://docs.microsoft.com/en-us/azure/route-server/overview). Lees het stuk over de [beperkingen](https://docs.microsoft.com/en-us/azure/route-server/overview#route-server-limits) goed door.
 
+![Route server](./data/route_server.svg)
+
 ## Route server
 
 ### Route server uitrollen

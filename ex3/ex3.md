@@ -8,6 +8,8 @@ BY Verzekeringen heeft ook SD-WAN uitgerold over alle branch offices. Hun oploss
 | Nederland | 10.192.0.0/22 |
 | Ierland | 10.192.4.0/22 |
 
+![SD-WAN](./data/sd_wan.svg)
+
 ## NVA uitrollen
 
 > **NOTE:** Hoewel er voor het lab maar een apparaat wordt uitgerold, gaan we het behandelen alsof het in een active/passive opstelling draait
@@ -38,6 +40,7 @@ We gaan een SD-WAN NVA uitrollen in het hub netwerk.
 1. Om TCP te testen, is er ook een intranetpagina geconfigureerd op de appliance. Probeer ook de HTTP pagina op de SD-WAN IP-reeksen te bekijken.
 
 ## Load balancing voor HA
+
 Onder normale omstandigheden wordt er gebruik gemaakt van een high available opstelling. In Azure is het niet mogelijk om met (gratuitous) ARPs IP-adressen te verhuizen tussen hosts. De twee opties zijn:
 1. Via de API. Failovers tot 2 minuten
 1. Via een load balancer. Failovers standaard tot 10 secondes

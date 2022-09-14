@@ -3,6 +3,12 @@
 BY wil web applicaties in de cloud gaan draaien. De webapplicatie moet geografisch redundant neergezet worden. Er moet ook een management (hub) `virtual network` en server komen waar vandaan de applicaties beheerd kunnen worden.
 Alle servers moeten gehardened worden door middel van `network security groups`. De enige server die direct vanuit het internet benaderbaar moet zijn, is de management server. 
 
+Na wat zorgvuldig onderzoek, kom je uit op de shared services hub-spoke model. Het is een fijn model waarbij de hub kan communiceren en diensten aanbieden aan de spokes. Een bijkomend voordeel is dat het secure by default is. De spokes kunnen niet bij elkaar.
+
+![Shared Hub](./data/shared_hub.svg)
+
+Voor een nieuwe startup een architectuur die past bij cloud-native workloads.
+
 ## Uitrollen hub/management netwerk
 
 > **NOTE:** Elke `virtual network` komt in een eigen resource group terecht. Dit helpt met het overzicht.
