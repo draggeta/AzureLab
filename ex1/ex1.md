@@ -74,10 +74,6 @@ Het netwerk moet bestaan uit twee spokes gekoppeld aan een hub netwerk waar vand
 1. Nadat de VNETs zijn aangemaakt, kan je onder de `virtual network` `Peering` selecteren en een [peering toevoegen](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) om de spokes netwerken aan de hub `virtual network` te koppelen. Doe dit voor elke spoke
     * Sta verkeer naar remote netwerken toe.
     * Sta verkeer van andere netwerken toe.
-1. Vergelijk de externe IPs tussen de spokes en management
-    * De publieke IP is te achterhalen: 
-    * linux: `curl https://api.ipify.org`
-
 
 ><details>
 >  <summary>VNET peering</summary>  
@@ -85,7 +81,6 @@ Het netwerk moet bestaan uit twee spokes gekoppeld aan een hub netwerk waar vand
 > Peerings verbinden twee [`VNETs`](a "Virtual Networks") met elkaar. De peering moet in beide VNETs worden aangemaakt. In de [`portal`](a "Azure Portal") gebeurt dit automatisch wanneer je rechten hebt op beide VNETs. Doe je dit op een andere wijze (API/PowerShell/Azure CLI), moet elke zijde van de peering los worden opgezet.
 
 </details>
-
 
 ## Uitrollen applicatie server
 
@@ -100,7 +95,7 @@ Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen
     * Geef de VMs geen `public IP`.
     * Geef de VMs geen `network security group`. Deze gaan we apart toevoegen.
     * Schakel `Auto-shutdown` in en zet deze op 00:00 in jouw lokale tijdzone.
-    * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Plak onderstaande script in dit vak. Hiermee gaan we de servers configureren.
+    * Bij de `Advanced` tab tijdens de configuratie kan een script worden ingevoerd. Plak onderstaande script in de **USER DATA**, niet **CUSTOM DATA**. Hiermee gaan we de servers configureren.
       * Custom scripts zijn ook te gebruiken voor het bootstrappen van bijv. netwerk apparatuur.
 
     ```bash
@@ -115,6 +110,15 @@ Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen
     echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
     ```
 
+Na het uitrollen van de applicatie servers, kan je via de management server inloggen op de API servers:
+```powershell
+ssh <username>@<ip/fqdn>
+ssh admin@10.0.0.1
+```
+
+1. Vergelijk de externe IPs tussen de spokes en management
+    * De publieke IP is te achterhalen: 
+    * linux: `curl https://api.ipify.org`
 1. Controleer hoe de verkeersstromen lopen:
     * Verkeer tussen spokes en hub
     * Verkeer richting internet vanuit de webservers
