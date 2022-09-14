@@ -132,6 +132,6 @@ De `UDRs` verwijzen naar de directe IP van de NVA. Om goed HA in te richten, moe
 >
 > Dit is op te lossen door naast DNAT, ook SNAT op de NVA te doen of een cluster mechanisme te gebruiken om verkeer altijd naar de juiste node te leiden.
 >
-> Beide opties hebben nadelen. Een fijnere optie kan zijn om de [`Gateway load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/gateway-overview) te gebruiken. Deze type load balancer zorgt ervoor dat north-south verkeer altijd symmetrisch loopt. Jammer genoeg heeft het (nog) geen ondersteuning voor east-west verkeer.
+> Beide opties hebben nadelen. Een fijnere optie kan zijn om de [`gateway load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/gateway-overview) of `route server` te gebruiken. De `gateway load balancer` zorgt ervoor dat north-south verkeer altijd symmetrisch loopt. Jammer genoeg heeft het (nog) geen ondersteuning voor east-west verkeer. De `route server` wordt later in het lab behandeld.
 
 </details>
