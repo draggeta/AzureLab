@@ -7,7 +7,6 @@ De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat
 ## Uitrol AZF
 1. Deploy een [`Azure Firewall`](https://docs.microsoft.com/en-us/azure/firewall/overview). De reden hiervoor is dat er meteen een makkelijke NVA aanwezig is die ook als 'custom' DNS server/proxy kan dienen
     * Let op, een `AZF` heeft nog extra componenten nodig zoals een `subnet`. De subnet moet `AzureFirewallSubnet` heten en voor de deployment worden aangemaakt.
-    * Zorg ervoor dat de `AZF` als DNS proxy kan dienen. Dit is een setting die ook na uitrol aan gezet kan worden.
     * Standard tier
     * Firewall Policy management
     * Plaats het in de hub
