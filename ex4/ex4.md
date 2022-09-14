@@ -32,9 +32,9 @@ Er is gekozen voor de DNS zone `by.cloud`.
     >
     > Om een zone gekoppeld aan een `VNET` te kunnen resolven, moet je de `VNET` DNS servers gebruiken. Alle `VNETs` hier gebruiken de `AZF` als DNS server. De `AZF` gebruikt echter niet het `VNET` als DNS server, maar CloudFlare DNS en Google DNS.  
     >
-    > De `VNET` DNS server is alleen bereikbaar vanuit de VNET. VM's kunnen dus niet de DNS server van een ander `VNET` gebruiken. Ook kun je niet vanuit een on-prem omgeving `private DNS zones` te resolven. 
+    > De ingebouwde `VNET` DNS server (168.63.129.16) is alleen bereikbaar vanuit de VNET. VM's kunnen dus niet de ingebouwde DNS server van een ander `VNET` gebruiken. Ook kun je niet vanuit een on-prem omgeving de VNET DNS banderen om `private DNS zones` te resolven. 
     >
-    > Om dit te kunnen in een productie omgeving, moet het resolven van de `private DNS zones` via een DNS forwarder/proxy lopen in een gekoppelde `VNET`.
+    > Er moet ten tijde van schijven dus altijd een eigen DNS server in Azure aanwezig zijn om de zones te resolven. Om dit te kunnen in een productie omgeving, moet het resolven van de `private DNS zones` via een DNS forwarder/proxy lopen in een gekoppelde `VNET`.
     >
     >**De enige reden dat de zone gekoppeld is aan de spokes, is dus voor de auto registratie, niet DNS resolving.**
 
