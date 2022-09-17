@@ -1,6 +1,6 @@
 resource "azurerm_public_ip" "hub_rs" {
-  # name                = "${azurerm_resource_group.hub.name}-rs-01-pi4-01"
-  name                = "route-server-01-pi4-01"
+  # name                = "route-server-01-pi4-01"
+  name                = "${azurerm_resource_group.hub.name}-rs-01-pi4-01"
   location            = azurerm_resource_group.hub.location
   resource_group_name = azurerm_resource_group.hub.name
   allocation_method   = "Static"
@@ -8,8 +8,8 @@ resource "azurerm_public_ip" "hub_rs" {
 }
 
 resource "azurerm_route_server" "hub_rs" {
-  # name = "${azurerm_resource_group.hub.name}-rs-01"
-  name                = "route-server-01"
+  # name                = "route-server-01"
+  name                = "${azurerm_resource_group.hub.name}-rs-01"
   location            = azurerm_resource_group.hub.location
   resource_group_name = azurerm_resource_group.hub.name
 

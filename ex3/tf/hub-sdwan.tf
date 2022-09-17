@@ -56,7 +56,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
   location              = azurerm_resource_group.hub.location
   resource_group_name   = azurerm_resource_group.hub.name
   network_interface_ids = [azurerm_network_interface.hub_sdwan.id]
-  size                  = "Standard_B2s"
+  size                  = "Standard_B1s"
 
   zone = 1
 

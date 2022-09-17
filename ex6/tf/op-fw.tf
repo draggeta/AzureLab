@@ -85,7 +85,7 @@ resource "azurerm_linux_virtual_machine" "op_fw" {
   location              = azurerm_resource_group.op.location
   resource_group_name   = azurerm_resource_group.op.name
   network_interface_ids = [azurerm_network_interface.op_fw.id]
-  size                  = "Standard_B2s"
+  size                  = "Standard_B1s"
 
   zone = 1
 

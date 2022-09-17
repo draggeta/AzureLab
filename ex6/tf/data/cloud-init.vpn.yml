@@ -1,6 +1,11 @@
 ## template: jinja
 #cloud-config
 
+{%  set vgw_peer_1 = '${vgw_peer_1}' -%}
+{%- set vgw_bgp_peer_1 = '${vgw_bgp_peer_1}' -%}
+{%- set vgw_peer_2 = '${vgw_peer_2}' -%}
+{%- set vgw_bgp_peer_2 = '${vgw_bgp_peer_2}' -%}
+
 snap:
   commands:
     00: snap install frr
@@ -92,14 +97,14 @@ write_files:
             # addresses:
             #   - 10.64.255.255/32
             routes:
-              - to: ${vgw_bgp_peer_1}/32
+              - to: {{ vgw_bgp_peer_1 }}/32
           xfrm1:
             dhcp4: false
             dhcp6: false
             # addresses:
             #   - 10.64.255.255/32
             routes:
-              - to: ${vgw_bgp_peer_2}/32
+              - to: {{ vgw_bgp_peer_2 }}/32
   # Configure the VPN:
   - path: /etc/swanctl/conf.d/azure.conf
     permissions: "0644"
@@ -117,7 +122,7 @@ write_files:
               local_addrs = {{ ds.meta_data.imds.network.interface[0].ipv4.ipAddress[0].privateIpAddress }}
 
               # Remote address(es) to use for IKE communication, comma separated.
-              remote_addrs = ${vgw_peer_1}
+              remote_addrs = {{ vgw_peer_1 }}
 
               aggressive = no
 
@@ -169,7 +174,7 @@ write_files:
               local_addrs = {{ ds.meta_data.imds.network.interface[0].ipv4.ipAddress[0].privateIpAddress }}
 
               # Remote address(es) to use for IKE communication, comma separated.
-              remote_addrs = ${vgw_peer_2}
+              remote_addrs = {{ vgw_peer_2 }}
 
               aggressive = no
 
@@ -255,8 +260,8 @@ write_files:
         neighbor AZURE update-source 10.64.255.255
         neighbor AZURE advertisement-interval 0
         neighbor AZURE timers 10 30
-        neighbor ${vgw_bgp_peer_1} peer-group AZURE
-        neighbor ${vgw_bgp_peer_2} peer-group AZURE
+        neighbor {{ vgw_bgp_peer_1 }} peer-group AZURE
+        neighbor {{ vgw_bgp_peer_2 }} peer-group AZURE
         !
         address-family ipv4 unicast
         redistribute connected route-map REDIS-RM

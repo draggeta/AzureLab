@@ -1,4 +1,12 @@
+## template: jinja
 #cloud-config
+
+{%  set rs_peer_1 = '${rs_peer_1}' -%}
+{%- set rs_peer_2 = '${rs_peer_2}' -%}
+
+{%- set iplist = ds.meta_data.imds.network.interface[0].ipv4.subnet[0].address.split('.') -%}
+{%- set octets = iplist[0], iplist[1], iplist[2], (iplist[3] | int + 1 ) | string -%}
+{%- set default_gw = octets | join('.') -%}
 
 snap:
   commands:
@@ -75,22 +83,30 @@ write_files:
       configure terminal
       frr defaults traditional
       log syslog informational
+      ip forwarding
       no ipv6 forwarding
       !
-      ip prefix-list ROUTESRV-PL seq 10 permit 10.192.0.0/21 ge 24
-      ip prefix-list ROUTESRV-PL seq 20 permit 10.193.128.0/21 ge 24
-      ip prefix-list REDIS-PL seq 10 permit 10.192.0.0/21 ge 24
-      ip prefix-list REDIS-PL seq 20 permit 10.193.128.0/21 ge 24
+      ip route {{ rs_peer_1 }}/32 {{ default_gw }}
+      ip route {{ rs_peer_2 }}/32 {{ default_gw }}
+      !
+      ip prefix-list ROUTESRV-PL-OUT seq 10 permit 10.192.0.0/21 ge 24
+      ip prefix-list ROUTESRV-PL-OUT seq 20 permit 10.193.128.0/21 ge 24
+      ip prefix-list ROUTESRV-PL-IN seq 10 permit 10.32.0.0/14 ge 16
+      ip prefix-list REDIS-PL-IN seq 10 permit 10.192.0.0/21 ge 24
+      ip prefix-list REDIS-PL-IN seq 20 permit 10.193.128.0/21 ge 24
       !
       route-map ROUTESRV-RM-OUT permit 1
-        match ip address prefix-list ROUTESRV-PL
+        match ip address prefix-list ROUTESRV-PL-OUT
       !
       route-map ROUTESRV-RM-OUT deny 2
       !
-      route-map ROUTESRV-RM-IN deny 1
+      route-map ROUTESRV-RM-IN permit 1
+        match ip address prefix-list ROUTESRV-PL-IN
+      !
+      route-map ROUTESRV-RM-IN deny 2
       !
       route-map REDIS-RM permit 1
-        match ip address prefix-list REDIS-PL
+        match ip address prefix-list REDIS-PL-IN
       !
       router bgp 65002
         neighbor ROUTESRV peer-group
@@ -98,8 +114,8 @@ write_files:
         neighbor ROUTESRV ebgp-multihop 5
         neighbor ROUTESRV advertisement-interval 0
         neighbor ROUTESRV timers 10 30
-        neighbor ${rs_peer_1} peer-group ROUTESRV
-        neighbor ${rs_peer_2} peer-group ROUTESRV
+        neighbor {{ rs_peer_1 }} peer-group ROUTESRV
+        neighbor {{ rs_peer_2 }} peer-group ROUTESRV
         !
         address-family ipv4 unicast
         redistribute connected route-map REDIS-RM

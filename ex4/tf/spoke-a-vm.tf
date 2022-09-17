@@ -15,7 +15,7 @@ resource "azurerm_linux_virtual_machine" "spoke_a_web" {
   location              = azurerm_resource_group.spoke_a.location
   resource_group_name   = azurerm_resource_group.spoke_a.name
   network_interface_ids = [azurerm_network_interface.spoke_a_web.id]
-  size                  = "Standard_B2s"
+  size                  = "Standard_B1s"
 
   zone = 1
 

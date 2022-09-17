@@ -17,9 +17,11 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
 
 ### Route server uitrollen
 
-> **NOTE:** De plaatsing van een route server is van belang. Bij peerings, geldt dat een route server en een VPN gateway precies hetzelfde behandeld worden. Het is niet mogelijk om in twee gepeerde VNETs, elk een route server neer te zetten en de twee VNETs gebruik te laten maken van elkaars route servers.
+> **NOTE:** De plaatsing van een `route server` is van belang. Bij peerings, geldt dat een `route server` en een VPN gateway precies hetzelfde behandeld worden. Het is niet mogelijk om in twee gepeerde VNETs, elk een `route server` neer te zetten en de twee VNETs gebruik te laten maken van elkaars `route servers`.
 >
-> Het is ook niet mogelijk om dit te doen met een combinatie van route server en VPN/ExpressRoute gateway.
+> Het is ook niet mogelijk om dit te doen met een combinatie van `route server` en VPN/ExpressRoute gateway.
+
+> **NOTE:** `Route servers` maken van de VNET stiekem een `virtual hub` lite. Dit betekent dat je ze niet continu aan kan maken en afbreken. `Virtual hubs` hebben dat je minstens een uur moet wachten na het verwijderen van een item voordat ze echt verwijderd zijn. Als je een fout maakt met de `route server`, kun je deze het best laten staan en gewoon doorgaan.
 
 1. De `route server` kan uitgerold worden in de hub. Zie indien nodig ook de [handleiding](https://docs.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-portal) in Azure. Let op de volgende instellingen:
     * De subnet moet een specifieke naam hebben

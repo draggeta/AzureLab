@@ -6,6 +6,8 @@ BY bevindt zich in een plek met uitstekende internet verbindingen en wil hierom 
 
 De makkelijkste oplossing is dus een [`VPN Gateway`](https://docs.microsoft.com/en-us/azure/vpn-gateway/) (`VGW`).
 
+![VPN gateway/virtual network gateway](./data/vpn_gateway.svg)
+
 ## VPN Gateway
 
 ### VPN Gateway uitrollen
@@ -30,12 +32,12 @@ Het uitrollen van een `VPN gateway` duurt lang. Ga lekker lunchen of iets dergel
         * Custom Azure APIPA BGP IP address: 
             * Geen, we gebruiken de standaard tunnel adressen die Azure genereert voor de Active/Active virtual network gateway
             * Het is mogelijk APIPA adressen te gebruiken in plaats van routed adressen. In productie kan dat tijd en moeite schelen indien het vrijspelen van IP adressen moeilijk is.
-    
+
     > <details><summary>Route server en virtual network gateways</summary>
     >
     > Wanneer een route server en network gateway worden gebruikt in combinatie met BGP, moet de network gateway in active/active modus draaien.
     >
-    > De ASN van de `VNGs` mogen gelijk zijn aan die van de `route server`. Afhankelijk van de configuratie is de peering tussen de `VNGs` en `route servers` dus EBGP of IBGP.
+    > De ASN van de `VNGs` mogen gelijk zijn aan die van de `route server`. Afhankelijk van de configuratie is de peering tussen de `VNGs` en `route servers` dus EBGP of IBGP. Dit kan routing beinvloeden.
     </details>
 
 ## On-prem firewall uitrollen
@@ -91,7 +93,7 @@ Welke gegevens moeten worden doorgegeven aan het NOC?
 ### Connection
 
 Met het DC NOC zijn de volgende instellingen afgesproken:
-* PSK: DitIsEENV4ilugP0sSwerd
+* PSK: `DitIsEENV4ilugP0sSwerd`
 * Phase 1:
     * Encryption: GCMAES128
     * Integrity: SHA256
@@ -109,26 +111,67 @@ Maak een `connection` aan en gebruik de bovenstaande instellingen. Configureer i
 
 ### Troubleshooten VPN verbinding
 
+De VPN verbinding wil niet actief worden. Dit zie je onder de `connection` bij `Overview`. Gebruik de `VPN troubleshoot` item om de VPN te troubleshooten. Stuur de output naar de log/`network watcher` `storage account`. Dit kan 5 minuten duren.
+
+Wacht totdat je een status terug krijgt onder kolom `Troubleshooting status`. Selecteer de `connection` en niet de gateway en controleer onder `Details` het `Action` tabblad.
+
+> <details><summary>Oorzaak en oplossing</summary>
+> ![Connection Action](./data/connection_action.png)
+>
+> Het lijkt erop dat de PSK verkeerd is. Na wat aandringen geeft het NOC aan dat ze het laatste karakter niet mee hadden gekopieerd. De correcte PSK is `DitIsEENV4ilugP0sSwerd!`.
+> 
+> Voer deze in in de `connection`.
+>
+> De zip file die wordt weggeschreven naar de `storage account` bevat de logs van de gateway indien je die zou willen bekijken.
+
+</details>
+
+Controleer of de verbinding actief wordt. Dit kan op de `connection` resource, maar ook op de 'firewall':
+```bash
+sudo swanctl --list-conns
+```
+
+```
+azure_primary: IKEv2, no reauthentication, rekeying every 14400s, dpd delay 30s
+  local:  10.10.0.4
+  remote: 20.8.124.18
+  local pre-shared key authentication:
+  remote pre-shared key authentication:
+  route_vpn_primary: TUNNEL, rekeying every 3600s or 1024000000 bytes, dpd action is clear
+    local:  0.0.0.0/0
+    remote: 0.0.0.0/0
+azure_secondary: IKEv2, no reauthentication, rekeying every 14400s, dpd delay 30s
+  local:  10.10.0.4
+  remote: 20.8.124.107
+  local pre-shared key authentication:
+  remote pre-shared key authentication:
+  route_vpn_secondary: TUNNEL, rekeying every 3600s or 1024000000 bytes, dpd action is clear
+    local:  0.0.0.0/0
+    remote: 0.0.0.0/0
+```
+
 ### Controleren BGP sessies en routes
 
-```cisco
-configure terminal
-router bgp 65002
-neighbor ${rs_peer_1} peer-group ROUTESRV
-neighbor ${rs_peer_2} peer-group ROUTESRV
-end
-write memory
-```
-
-Controleer of de peerings up komen:
+Als het goed is worden de BGP sessies nu actief en worden routes uitgewisseld. Op de 'on-prem firewall' kun je met `sudo vtysh` de FRR daemon beheren
 
 ```cisco
-!!!!!!!!!!!!!!!!!!!!!
-show bgp neighbors
+show bgp summary
+show ip route
 ```
 
-En of er routes worden uitgewisseld:
-```cisco
-!!!!!!!!!!!!!!!!!!!!!
-show bgp neighbors database
-```
+Ook kun je onder de `virtual network gateway` > `BGP peers` de peerings en geleerde routes zien. Wat valt je op als je naar de output van de 'firewall' en de gateway kijkt?
+
+> <details><summary>Route servers en gateways</summary>
+> `Route servers` wisselen niet automatisch routes uit met `virtual network gateways`, ook niet `ExpressRoute gateways`. Indien dit gewenst is, moet onder de `route server` > `Configuration`, `Branch-to-branch` aan worden gezet.
+>
+> Nadat dit gedaan is, zal je alle routes zien op de SD-WAN, gateway en on-prem firewall.
+
+</details>
+
+## Overig
+
+Wat je hier bouwt is vergelijkbaar met een Virtual WAN en Virtual Hub routing. Het verschil is dat een deel van het handwerk weg wordt genomen. Je hoeft met minder rekening te houden, maar je bent ook minder flexibel.
+
+Ook worden point-to-site verbindingen (client VPN) niet behandeld. Voor het examen is (goed) inlezen voldoende, maar het kan handig zijn om hier mee te labben.
+
+Daarnaast is het moeilijk om met ExpressRoutes aan de slag te gaan. Ook hier geldt weer dat goed inlezen/videos kijken voldoende moet zijn.
