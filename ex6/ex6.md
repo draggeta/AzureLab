@@ -122,7 +122,7 @@ Wacht totdat je een status terug krijgt onder kolom `Troubleshooting status`. Se
 > 
 > Voer deze in in de `connection`.
 >
-> De zip file die wordt weggeschreven naar de `storage account` bevat de logs van de gateway indien je die zou willen bekijken.
+> De zip file die wordt weggeschreven naar de `storage account` bevat de logs van de gateway indien je die zou willen bekijken. Meer troubleshooting informatie kan je in de [Microsoft documentatie](https://learn.microsoft.com/en-us/azure/vpn-gateway/reset-gateway?WT.mc_id=Portal-Microsoft_Azure_HybridNetworking) vinden.
 
 </details>
 
