@@ -3,6 +3,7 @@ resource "azurerm_public_ip" "spoke_a_agw" {
   resource_group_name = azurerm_resource_group.spoke_a.name
   location            = azurerm_resource_group.spoke_a.location
   allocation_method   = "Dynamic"
+  sku                 = "Standard"
 
   # domain_name_label = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"
 }
@@ -13,8 +14,8 @@ resource "azurerm_application_gateway" "spoke_a_agw" {
   location            = azurerm_resource_group.spoke_a.location
 
   sku {
-    name     = "Standard_Small"
-    tier     = "Standard"
+    name     = "Standard_v2"
+    tier     = "Standard_v2"
     capacity = 1
   }
 

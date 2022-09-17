@@ -1,0 +1,134 @@
+# Dag 6 - VPN Gateway
+
+Na flink wat groei wil BY Verzekeringen wat workloads naar on-prem gaan verhuizen. Een deel van de IT omgeving heeft een steady state bereikt. De flexibiliteit van de cloud weegt niet op tegen de kosten van deze vaste lasten. Azure wordt niet uitgefaseerd. Het is puur een kostenbesparende maatregel. Dev omgevingen en extra capaciteit worden nog steeds in de cloud ingekocht.
+
+BY bevindt zich in een plek met uitstekende internet verbindingen en wil hierom geen [`ExpressRoute`](https://docs.microsoft.com/en-us/azure/expressroute/expressroute-introduction) gebruiken. VPNs over het internet is voldoende. Er is ervoor gekozen om de SD-WAN appliance niet te gebruiken voor verbindingen tussen de datacentra en Azure, omdat deze geen client VPNs ondersteunt en het erop lijkt dat developers dit nodig gaan hebben in de toekomst.
+
+De makkelijkste oplossing is dus een [`VPN Gateway`](https://docs.microsoft.com/en-us/azure/vpn-gateway/) (`VGW`).
+
+## VPN Gateway
+
+### VPN Gateway uitrollen
+
+> **NOTE:** De plaatsing van een VPN gateway is van belang. Bij peerings, geldt dat een Virtual Network Gateway en een route server precies hetzelfde behandeld worden. Het is niet mogelijk om in twee gepeerde VNETs, elk een VPN gateway neer te zetten en de twee VNETs gebruik te laten maken van elkaars VGWs.
+>
+> Het is ook niet mogelijk om dit te doen met een combinatie van Virtual Network Gateways en route servers.
+
+On-prem wordt gebruik gemaakt van BGP voor dynamische routering en VXLAN. Netwerken kunnen 5 minuten bestaan en even later weer verdwijnen. Voor het uitwisselen van de routes tussen DC en Azure zal ook BGP worden gebruikt.
+
+Het uitrollen van een `VPN gateway` duurt lang. Ga lekker lunchen of iets dergelijks.
+
+1. De `VGW` kan worden uitgerold in de hub. De uitrol spreekt redelijk voor zich.
+    * De subnet moet een specifieke naam hebben
+    * Gateway type: VPN
+    * VPN type: de versie die [BGP](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#can-i-use-bgp-with-azure-policy-vpn-gateways) ondersteunt
+    * SKU: De [goedkoopste](https://azure.microsoft.com/en-gb/pricing/details/vpn-gateway/#pricing) **NON AZ** versie die [BGP](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#is-bgp-supported-on-all-azure-vpn-gateway-skus) ondersteunt
+        * In productie wil je wel zone redundancy
+    * Enable active-active mode: Enabled
+    * Configure BGP: Enabled
+        * ASN: 65515
+        * Custom Azure APIPA BGP IP address: 
+            * Geen, we gebruiken de standaard tunnel adressen die Azure genereert voor de Active/Active virtual network gateway
+            * Het is mogelijk APIPA adressen te gebruiken in plaats van routed adressen. In productie kan dat tijd en moeite schelen indien het vrijspelen van IP adressen moeilijk is.
+    
+    > <details><summary>Route server en virtual network gateways</summary>
+    >
+    > Wanneer een route server en network gateway worden gebruikt in combinatie met BGP, moet de network gateway in active/active modus draaien.
+    >
+    > De ASN van de `VNGs` mogen gelijk zijn aan die van de `route server`. Afhankelijk van de configuratie is de peering tussen de `VNGs` en `route servers` dus EBGP of IBGP.
+    </details>
+
+## On-prem firewall uitrollen
+
+Het volgende stuk is puur om in Azure een simulatie te maken van een datacenter netwerk die al bestaat. Voor het doel van deze labs, is het een black box. Wat jij als engineer weet is dat er een site to site verbinding moet komen tussen de netwerken in Azure die jij beheert, en de datacentra die door een ander team beheerd wordt.
+
+### Uitrollen VNET voor on-prem firewall
+
+1. Rol een `VNET` uit in Azure. De address space maakt niet uit. De Linux firewall die we uit gaan rollen simuleert wat subnets.
+1. Maak een subnet aan voor de Linux firewall
+1. Maak een `NSG` aan die IKE/IPSec in en outbound toe staat en SSH vanuit jouw eigen publieke IP.
+1. BGP hoeft niet, dit gebeurt binnen in de tunnel.
+
+### Uitrollen on-prem firewall
+
+Wacht totdat de `VGW` uitgerold is en haal zijn publieke IP-adres op.
+
+1. Rol nu een Ubuntu 22.04 VM uit als firewall.
+    * Gebruik zinnige sizes en instellingen
+    * Geef de VM een public IP
+    * Gebruik de gegevens uit de [cloud-init](./tf/data/cloud-init.vpn.yml) file in **CUSTOM DATA**, niet **USER DATA**.
+      
+      > **NOTE:** pas de `${vgw_peer_1}`, `${vgw_bgp_peer_1}`, `${vgw_peer_2}` en `${vgw_bgp_peer_2}` variabelen aan naar de `VGW` public IPs (vgw_peer) en de `(Secondary) Default Azure BGP peer IP addresses` (vgw_bgp_peer_1) onder `Configuration` bij de `virtual network gateway`.
+
+Er is nu een 'datacentrum' die als remote netwerk gebruikt kan worden. Test voor de zekerheid of je op de 'firewall' in kan loggen.
+
+## VPN configureren in Azure
+
+Een VPN verbinding in Azure bestaat uit drie delen:
+1. `VPN gateway`, het apparaat dat de verbinding op zet
+2. `Local network gateway`, informatie over het remote apparaat (vanuit het perspectief van de `VPN gateway`) 
+3. `Connection`, koppelt een `VPN gateway` aan een `local network gateway` en specificeert de instellingen.
+
+### Local network gateway
+
+De on-prem firewall moet worden gedefinieerd als een `LNG`. Maak deze aan.
+* Endpoint: Beide opties zijn mogelijk, kies hier wat fijner is
+* Address Spaces: Houd deze leeg. We gebruiken BGP, dus hoeven we geen 'statische routes' toe te voegen.
+    * Indien je geen BGP gebruikt, zul je hier de netwerken moeten invullen die achter de VPN te benaderen zijn.
+* Onder tab advanced BGP enablen
+
+Van het DC NOC zijn de volgende BGP gegevens ontvangen
+* ASN: 65003
+* BGP peer address: 10.64.255.255
+
+Welke gegevens moeten worden doorgegeven aan het NOC?
+
+> <details><summary>VPN gateway BGP config</summary>
+>
+> Deze gegevens zijn makkelijk te vinden bij de `Virtual Network Gateway` onder 'Configuration'.
+</details>
+
+### Connection
+
+Met het DC NOC zijn de volgende instellingen afgesproken:
+* PSK: DitIsEENV4ilugP0sSwerd
+* Phase 1:
+    * Encryption: GCMAES128
+    * Integrity: SHA256
+    * DH Group: DH20 (ECP384)
+* Phase 2:
+    * Encryption: GCMAES128
+    * Integrity: GCMAES128
+    * DH Group: DH20 (ECP384)
+* IPsec SA lifetime KB: 102400000
+* IPsec SA lifetime s: 3600
+
+Maak een `connection` aan en gebruik de bovenstaande instellingen. Configureer in de connection ook de volgende items:
+* Connection type: Site-to-site (IPsec)
+* Enable BGP: aanvinken
+
+### Troubleshooten VPN verbinding
+
+### Controleren BGP sessies en routes
+
+```cisco
+configure terminal
+router bgp 65002
+neighbor ${rs_peer_1} peer-group ROUTESRV
+neighbor ${rs_peer_2} peer-group ROUTESRV
+end
+write memory
+```
+
+Controleer of de peerings up komen:
+
+```cisco
+!!!!!!!!!!!!!!!!!!!!!
+show bgp neighbors
+```
+
+En of er routes worden uitgewisseld:
+```cisco
+!!!!!!!!!!!!!!!!!!!!!
+show bgp neighbors database
+```

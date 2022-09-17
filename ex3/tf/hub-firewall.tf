@@ -189,7 +189,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
 
     retention_policy {
       days    = 7
-      enabled = false
+      enabled = true
     }
   }
 
@@ -261,11 +261,11 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
 
   metric {
     category = "AllMetrics"
-    enabled  = false
+    enabled  = true
 
     retention_policy {
       days    = 7
-      enabled = false
+      enabled = true
     }
   }
 }

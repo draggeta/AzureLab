@@ -13,11 +13,33 @@ resource "azurerm_virtual_network" "hub" {
   tags = var.tags
 }
 
+resource "azurerm_subnet" "hub_gateway_subnet" {
+  name                 = "GatewaySubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.0.0/24"]
+
+  depends_on = [
+    azurerm_route_server.hub_rs
+  ]
+}
 resource "azurerm_subnet" "hub_firewall_subnet" {
   name                 = "AzureFirewallSubnet"
   resource_group_name  = azurerm_resource_group.hub.name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = ["10.128.1.0/24"]
+}
+resource "azurerm_subnet" "hub_routeserver_subnet" {
+  name                 = "RouteServerSubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.2.0/24"]
+}
+resource "azurerm_subnet" "hub_bastion_subnet" {
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.3.0/24"]
 }
 resource "azurerm_subnet" "hub_agw_subnet" {
   name                 = "ApplicationGatewaySubnet"
@@ -35,7 +57,7 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke_a" {
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
 
-  allow_gateway_transit = false
+  allow_gateway_transit = true
 }
 
 # enable global peering between the two virtual network
@@ -47,5 +69,5 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke_b" {
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
 
-  allow_gateway_transit = false
+  allow_gateway_transit = true
 }

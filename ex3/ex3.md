@@ -29,7 +29,7 @@ We gaan een SD-WAN NVA uitrollen in het hub netwerk.
     * Rol de VMs in een `availability zone` uit.
     * Geef de VMs geen `public IP`.
     * Schakel `Auto-shutdown` in en zet deze op 00:00 in jouw lokale tijdzone.
-    * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Kopieer de inhoud uit de [cloud init file](./tf/data/cloud-init.yml) in dit veld.
+    * Bij de `Advanced` tab tijdens de configuratie kan een custom script worden ingevoerd. Kopieer de inhoud uit de [cloud init file](./tf/data/cloud-init.yml) in de **CUSTOM DATA**, niet **USER DATA**.
 1. Pas alle `UDRs` aan zodat verkeer richting de bovenstaande subnetten via de `SD-WAN NVA` appliance loopt.
 1. Probeer vanuit de management server de IP adressen te pingen.
     > <details><summary>IP Forwarding</summary>

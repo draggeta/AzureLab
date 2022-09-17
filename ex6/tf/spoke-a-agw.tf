@@ -2,7 +2,7 @@ resource "azurerm_public_ip" "spoke_a_agw" {
   name                = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"
   resource_group_name = azurerm_resource_group.spoke_a.name
   location            = azurerm_resource_group.spoke_a.location
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
   sku                 = "Standard"
 
   domain_name_label = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"

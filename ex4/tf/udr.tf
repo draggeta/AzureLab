@@ -23,7 +23,7 @@
 # }
 
 resource "azurerm_route_table" "hub" {
-  name                = "${var.prefix}-${var.org}-udr-hub-01"
+  name                = "${var.prefix}-${var.org}-hub-udr-01"
   location            = azurerm_resource_group.hub.location
   resource_group_name = azurerm_resource_group.hub.name
 
@@ -48,7 +48,7 @@ resource "azurerm_subnet_route_table_association" "hub_management" {
 }
 
 resource "azurerm_route_table" "spoke_a" {
-  name                = "${var.prefix}-${var.org}-udr-spoke-01"
+  name                = "${var.prefix}-${var.org}-spoke-a-udr-01"
   location            = azurerm_resource_group.spoke_a.location
   resource_group_name = azurerm_resource_group.spoke_a.name
 
@@ -78,7 +78,7 @@ resource "azurerm_subnet_route_table_association" "spoke_a_web" {
 }
 
 resource "azurerm_route_table" "spoke_b" {
-  name                = "${var.secondary_prefix}-${var.org}-udr-spoke-01"
+  name                = "${var.secondary_prefix}-${var.org}-spoke-b-udr-01"
   location            = azurerm_resource_group.spoke_b.location
   resource_group_name = azurerm_resource_group.spoke_b.name
 

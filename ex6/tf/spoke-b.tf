@@ -33,6 +33,6 @@ resource "azurerm_virtual_network_peering" "spoke_b_to_hub" {
   use_remote_gateways   = true
 
   depends_on = [
-    azurerm_route_server.hub_rs
+    azurerm_virtual_network_gateway.hub_vpngw
   ]
 }

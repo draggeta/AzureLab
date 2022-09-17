@@ -1,5 +1,6 @@
 resource "azurerm_public_ip" "hub_rs" {
-  name                = "${azurerm_resource_group.hub.name}-rs-01-pi4-01"
+  # name                = "${azurerm_resource_group.hub.name}-rs-01-pi4-01"
+  name                = "route-server-01-pi4-01"
   location            = azurerm_resource_group.hub.location
   resource_group_name = azurerm_resource_group.hub.name
   allocation_method   = "Static"
@@ -7,13 +8,15 @@ resource "azurerm_public_ip" "hub_rs" {
 }
 
 resource "azurerm_route_server" "hub_rs" {
-  name                             = "${azurerm_resource_group.hub.name}-rs-01"
-  location                         = azurerm_resource_group.hub.location
-  resource_group_name              = azurerm_resource_group.hub.name
+  # name = "${azurerm_resource_group.hub.name}-rs-01"
+  name                = "route-server-01"
+  location            = azurerm_resource_group.hub.location
+  resource_group_name = azurerm_resource_group.hub.name
+
   sku                              = "Standard"
   public_ip_address_id             = azurerm_public_ip.hub_rs.id
   subnet_id                        = azurerm_subnet.hub_routeserver_subnet.id
-  branch_to_branch_traffic_enabled = false
+  branch_to_branch_traffic_enabled = true
 }
 
 resource "azurerm_route_server_bgp_connection" "hub_rs_to_hub_sdwan" {

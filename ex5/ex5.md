@@ -23,8 +23,8 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
 
 1. De `route server` kan uitgerold worden in de hub. Zie indien nodig ook de [handleiding](https://docs.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-portal) in Azure. Let op de volgende instellingen:
     * De subnet moet een specifieke naam hebben
-        * De subnet is al aangemaakt
     * Public IP
+    * Branch-to-branch: Disabled
 
     > **NOTE:** De route server is niet extern benaderbaar en is niet hetgeen wat routeert. Het is een BGP route reflector. De `public IP` wordt gebruikt voor communicatie met het Azure platform.
 1. Configureer de peering vanuit de `route server` zijde. De SD-WAN appliance (niet de interne load balancer ervoor) kan als peer gebruikt worden.
