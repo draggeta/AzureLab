@@ -213,7 +213,7 @@ BY zou graag willen dat 50% van alle API requests naar het datacentrum gaat. De 
 Dit is in te regelen door traffic manager hierachisch in te richten.
 * Een global profile met [priority](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) balancing.
     * Profile 1 gaat naar een [nested profile](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-nested-profiles) en heeft een priority van 100
-        * Nested profile is [weighted](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) en heeft een gelijke verdeling tussen on-prem en West Europe
+        * Nested profile is [weighted](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) en heeft een gelijke verdeling tussen on-prem en West Europe. On-prem moet als een external endpoint geconfigureerd worden, omdat het 'buiten Azure' draait.
     * Profile 2 gaat naar de Azure firewall (die naar de externe North Europe LB NAT) met een priority van 120
 
 Bezoek de parent `traffic manager` en controleer of je alleen de juiste API locaties ziet.
