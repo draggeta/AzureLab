@@ -83,7 +83,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
 
   custom_data = base64encode(
     templatefile(
-      "data/cloud-init.yml",
+      "data/cloud-init.yml.j2",
       {
         rs_peer_1 = "10.128.2.4",
         rs_peer_2 = "10.128.2.5"
@@ -94,7 +94,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
   depends_on = [
     azurerm_firewall.hub_firewall,
     azurerm_firewall_policy_rule_collection_group.hub_firewall_default,
-    azurerm_subnet_nat_gateway_association.hub_ngw_to_hub_sdwan
+    azurerm_subnet_nat_gateway_association.hub_ngw_to_hub_sdwan,
   ]
 
   tags = var.tags

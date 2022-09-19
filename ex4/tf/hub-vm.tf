@@ -5,17 +5,6 @@ resource "azurerm_subnet" "hub_management" {
   address_prefixes     = ["10.128.5.0/24"]
 }
 
-# resource "azurerm_public_ip" "hub_management" {
-#   name                = "mgt01-nic-01-pi4-01"
-#   resource_group_name = azurerm_resource_group.hub.name
-#   location            = azurerm_resource_group.hub.location
-#   allocation_method   = "Dynamic"
-#   sku                 = "Basic"
-#   domain_name_label   = "${var.prefix}-${var.org}-mgt01"
-
-#   tags = var.tags
-# }
-
 resource "azurerm_network_interface" "hub_management" {
   name                = "mgt01-nic-01"
   location            = azurerm_resource_group.hub.location
@@ -25,7 +14,6 @@ resource "azurerm_network_interface" "hub_management" {
     name                          = "ipConfig1"
     subnet_id                     = azurerm_subnet.hub_management.id
     private_ip_address_allocation = "Dynamic"
-    # public_ip_address_id          = azurerm_public_ip.hub_management.id
   }
 }
 

@@ -33,12 +33,12 @@ resource "azurerm_private_dns_zone_virtual_network_link" "priv_dns_to_spoke_b" {
   registration_enabled  = true
 }
 
-resource "azurerm_private_dns_a_record" "spoke_a" {
+resource "azurerm_private_dns_cname_record" "spoke_a" {
   name                = "api-pri"
   zone_name           = azurerm_private_dns_zone.priv_dns.name
   resource_group_name = azurerm_private_dns_zone.priv_dns.resource_group_name
   ttl                 = 300
-  records             = [azurerm_public_ip.spoke_a_agw.ip_address]
+  record              = azurerm_public_ip.spoke_a_agw.fqdn
 }
 resource "azurerm_private_dns_cname_record" "spoke_b" {
   name                = "api-sec"

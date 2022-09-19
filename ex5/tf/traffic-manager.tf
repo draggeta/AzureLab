@@ -1,10 +1,15 @@
+resource "azurerm_resource_group" "tm" {
+  name     = "${var.prefix}-${var.org}-traffic-manager-01"
+  location = var.primary_location
+}
+
 resource "azurerm_traffic_manager_profile" "tm" {
-  name                   = "${azurerm_resource_group.hub.name}-tm-01"
-  resource_group_name    = azurerm_resource_group.hub.name
+  name                   = "${var.prefix}-${var.org}-tm-01"
+  resource_group_name    = azurerm_resource_group.tm.name
   traffic_routing_method = "Priority"
 
   dns_config {
-    relative_name = lower(random_id.tm.b64_url)
+    relative_name = "${var.prefix}-${var.org}-tm-01-${random_id.unique.hex}"
     ttl           = 30
   }
 
@@ -23,17 +28,13 @@ resource "azurerm_traffic_manager_profile" "tm" {
 }
 
 resource "azurerm_traffic_manager_azure_endpoint" "spoke_a" {
-  name               = "spoke-a"
+  name               = "primary"
   profile_id         = azurerm_traffic_manager_profile.tm.id
   priority           = 100
   target_resource_id = azurerm_public_ip.spoke_a_agw.id
-
-  depends_on = [
-    azurerm_application_gateway.spoke_a_agw
-  ]
 }
 resource "azurerm_traffic_manager_azure_endpoint" "spoke_b" {
-  name               = "spoke-b"
+  name               = "secondary"
   profile_id         = azurerm_traffic_manager_profile.tm.id
   priority           = 120
   target_resource_id = azurerm_public_ip.hub_firewall.id

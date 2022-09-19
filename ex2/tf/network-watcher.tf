@@ -9,7 +9,7 @@ data "azurerm_resource_group" "net_watch" {
 
 # Log collection components
 resource "azurerm_storage_account" "net_watch_pri" {
-  name                = "${replace(var.prefix, "-", "")}${var.org}logdata01"
+  name                = substr(replace(join("", [var.prefix, var.org, "log", random_id.unique.hex]), "/[-_\\s\\+]/", ""), 0, 24)
   resource_group_name = azurerm_resource_group.net_watch_data.name
   location            = var.primary_location
 
@@ -19,23 +19,12 @@ resource "azurerm_storage_account" "net_watch_pri" {
 }
 
 resource "azurerm_log_analytics_workspace" "net_watch_pri" {
-  name                = "${var.prefix}-${var.org}-log-data-01"
+  name                = "${var.prefix}-${var.org}-log-data-01-${random_id.unique.hex}"
   resource_group_name = azurerm_resource_group.net_watch_data.name
   location            = var.primary_location
   retention_in_days   = 30
   daily_quota_gb      = 10
 }
-
-# The Network Watcher Instance & network log flow
-# There can only be one Network Watcher per subscription and region
-
-# resource "azurerm_network_watcher" "net_watch_pri" {
-#   name = "NetworkWatcher_${replace(lower(var.primary_location), " ", "")}"
-#   # location            = azurerm_resource_group.net_watch.location
-#   # resource_group_name = azurerm_resource_group.net_watch.name
-#   location            = data.azurerm_resource_group.net_watch.location
-#   resource_group_name = data.azurerm_resource_group.net_watch.name
-# }
 
 data "azurerm_network_watcher" "net_watch_pri" {
   name                = "NetworkWatcher_${replace(lower(var.primary_location), " ", "")}"
@@ -96,9 +85,7 @@ resource "azurerm_network_watcher_flow_log" "net_watch_pri_spoke_a" {
 
 # Log collection components
 resource "azurerm_storage_account" "net_watch_sec" {
-  name = "${replace(var.secondary_prefix, "-", "")}${var.org}logdata01"
-  # resource_group_name = azurerm_resource_group.net_watch.name
-  # location            = azurerm_resource_group.net_watch.location
+  name                = substr(replace(join("", [var.secondary_prefix, var.org, "log", random_id.unique.hex]), "/[-_\\s\\+]/", ""), 0, 24)
   resource_group_name = azurerm_resource_group.net_watch_data.name
   location            = var.secondary_location
 
@@ -106,14 +93,6 @@ resource "azurerm_storage_account" "net_watch_sec" {
   account_replication_type = "LRS"
   min_tls_version          = "TLS1_2"
 }
-
-# resource "azurerm_network_watcher" "net_watch_sec" {
-#   name = "NetworkWatcher_${replace(lower(var.secondary_location), " ", "")}"
-#   # location            = azurerm_resource_group.net_watch.location
-#   # resource_group_name = azurerm_resource_group.net_watch.name
-#   location            = data.azurerm_resource_group.net_watch.location
-#   resource_group_name = data.azurerm_resource_group.net_watch.name
-# }
 
 data "azurerm_network_watcher" "net_watch_sec" {
   name                = "NetworkWatcher_${replace(lower(var.secondary_location), " ", "")}"

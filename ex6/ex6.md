@@ -61,7 +61,7 @@ Wacht totdat de `VGW` uitgerold is en haal zijn publieke IP-adres op.
 1. Rol nu een Ubuntu 22.04 VM uit als firewall.
     * Gebruik zinnige sizes en instellingen
     * Geef de VM een public IP
-    * Gebruik de gegevens uit de [cloud-init](./tf/data/cloud-init.vpn.yml) file in **CUSTOM DATA**, niet **USER DATA**.
+    * Gebruik de gegevens uit de [cloud-init](./tf/data/cloud-init.vpn.yml.j2) file in **CUSTOM DATA**, niet **USER DATA**.
       
       > **NOTE:** pas de `${vgw_peer_1}`, `${vgw_bgp_peer_1}`, `${vgw_peer_2}` en `${vgw_bgp_peer_2}` variabelen aan naar de `VGW` public IPs (vgw_peer) en de `(Secondary) Default Azure BGP peer IP addresses` (vgw_bgp_peer_1) onder `Configuration` bij de `virtual network gateway`.
 

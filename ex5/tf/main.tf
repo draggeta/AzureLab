@@ -32,9 +32,10 @@ provider "azurerm" {
   }
 }
 
-provider "http" {}
+#  Get tenant identifier.
+data "azurerm_client_config" "current" {}
 
-provider "random" {}
+provider "http" {}
 
 data "http" "ip" {
   url = "https://api.ipify.org"
@@ -45,18 +46,12 @@ data "http" "ip" {
   }
 }
 
-# random_id for spoke B external load balancer
-resource "random_id" "spoke_b" {
-  keepers = {
-    azi_id = 1
-  }
+provider "random" {}
 
-  byte_length = 8
-}
-# random_id for traffic manager
-resource "random_id" "tm" {
+# random_id for DNS names
+resource "random_id" "unique" {
   keepers = {
-    azi_id = 1
+    az_sub_id = data.azurerm_client_config.current.subscription_id
   }
 
   byte_length = 8

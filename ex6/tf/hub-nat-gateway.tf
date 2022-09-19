@@ -5,7 +5,7 @@ resource "azurerm_public_ip" "hub_ngw" {
   allocation_method   = "Static"
   sku                 = "Standard"
 
-  domain_name_label = "${azurerm_resource_group.hub.name}-ngw-01-pi4-01"
+  domain_name_label = "${azurerm_resource_group.hub.name}-ngw-01-pi4-01-${random_id.unique.hex}"
 }
 
 resource "azurerm_nat_gateway_public_ip_association" "hub_ngw_to_hub_ngw" {

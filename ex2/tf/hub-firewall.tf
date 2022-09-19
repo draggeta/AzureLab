@@ -5,7 +5,7 @@ resource "azurerm_public_ip" "hub_firewall" {
   allocation_method   = "Static"
   sku                 = "Standard"
 
-  domain_name_label = "${azurerm_resource_group.hub.name}-azf-01-pi4-01"
+  domain_name_label = "${azurerm_resource_group.hub.name}-azf-01-pi4-01-${random_id.unique.hex}"
 }
 
 resource "azurerm_firewall" "hub_firewall" {
@@ -133,7 +133,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -142,7 +142,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -151,7 +151,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -161,7 +161,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -170,7 +170,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -179,7 +179,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -189,7 +189,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -199,7 +199,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -208,7 +208,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -218,7 +218,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -227,7 +227,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -237,7 +237,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -246,7 +246,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -255,7 +255,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -265,7 +265,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }

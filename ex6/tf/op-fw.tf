@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "op" {
-  name     = "ams-tst-${var.org}-op-01"
+  name     = "on-prem-dc-${var.org}-fw-01"
   location = var.primary_location
 }
 
@@ -73,7 +73,7 @@ resource "azurerm_public_ip" "op_fw" {
   allocation_method   = "Static"
   sku                 = "Standard"
 
-  domain_name_label = "${var.prefix}-${var.org}-fw01"
+  domain_name_label = "fw01-nic-01-pi4-01-${random_id.unique.hex}"
 }
 
 resource "azurerm_network_interface" "op_fw" {
@@ -123,7 +123,7 @@ resource "azurerm_linux_virtual_machine" "op_fw" {
 
   custom_data = base64encode(
     templatefile(
-      "data/cloud-init.vpn.yml",
+      "data/cloud-init.vpn.yml.j2",
       {
         vgw_peer_1     = azurerm_public_ip.hub_vpngw_1.ip_address,
         vgw_bgp_peer_1 = azurerm_virtual_network_gateway.hub_vpngw.bgp_settings[0].peering_addresses[0].default_addresses[0],

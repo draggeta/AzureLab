@@ -5,7 +5,7 @@ resource "azurerm_public_ip" "spoke_b_web_lb" {
 
   sku               = "Standard"
   allocation_method = "Static"
-  domain_name_label = lower(random_id.spoke_b.b64_url)
+  domain_name_label = "${var.secondary_prefix}-${var.org}-lb-web-01-${random_id.unique.hex}"
 }
 
 resource "azurerm_lb" "spoke_b_web_lb" {
@@ -90,7 +90,7 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_b_web_lb" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }

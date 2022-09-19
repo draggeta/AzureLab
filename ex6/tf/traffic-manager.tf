@@ -1,10 +1,15 @@
+resource "azurerm_resource_group" "tm" {
+  name     = "${var.prefix}-${var.org}-traffic-manager-01"
+  location = var.primary_location
+}
+
 resource "azurerm_traffic_manager_profile" "tm" {
-  name                   = "${azurerm_resource_group.hub.name}-tm-01"
-  resource_group_name    = azurerm_resource_group.hub.name
+  name                   = "${var.prefix}-${var.org}-tm-01"
+  resource_group_name    = azurerm_resource_group.tm.name
   traffic_routing_method = "Priority"
 
   dns_config {
-    relative_name = lower(random_id.tm.b64_url)
+    relative_name = "${var.prefix}-${var.org}-tm-01-${random_id.unique.hex}"
     ttl           = 30
   }
 
@@ -39,12 +44,12 @@ resource "azurerm_traffic_manager_azure_endpoint" "spoke_b" {
 }
 
 resource "azurerm_traffic_manager_profile" "tm_nested_pri" {
-  name                   = "${azurerm_resource_group.hub.name}-tm-primary-01"
-  resource_group_name    = azurerm_resource_group.hub.name
+  name                   = "${var.prefix}-${var.org}-tm-primary-01"
+  resource_group_name    = azurerm_resource_group.tm.name
   traffic_routing_method = "Weighted"
 
   dns_config {
-    relative_name = lower(random_id.tm_nested_pri.b64_url)
+    relative_name = "${var.prefix}-${var.org}-tm-primary-01-${random_id.unique.hex}"
     ttl           = 30
   }
 
@@ -67,10 +72,6 @@ resource "azurerm_traffic_manager_azure_endpoint" "spoke_a" {
   profile_id         = azurerm_traffic_manager_profile.tm_nested_pri.id
   weight             = 100
   target_resource_id = azurerm_public_ip.spoke_a_agw.id
-
-  depends_on = [
-    azurerm_application_gateway.spoke_a_agw
-  ]
 }
 
 resource "azurerm_traffic_manager_external_endpoint" "on_prem" {

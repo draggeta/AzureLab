@@ -83,7 +83,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
 
   custom_data = base64encode(
     templatefile(
-      "data/cloud-init.yml",
+      "data/cloud-init.yml.j2",
       {}
     )
   )
@@ -91,6 +91,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
   depends_on = [
     azurerm_firewall.hub_firewall,
     azurerm_firewall_policy_rule_collection_group.hub_firewall_default,
+    azurerm_subnet_nat_gateway_association.hub_ngw_to_hub_sdwan,
   ]
 
   tags = var.tags
@@ -177,7 +178,7 @@ resource "azurerm_monitor_diagnostic_setting" "hub_sdwan" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }

@@ -44,8 +44,6 @@ resource "azurerm_network_interface" "hub_sdwan" {
     name                          = "ipConfig1"
     subnet_id                     = azurerm_subnet.hub_sdwan.id
     private_ip_address_allocation = "Dynamic"
-
-    # public_ip_address_id          = azurerm_public_ip.sd_wan.id
   }
   enable_ip_forwarding = true
 
@@ -83,7 +81,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
 
   custom_data = base64encode(
     templatefile(
-      "data/cloud-init.yml",
+      "data/cloud-init.yml.j2",
       {
         rs_peer_1 = "10.128.2.4",
         rs_peer_2 = "10.128.2.5"
@@ -94,6 +92,7 @@ resource "azurerm_linux_virtual_machine" "hub_sdwan" {
   depends_on = [
     azurerm_firewall.hub_firewall,
     azurerm_firewall_policy_rule_collection_group.hub_firewall_default,
+    azurerm_subnet_nat_gateway_association.hub_ngw_to_hub_sdwan,
   ]
 
   tags = var.tags

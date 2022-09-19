@@ -2,10 +2,10 @@ resource "azurerm_public_ip" "spoke_a_agw" {
   name                = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"
   resource_group_name = azurerm_resource_group.spoke_a.name
   location            = azurerm_resource_group.spoke_a.location
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
   sku                 = "Standard"
 
-  # domain_name_label = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"
+  domain_name_label = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01-${random_id.unique.hex}"
 }
 
 resource "azurerm_application_gateway" "spoke_a_agw" {
@@ -72,6 +72,7 @@ resource "azurerm_application_gateway" "spoke_a_agw" {
   }
 
   request_routing_rule {
+    priority                   = 100
     name                       = "rrr-spoke-a"
     rule_type                  = "Basic"
     http_listener_name         = "ls-spoke-a"
@@ -99,7 +100,7 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_a_agw" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -108,7 +109,7 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_a_agw" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -117,7 +118,7 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_a_agw" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }
@@ -127,7 +128,7 @@ resource "azurerm_monitor_diagnostic_setting" "spoke_a_agw" {
     enabled  = true
 
     retention_policy {
-      days    = 7
+      days    = 90
       enabled = true
     }
   }

@@ -11,7 +11,7 @@ resource "azurerm_public_ip" "hub_management" {
   location            = azurerm_resource_group.hub.location
   allocation_method   = "Dynamic"
   sku                 = "Basic"
-  domain_name_label   = "${var.prefix}-${var.org}-mgt01"
+  domain_name_label   = "${var.prefix}-${var.org}-mgt01-${random_id.unique.hex}"
 
   tags = var.tags
 }

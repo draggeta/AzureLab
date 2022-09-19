@@ -59,6 +59,7 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 > **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen.
 
 1. Configureer de `application gateway`.
+    * Kies voor een v2 application gateway
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VM(s) erin
     * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
@@ -150,3 +151,5 @@ Kies een van de twee opties om het op te lossen:
 1. Test nu het browsen naar de website vanuit een externe client door gebruik te maken van jouw DNS name, te vinden bij 'Overview'.
     * Schakel de VM in spoke A uit en controleer of je in spoke B uit komt.
 1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.
+
+> **NOTE:** Onder normale omstandigheden maak je gebruik van een CNAME die naar de traffic manager FQDN verwijst en ga je niet direct naar de TM FQDN. Voor het lab is geen externe DNS zone beschikbaar.
