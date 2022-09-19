@@ -46,6 +46,17 @@ resource "azurerm_network_security_group" "op_fw" {
     source_address_prefix      = "*"
     destination_address_prefix = "VirtualNetwork"
   }
+  security_rule {
+    name                       = "AllowHttpInbound"
+    priority                   = 300
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = 80
+    source_address_prefix      = "*"
+    destination_address_prefix = "VirtualNetwork"
+  }
 
   tags = var.tags
 }

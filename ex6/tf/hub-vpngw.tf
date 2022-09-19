@@ -12,6 +12,14 @@ resource "azurerm_public_ip" "hub_vpngw_2" {
   allocation_method   = "Static"
   sku                 = "Standard"
 }
+# IP for client VPN
+resource "azurerm_public_ip" "hub_vpngw_3" {
+  name                = "${azurerm_resource_group.hub.name}-vgw-01-pi4-03"
+  location            = azurerm_resource_group.hub.location
+  resource_group_name = azurerm_resource_group.hub.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
 
 resource "azurerm_virtual_network_gateway" "hub_vpngw" {
   name                = "${azurerm_resource_group.hub.name}-vgw-01"
@@ -26,6 +34,10 @@ resource "azurerm_virtual_network_gateway" "hub_vpngw" {
   sku           = "VpnGw1"
   # generation    = "Generation2"
 
+  custom_route {
+    address_prefixes = []
+  }
+
   ip_configuration {
     name                          = "vnetGatewayConfig1"
     public_ip_address_id          = azurerm_public_ip.hub_vpngw_1.id
@@ -38,6 +50,13 @@ resource "azurerm_virtual_network_gateway" "hub_vpngw" {
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.hub_gateway_subnet.id
   }
+  # Client VPN
+  ip_configuration {
+    name                          = "vnetGatewayConfig3"
+    public_ip_address_id          = azurerm_public_ip.hub_vpngw_3.id
+    private_ip_address_allocation = "Dynamic"
+    subnet_id                     = azurerm_subnet.hub_gateway_subnet.id
+  }
 
   bgp_settings {
     asn = 65515
@@ -47,6 +66,17 @@ resource "azurerm_virtual_network_gateway" "hub_vpngw" {
     peering_addresses {
       ip_configuration_name = "vnetGatewayConfig2"
     }
+  }
+
+  vpn_client_configuration {
+    address_space = ["10.96.0.0/24"]
+
+    vpn_client_protocols = ["OpenVPN"]
+    vpn_auth_types       = ["AAD"]
+
+    aad_tenant   = "https://login.microsoftonline.com/${data.azurerm_client_config.current.tenant_id}/"
+    aad_audience = "41b23e61-6c1e-4545-b367-cd054e0ed4b4"
+    aad_issuer   = "https://sts.windows.net/${data.azurerm_client_config.current.tenant_id}/"
   }
 }
 

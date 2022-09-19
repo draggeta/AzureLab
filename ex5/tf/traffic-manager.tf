@@ -4,7 +4,7 @@ resource "azurerm_traffic_manager_profile" "tm" {
   traffic_routing_method = "Priority"
 
   dns_config {
-    relative_name = random_id.server.hex
+    relative_name = lower(random_id.tm.b64_url)
     ttl           = 30
   }
 

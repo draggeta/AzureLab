@@ -45,7 +45,17 @@ data "http" "ip" {
   }
 }
 
-resource "random_id" "server" {
+
+# random_id for spoke B external load balancer
+resource "random_id" "spoke_b" {
+  keepers = {
+    azi_id = 1
+  }
+
+  byte_length = 8
+}
+# random_id for traffic manager
+resource "random_id" "tm" {
   keepers = {
     azi_id = 1
   }

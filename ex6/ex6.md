@@ -48,7 +48,10 @@ Het volgende stuk is puur om in Azure een simulatie te maken van een datacenter 
 
 1. Rol een `VNET` uit in Azure. De address space maakt niet uit. De Linux firewall die we uit gaan rollen simuleert wat subnets.
 1. Maak een subnet aan voor de Linux firewall
-1. Maak een `NSG` aan die IKE/IPSec in en outbound toe staat en SSH vanuit jouw eigen publieke IP.
+1. Maak een `NSG` aan:
+    * IKE/IPSec in en outbound
+    * SSH vanuit jouw eigen publieke IP. 
+    * HTTP om de API ook vanuit het datacenrum beschikbaar te maken.
 1. BGP hoeft niet, dit gebeurt binnen in de tunnel.
 
 ### Uitrollen on-prem firewall
@@ -159,7 +162,10 @@ show bgp summary
 show ip route
 ```
 
-Ook kun je onder de `virtual network gateway` > `BGP peers` de peerings en geleerde routes zien. Wat valt je op als je naar de output van de 'firewall' en de gateway kijkt?
+Ook kun je onder de `virtual network gateway` > `BGP peers` de peerings en geleerde routes zien. 
+Als laatst kun je naar de `effective routes` kijken van de spoke VMs
+
+Wat valt je op als je naar de output van de 'firewall', gateway en `effective routes` kijkt?
 
 > <details><summary>Route servers en gateways</summary>
 > `Route servers` wisselen niet automatisch routes uit met `virtual network gateways`, ook niet `ExpressRoute gateways`. Indien dit gewenst is, moet onder de `route server` > `Configuration`, `Branch-to-branch` aan worden gezet.
@@ -168,10 +174,63 @@ Ook kun je onder de `virtual network gateway` > `BGP peers` de peerings en gelee
 
 </details>
 
+## (Optioneel) Client VPN
+
+> **NOTE:** Indien je geen toegang tot een Azure AD tenant hebt waar je global admin bent (of gebruikers applicaties in Azure AD mogen registereren), is deze opdracht theoretisch.
+
+BY developers die thuis werken moeten via een client VPN kunnen verbinden met de development omgeving. BY wil graag dat de VPN TCP/443 gebruikt en authenticatie direct tegen Azure AD doet. Ook moet het kunnen werken op Windows, MacOS en Linux distributies.
+
+Welke [client/point-to-site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/point-to-site-about#protocol) type voldoet aan deze eisen?
+
+### Configureren client VPN
+
+1. Ga naar de `VPN gateway` en open de `Point-to-site configuration`. Configureer hier de client VPN als volgt:
+    * Address pool: 10.96.0.0/24
+    * Tunnel type: OpenVPN (SSL)
+    * Authentication type: Azure Active Directory
+    * Public IP address: Doordat we active/active draaien, is een load balanced client-vpn IP nodig. Maak een nieuwe of gebruik een beschikbare bestaande. Gebruik niet die van de NAT gateway.
+2. Configureer de Azure Active Directory instellingen. Let op dat je de tenant identifier gebruikt en niet de tenant domein naam:
+    * Tenant: [https://login.microsoftonline.com/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
+    * Audience: [41b23e61-6c1e-4545-b367-cd054e0ed4b4](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
+    * Issuer: [https://sts.windows.net/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
+3. Met een Azure AD admin account kan je toegang geven tot AAD authenticatie. Klik hiervoor op `Grant administrator consent for Azure VPN client application` of doe dit zoals in de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication) beschreven.. 
+    * Vink consent on behalf of your organization aan. Hiermeer zorg je ervoor dat gebruikers deze prompt niet krijgen.
+    ![Azure AD authentication](./data/client_vpn.png)
+4. Klik op 'Save'. De deployment duurt 10+ minuten. Download de VPN client configuratie bovenaan de pagina nadat de wijzigingen doorgevoerd zijn. Pak de ZIP bestanden uit.
+
+### Inloggen op de client VPN
+
+Installeer de 'Azure VPN Client' conform de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-client). Na het installeren kun je de azurevpnconfig.xml importeren.
+
+Verbind met de VPN. Welke routes krijg je allemaal mee?
+
+## (Optioneel) Traffic manager aanpassingen
+
+BY zou graag willen dat 50% van alle API requests naar het datacentrum gaat. De rest moet naar Azure in West Europa. Pas als beide zones niet werken, moet het naar de standby regio in North Europe.
+
+![Traffic manager with priority and weight](./data/traffic_manager_nested.svg)
+
+Dit is in te regelen door traffic manager hierachisch in te richten.
+* Een global profile met [priority](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) balancing.
+    * Profile 1 gaat naar een [nested profile](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-nested-profiles) en heeft een priority van 100
+        * Nested profile is [weighted](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) en heeft een gelijke verdeling tussen on-prem en West Europe
+    * Profile 2 gaat naar de Azure firewall (die naar de externe North Europe LB NAT) met een priority van 120
+
+Bezoek de parent `traffic manager` en controleer of je alleen de juiste API locaties ziet.
+
+Controleer ook met DNS:
+```linux
+dig @1.1.1.1 <fqdn> +short
+```
+
+```windows
+Resolve-DnsName <fqdn> -Server 1.1.1.1
+```
+
 ## Overig
 
-Wat je hier bouwt is vergelijkbaar met een Virtual WAN en Virtual Hub routing. Het verschil is dat een deel van het handwerk weg wordt genomen. Je hoeft met minder rekening te houden, maar je bent ook minder flexibel.
+Wat je hier bouwt is vergelijkbaar met een Virtual WAN en Virtual Hub routing. Het verschil is dat deze oplossingen een deel van het handwerk wegnemen. Je hoeft met minder rekening te houden, maar je bent ook minder flexibel.
 
-Ook worden point-to-site verbindingen (client VPN) niet behandeld. Voor het examen is (goed) inlezen voldoende, maar het kan handig zijn om hier mee te labben.
+Filtering van BGP routes in Azure kan niet (met uitzondering van Virtual WAN). Voor site-to-site verbindingen moet dit puur op basis van routes. Wanneer de verbinding een `ExpressRoute` betreft, kan ook gebruik worden gemaakt van (VNET) [BGP communities](https://learn.microsoft.com/en-us/azure/expressroute/how-to-configure-custom-bgp-communities-portal). 
 
-Daarnaast is het moeilijk om met ExpressRoutes aan de slag te gaan. Ook hier geldt weer dat goed inlezen/videos kijken voldoende moet zijn.
+Het is moeilijk om met ExpressRoutes aan de slag te gaan. Ook hier geldt weer dat goed inlezen/videos kijken voldoende moet zijn.

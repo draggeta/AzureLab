@@ -5,7 +5,7 @@ resource "azurerm_public_ip" "spoke_b_web_lb" {
 
   sku               = "Standard"
   allocation_method = "Static"
-  domain_name_label = lower(random_id.server.b64_url)
+  domain_name_label = lower(random_id.spoke_b.b64_url)
 }
 
 resource "azurerm_lb" "spoke_b_web_lb" {
