@@ -139,3 +139,7 @@ Ruim de regels op die niet meer nodig zijn nu beheer toegang door de Bastion wor
 1. NSG en AZF ACEs en NAT regels die RDP vanaf het internet naar de management server faciliteren
 1. Zorg ervoor dat de management server nog steeds op beheer poorten kan verbinden
 1. Controleer dat de management server niet meer benaderbaar is vanaf het internet.
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).

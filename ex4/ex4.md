@@ -153,3 +153,7 @@ Kies een van de twee opties om het op te lossen:
 1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.
 
 > **NOTE:** Onder normale omstandigheden maak je gebruik van een CNAME die naar de traffic manager FQDN verwijst en ga je niet direct naar de TM FQDN. Voor het lab is geen externe DNS zone beschikbaar.
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).

@@ -14,7 +14,7 @@ De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat
     * Firewall Policy management
     * Plaats het in de hub
     * Forced tunneling uit
-1. De configuratie van de meeste instellingen gebeurt in de firewall policy. Configureer de firewall als [DNS proxy](https://docs.microsoft.com/en-us/azure/firewall/dns-settings).
+1. De configuratie van de meeste instellingen gebeurt in de **`firewall policy`**. Configureer de firewall als [DNS proxy](https://docs.microsoft.com/en-us/azure/firewall/dns-settings).
     * DNS > Enabled
     * DNS Proxy > Enabled
     * DNS Servers > Gebruik Google DNS en Cloudflare DNS als DNS servers in plaats van de VNET default DNS.
@@ -177,3 +177,14 @@ Om de asymmetrische routering te repareren, moet de inbound verkeer via de firew
 > **Note:** de bovenstaande URL werkt niet meer.
 
 > **Optioneel:** configureer een [DNS record](https://docs.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).
+
+Indien je het lab wilt behouden, kun je de onderstaande stappen uitvoeren. Anders mag het lab worden opgeruimd.
+* VMs uitschakelen
+* Azure firewall policy behouden
+* Azure firewall verwijderen
+    * Public IPs behouden
+    * Voor het volgende lab moet de firewall opnieuw uitgerold worden

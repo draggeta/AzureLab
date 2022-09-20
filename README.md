@@ -69,3 +69,17 @@ Hieronder een verdeling van de superscope naar [`VNETs`](a "virtual networks").
 ### Subnets
 
 Elke subnet is /24 groot. Dit houdt het simpel.
+
+## Lab checkpoints
+
+Voor elke lab opdracht is een eindstaat in Terraform gemaakt. Indien je later door wilt gaan of gewoonweg een correcte optie wilt zien, kun je deze uitrollen. Dit kan o.a. in de [Azure Cloud Shell](https://learn.microsoft.com/en-us/azure/cloud-shell/overview).
+
+```bash
+# az account set --name "${subscription name}"
+git clone https://github.com/draggeta/AzureLab.git
+terraform -chdir=AzureLab/ex1/tf init
+terraform -chdir=AzureLab/ex1/tf apply
+rm -rf AzureLab/
+```
+
+Het enige waar je rekening mee moet houden is dat ACLs een verkeerde 'thuis IP' zullen bevatten. Deze zul je moeten aanpassen naar de correcte source.

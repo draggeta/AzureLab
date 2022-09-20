@@ -234,3 +234,7 @@ Wat je hier bouwt is vergelijkbaar met een Virtual WAN en Virtual Hub routing. H
 Filtering van BGP routes in Azure kan niet (met uitzondering van Virtual WAN). Voor site-to-site verbindingen moet dit puur op basis van routes. Wanneer de verbinding een `ExpressRoute` betreft, kan ook gebruik worden gemaakt van (VNET) [BGP communities](https://learn.microsoft.com/en-us/azure/expressroute/how-to-configure-custom-bgp-communities-portal). 
 
 Het is moeilijk om met ExpressRoutes aan de slag te gaan. Ook hier geldt weer dat goed inlezen/videos kijken voldoende moet zijn.
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).

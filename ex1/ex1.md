@@ -195,4 +195,10 @@ De Hollandsche Bank eist dat BY verkeer dat langs komt kan analyseren voor 30 da
     * Traffic Analytics status: On
     * Processing interval: Every 10 mins
 
-> **Note:** Over ongeveer 10-15 minuten kan gebruik worden gemaakt van de `Traffic Analytics` functionaliteit van de `Network Watcher`. 
+> **Note:** Over ongeveer 10-15 minuten kan gebruik worden gemaakt van de `Traffic Analytics` functionaliteit van de `Network Watcher`.
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).
+
+Indien je het lab wilt behouden, kun je de VMs uit zetten. Anders mag het lab worden opgeruimd.

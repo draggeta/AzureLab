@@ -135,3 +135,7 @@ De `UDRs` verwijzen naar de directe IP van de NVA. Om goed HA in te richten, moe
 > Beide opties hebben nadelen. Een fijnere optie kan zijn om de [`gateway load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/gateway-overview) of `route server` te gebruiken. De `gateway load balancer` zorgt ervoor dat north-south verkeer altijd symmetrisch loopt. Jammer genoeg heeft het (nog) geen ondersteuning voor east-west verkeer. De `route server` wordt later in het lab behandeld.
 
 </details>
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).
