@@ -28,7 +28,7 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
     * Public IP
     * Branch-to-branch: Disabled
 
-    > **NOTE:** De route server is niet extern benaderbaar en is niet hetgeen wat routeert. Het is een BGP route reflector. De `public IP` wordt gebruikt voor communicatie met het Azure platform.
+    > **NOTE:** De route server is niet extern benaderbaar en is niet hetgeen wat routeert. Het is een BGP route server. De `public IP` wordt gebruikt voor communicatie met het Azure platform.
 1. Configureer de peering vanuit de `route server` zijde. De SD-WAN appliance (niet de interne load balancer ervoor) kan als peer gebruikt worden.
     * Gebruik `65002` als ASN
 1. Controleer de route tabellen voor enkele subnets. Wat valt op?
