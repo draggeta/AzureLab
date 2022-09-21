@@ -75,10 +75,10 @@ Elke subnet is /24 groot. Dit houdt het simpel.
 Voor elke lab opdracht is een eindstaat in Terraform gemaakt. Indien je later door wilt gaan of gewoonweg een correcte optie wilt zien, kun je deze uitrollen. Dit kan o.a. in de [Azure Cloud Shell](https://learn.microsoft.com/en-us/azure/cloud-shell/overview).
 
 ```bash
-# az account set --name "<subscription name>"
+# (optioneel) az account set --name "<subscription name>"
 git clone https://github.com/draggeta/AzureLab.git
-terraform -chdir=AzureLab/ex1/tf init
-terraform -chdir=AzureLab/ex1/tf apply
+terraform -chdir=AzureLab/ex<number>/tf init
+terraform -chdir=AzureLab/ex<number>/tf apply
 rm -rf AzureLab/
 ```
 
