@@ -41,9 +41,12 @@ We gaan een SD-WAN NVA uitrollen in het hub netwerk.
 
 ## Load balancing voor HA
 
-Onder normale omstandigheden wordt er gebruik gemaakt van een high available opstelling. In Azure is het niet mogelijk om met (gratuitous) ARPs IP-adressen te verhuizen tussen hosts. De twee opties zijn:
+Onder normale omstandigheden wordt er gebruik gemaakt van een high available opstelling. In Azure is het niet mogelijk om met (gratuitous) ARPs IP-adressen te verhuizen tussen hosts. Enkele opties zijn:
 1. Via de API. Failovers tot 2 minuten
 1. Via een load balancer. Failovers standaard tot 10 secondes
+1. Via een route server. Failover tussen 1 en 40 secondes
+
+Voor dit onderdeel van het lab wordt gebruik gemaakt van een load balancer.
 
 > <details><summary>Intern of publiek?</summary>
 >
@@ -55,7 +58,7 @@ Onder normale omstandigheden wordt er gebruik gemaakt van een high available ops
 
 </details>
 
-Voor deze configuratie maken we een enkele interne load balancer, omdat de SD-WAN apparaat alleen een VPN opzet naar buiten.
+Er is gekozen voor enkel een interne load balancer, omdat het SD-WAN apparaat alleen een VPN opzet naar buiten.
 1. Maak een loadbalancer aan via de portal
     * Gebruik de `Standard` SKU.
     * Kies voor de type `Internal`
@@ -69,7 +72,7 @@ Voor deze configuratie maken we een enkele interne load balancer, omdat de SD-WA
     > Als je echter verkeer binnen in een zone moet houden (door bijvoorbeeld latency), kan het kiezen van specifieke zones voordelen hebben
     
     </details>
-1. Maak een `Backend pool` aan. Dit is een pool van hosts waar verkeer naartoe gestuurd kan worden. Voeg hier de SD-WAN appliance aan.
+1. Maak een `Backend pool` aan. Dit is een pool van hosts waar verkeer naartoe gestuurd kan worden. Voeg hier de SD-WAN appliance aan toe.
 1. Maak een inbound rule aan.
     * Vink `HA Ports` aan. HA ports zijn alleen beschikbaar op Standard interne load balancers en Gateway load balancers. Hierdoor wordt al het verkeer doorgezet naar de backend pool.
     * Maak een nieuwe health probe aan
