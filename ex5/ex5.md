@@ -58,8 +58,8 @@ Plak hier de volgende command-blok (na vervanging van de `route server` IP-adres
 ```cisco
 configure terminal
 router bgp 65002
-neighbor ${rs_peer_1} peer-group ROUTESRV
-neighbor ${rs_peer_2} peer-group ROUTESRV
+neighbor <rs_peer_1> peer-group ROUTESRV
+neighbor <rs_peer_2> peer-group ROUTESRV
 end
 write memory
 ```
@@ -73,8 +73,8 @@ show bgp neighbors
 
 En of er routes worden uitgewisseld:
 ```cisco
-show bgp ipv4 neighbors ${rs_peer} advertised-routes
-show bgp ipv4 neighbors ${rs_peer} received-routes
+show bgp ipv4 neighbors <rs_peer> advertised-routes
+show bgp ipv4 neighbors <rs_peer> received-routes
 ```
 
 Vanuit de `route server` zijde kunnen de[ geleerde en geadverteerde routes](https://docs.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-powershell#troubleshooting) via PowerShell achterhaald worden (in bijvoorbeelde de [`Cloud Shell`](https://docs.microsoft.com/en-us/azure/cloud-shell/overview)). De output van de commands kan even op zich laten wachten.
