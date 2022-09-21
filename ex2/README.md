@@ -42,7 +42,7 @@ De `AZF` wordt nu gebruikt als DNS server/proxy.
 
 ## Aanpassen interne routering
 
-Zoals gewoonlijk, veranderen eisen na verloop van tijd. Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Een message queue is geen optie. De ontwikkelde communicatie moet direct tussen de hosts.
+Zoals gewoonlijk, veranderen eisen na verloop van tijd. Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Een message queue is geen optie. De ontwikkelde communicatie methode is zo geschreven dat data uitwisseling direct tussen de hosts plaats moet vinden (al dan niet gerouteerd).
 
 BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
 
