@@ -188,12 +188,12 @@ Welke [client/point-to-site VPN](https://learn.microsoft.com/en-us/azure/vpn-gat
     * Address pool: 10.96.0.0/24
     * Tunnel type: OpenVPN (SSL)
     * Authentication type: Azure Active Directory
-    * Public IP address: Doordat we active/active draaien, is een load balanced client-vpn IP nodig. Maak een nieuwe of gebruik een beschikbare bestaande. Gebruik niet die van de NAT gateway.
+    * Public IP address: Doordat we active/active draaien, is een load balanced client VPN IP-adres nodig. Maak een nieuwe of gebruik een beschikbare bestaande. Gebruik niet die van de NAT gateway.
 2. Configureer de Azure Active Directory instellingen. Let op dat je de tenant identifier gebruikt en niet de tenant domein naam:
     * Tenant: [https://login.microsoftonline.com/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
     * Audience: [41b23e61-6c1e-4545-b367-cd054e0ed4b4](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
     * Issuer: [https://sts.windows.net/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
-3. Met een Azure AD admin account kan je toegang geven tot AAD authenticatie. Klik hiervoor op `Grant administrator consent for Azure VPN client application` of doe dit zoals in de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication) beschreven.. 
+3. Met een Azure AD admin account kan je toegang geven tot AAD authenticatie. Klik hiervoor op `Grant administrator consent for Azure VPN client application` of doe dit zoals in de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication) beschreven.
     * Vink consent on behalf of your organization aan. Hiermeer zorg je ervoor dat gebruikers deze prompt niet krijgen.
     ![Azure AD authentication](./data/client_vpn.png)
 4. Klik op 'Save'. De deployment duurt 10+ minuten. Download de VPN client configuratie bovenaan de pagina nadat de wijzigingen doorgevoerd zijn. Pak de ZIP bestanden uit.
