@@ -1,3 +1,10 @@
+resource "azurerm_subnet" "hub_firewall_subnet" {
+  name                 = "AzureFirewallSubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.1.0/24"]
+}
+
 resource "azurerm_public_ip" "hub_firewall" {
   name                = "${azurerm_resource_group.hub.name}-azf-01-pi4-01"
   location            = azurerm_resource_group.hub.location

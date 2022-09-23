@@ -1,3 +1,14 @@
+resource "azurerm_subnet" "hub_gateway_subnet" {
+  name                 = "GatewaySubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.0.0/24"]
+
+  depends_on = [
+    azurerm_route_server.hub_rs
+  ]
+}
+
 resource "azurerm_public_ip" "hub_vpngw_1" {
   name                = "${azurerm_resource_group.hub.name}-vgw-01-pi4-01"
   location            = azurerm_resource_group.hub.location

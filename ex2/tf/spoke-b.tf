@@ -13,13 +13,6 @@ resource "azurerm_virtual_network" "spoke_b" {
   tags = var.tags
 }
 
-resource "azurerm_subnet" "spoke_b_web" {
-  name                 = "web"
-  resource_group_name  = azurerm_resource_group.spoke_b.name
-  virtual_network_name = azurerm_virtual_network.spoke_b.name
-  address_prefixes     = ["10.130.5.0/24"]
-}
-
 # enable global peering between the two virtual network
 resource "azurerm_virtual_network_peering" "spoke_b_to_hub" {
   name                         = "peering-to-${azurerm_virtual_network.hub.name}"

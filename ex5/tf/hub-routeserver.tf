@@ -1,3 +1,17 @@
+resource "azurerm_subnet" "hub_bastion_subnet" {
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.3.0/24"]
+}
+
+resource "azurerm_subnet" "hub_routeserver_subnet" {
+  name                 = "RouteServerSubnet"
+  resource_group_name  = azurerm_resource_group.hub.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = ["10.128.2.0/24"]
+}
+
 resource "azurerm_public_ip" "hub_rs" {
   name                = "${azurerm_resource_group.hub.name}-rs-01-pi4-01"
   location            = azurerm_resource_group.hub.location

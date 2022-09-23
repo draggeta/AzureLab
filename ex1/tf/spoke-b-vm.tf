@@ -1,3 +1,10 @@
+resource "azurerm_subnet" "spoke_b_web" {
+  name                 = "web"
+  resource_group_name  = azurerm_resource_group.spoke_b.name
+  virtual_network_name = azurerm_virtual_network.spoke_b.name
+  address_prefixes     = ["10.130.5.0/24"]
+}
+
 resource "azurerm_network_interface" "spoke_b_web" {
   name                = "web02-nic-01"
   location            = azurerm_resource_group.spoke_b.location

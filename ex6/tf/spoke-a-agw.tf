@@ -1,3 +1,10 @@
+resource "azurerm_subnet" "spoke_a_agw_subnet" {
+  name                 = "ApplicationGatewaySubnet"
+  resource_group_name  = azurerm_resource_group.spoke_a.name
+  virtual_network_name = azurerm_virtual_network.spoke_a.name
+  address_prefixes     = ["10.129.4.0/24"]
+}
+
 resource "azurerm_public_ip" "spoke_a_agw" {
   name                = "${var.prefix}-${var.org}-spoke-a-01-agw-01-pi4-01"
   resource_group_name = azurerm_resource_group.spoke_a.name

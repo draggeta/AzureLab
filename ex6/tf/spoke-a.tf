@@ -13,19 +13,6 @@ resource "azurerm_virtual_network" "spoke_a" {
   tags = var.tags
 }
 
-resource "azurerm_subnet" "spoke_a_agw_subnet" {
-  name                 = "ApplicationGatewaySubnet"
-  resource_group_name  = azurerm_resource_group.spoke_a.name
-  virtual_network_name = azurerm_virtual_network.spoke_a.name
-  address_prefixes     = ["10.129.4.0/24"]
-}
-resource "azurerm_subnet" "spoke_a_web" {
-  name                 = "web"
-  resource_group_name  = azurerm_resource_group.spoke_a.name
-  virtual_network_name = azurerm_virtual_network.spoke_a.name
-  address_prefixes     = ["10.129.5.0/24"]
-}
-
 # enable global peering between the two virtual network
 resource "azurerm_virtual_network_peering" "spoke_a_to_hub" {
   name                         = "peering-to-${azurerm_virtual_network.hub.name}"
