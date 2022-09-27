@@ -50,7 +50,7 @@ Nadat de `functions` succesvol uitgerold zijn, gaan we de API deployen. Ga naar 
 3. Bij Branch moet 'master' ingevuld worden
 4. Klik op save
 5. (Optioneel) Controleer bij tabblad Logs de deployment. Dit kan even duren. Bij status 'Success (Active)' is het gelukt.
-6. Probeer de API op 'https://<fqdn>/api/info' en 'https://<fqdn>/api/health' (dit keer zonder '/' aan het eind)
+6. Probeer de API op `https://<fqdn>/api/info` en `https://<fqdn>/api/health` (dit keer zonder '/' aan het eind)
 7. Probeer ook de API vanuit de management server. Dit zou niet moeten lukken.
 
 ## Service endpoint
@@ -82,7 +82,7 @@ Het is niet mogelijk om vanuit de management server de API in Azure te benaderen
 Ga naar de spoke A `function app` > Networking > `Private endpoints` en voeg een endpoint toe
 * Integrate with private DNS zone: No
 
-Wacht totdat de endpoint uitgerold is. Probeer vanaf de management server 'https://<fqdn>' of een van de API endpoints te bereiken. Resolve ook de DNS met:
+Wacht totdat de endpoint uitgerold is. Probeer vanaf de management server `https://<fqdn>` of een van de API endpoints te bereiken. Resolve ook de DNS met:
 
 ```powershell
 Resolve-DnsName <fqdn>
