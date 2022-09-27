@@ -1,5 +1,12 @@
 # LAB opdrachten
 
+* [Inleiding](#inleiding)
+* [Vereisten](#vereisten)
+* [Code Samples](#code-samples)
+* [Navigatie door de portal](#navigatie-door-de-portal)
+* [Voorbereiding](#voorbereiding)
+* [Lab checkpoints](#lab-checkpoints)
+
 ## Inleiding
 
 Je werkt voor BY, een nieuwe verzekeraar. BY heeft geen eigen hardware en is in de startup fase niet van plan om uitgaven te doen aan kapitaal. Daarom beginnen ze direct in de cloud. Jij werkt als netwerk engineer voor de verzekeraar en moet direct aan de slag om een initiele netwerk op te zetten en deze door te ontwikkelen.
@@ -74,6 +81,10 @@ Elke subnet is /24 groot. Dit houdt het simpel.
 
 Voor elke lab opdracht is een eindstaat in Terraform gemaakt. Indien je later door wilt gaan of gewoonweg een correcte optie wilt zien, kun je deze uitrollen. Dit kan o.a. in de [Azure Cloud Shell](https://learn.microsoft.com/en-us/azure/cloud-shell/overview).
 
+> **NOTE:** De credentials voor alle apparaten uitgerold door de templates is `adminuser`/`AzureLabs10IT!`.
+
+> **NOTE:** Indien de Cloud Shell gebruikt wordt voor het uitrollen van de resource, wordt in ACLs het IP van de Cloud Shell container als source toegestaan, niet de publieke IP van het apparaat waar je vandaan werkt. Denk hierbij aan RDP/SSH source IPs die door NSGs en Azure Firewalls gefilterd worden.
+
 ```bash
 # (optioneel) az account set --name "<subscription name>"
 git clone https://github.com/draggeta/AzureLab.git
@@ -81,5 +92,3 @@ terraform -chdir=AzureLab/ex<number>/tf init
 terraform -chdir=AzureLab/ex<number>/tf apply
 rm -rf AzureLab/
 ```
-
-Het enige waar je rekening mee moet houden is dat ACLs een verkeerde 'thuis IP' zullen bevatten. Deze zul je moeten aanpassen naar de correcte source.
