@@ -53,6 +53,26 @@ Nadat de `functions` succesvol uitgerold zijn, gaan we de API deployen. Ga naar 
 6. Probeer de API op 'https://<fqdn>/api/info' en 'https://<fqdn>/api/health' (dit keer zonder '/' aan het eind)
 7. Probeer ook de API vanuit de management server. Dit zou niet moeten lukken.
 
+## Service endpoint
+
+[`Service endpoints`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) hebben niet meer de voorkeur, maar ze kunnen nog wel gebruikt worden. `Service endpoints` voegen een directe route over de Microsoft backbone toe richting bepaalde PaaS diensten. Het verkeer gaat niet over het internet en apparaten die gebruik hiervan maken hoeven geen internet verbinding te hebben. Een nadeel is dat alleen apparaten die in een subnet met een `service endpoint` zitten, gebruik kunnen maken van deze `service endpoints`. Andere subnetten en vanuit on-prem kunnen niet een willekeurige `service endpoint` gebruiken.
+
+Service endpoints zijn voor een beperkte set resources beschikbaar.
+
+### Service endpoint configureren
+
+Ga naar het hub netwerk en open het subnet waar de management server zich in bevindt. Selecteer de 'Microsoft.Web' service onder de `Service Endpoints` en pas de wijzigingen toe. Controleer de toegang tot de spoke A en B APIs.
+
+> <details><summary>Service endpoints beveiligen</summary>
+>
+> Wanneer een `service endpoint` aan een subnet wordt gekoppeld, kan elk apparaat in dat subnet bij elke resource van het type. Dit is een probleem. Het is van belang dat door middel van `NSGs` en [`service tags`](https://learn.microsoft.com/en-us/azure/virtual-network/service-tags-overview) outbound verkeer wordt gelimiteerd.
+>
+> Voor `storage accounts` kan ook gebruik worden gemaakt van [`service endpoint policies`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoint-policies-overview).
+
+Limiteer voor de management server de toegang tot alleen function apps in 'North Europe' door gebruik te maken van de juiste `service tags` en de bestaande `NSG`.
+
+</details>
+
 ## Private endpoint
 
 Het is niet mogelijk om vanuit de management server de API in Azure te benaderen. Het is wel gewenst, maar Security wil niet dat de management zone het internet op kan. De door Microsoft aangerade oplossing is om [`private endpoints`](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview) te gebruiken. Voor het lab wordt de 'West Europe' `function app` met een `private endpoint` gekoppeld aan de spoke A `VNET`.
@@ -102,7 +122,3 @@ Test nadat de uitrol gelukt is, de DNS resolving en of de website bereikbaar is 
 </details>
 
 Repareer de externe toegang tot de spoke A API. Iederen moet erbij kunnen.
-
-## Service endpoint
-
-[`Service endpoints`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) hebben niet meer de voorkeur, maar ze kunnen nog wel gebruikt worden. `Service endpoints` voegen een directe route over de Microsoft backbone toe richting bepaalde PaaS diensten. Het verkeer gaat niet over het internet en apparaten die gebruik hiervan maken hoeven geen internet verbinding te hebben. Een nadeel is dat alleen apparaten die in een subnet met een `service endpoint` zitten, gebruik kunnen maken van deze `service endpoints`. Andere subnetten en vanuit on-prem kunnen niet een willekeurige `service endpoint` gebruiken.
