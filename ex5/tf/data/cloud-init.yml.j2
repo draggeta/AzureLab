@@ -5,7 +5,7 @@
 {%- set rs_peer_2 = '${rs_peer_2}' -%}
 
 {%- set iplist = ds.meta_data.imds.network.interface[0].ipv4.subnet[0].address.split('.') -%}
-{%- set octets = iplist[0], iplist[1], iplist[2], (iplist[3] | int + 1 ) | string -%}
+{%- set octets = iplist[0], iplist[1], iplist[2], (iplist[3] | int + 1) | string -%}
 {%- set default_gw = octets | join('.') -%}
 
 snap:

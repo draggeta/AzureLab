@@ -1,7 +1,14 @@
 
 # Dag 4 - Load balancing en DNS
 
-De omgeving vordert en interne IP adressen onthouden wordt vervelend. Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel. Een oplossing hiervoor is DNS. Voor interne resolving gaan we gebruik maken van een private DNS zone.
+* [Private DNS Zones](#private-dns-zones)
+* [Application Gateway](#application-gateway)
+* [Load Balancing](#load-balancing)
+* [Traffic Manager](#traffic-manager)
+* [Opruimen lab](#opruimen-lab)
+
+De omgeving vordert en interne IP adressen onthouden wordt vervelend. Een oplossing hiervoor is DNS. Voor interne resolving gaan we gebruik maken van een private DNS zone. 
+Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel. 
 
 ![Private DNS resolving](./data/private_dns.svg)
 
@@ -32,11 +39,11 @@ Er is gekozen voor de DNS zone `by.cloud`.
     >
     > Om een zone gekoppeld aan een `VNET` te kunnen resolven, moet je de `VNET` DNS servers gebruiken. Alle `VNETs` hier gebruiken de `AZF` als DNS server. De `AZF` gebruikt echter niet het `VNET` als DNS server, maar CloudFlare DNS en Google DNS.  
     >
-    > De ingebouwde `VNET` DNS server (168.63.129.16) is alleen bereikbaar vanuit de VNET. VM's kunnen dus niet de ingebouwde DNS server van een ander `VNET` gebruiken. Ook kun je niet vanuit een on-prem omgeving de VNET DNS banderen om `private DNS zones` te resolven. 
+    > De ingebouwde `VNET` DNS server (168.63.129.16) is alleen bereikbaar vanuit de VNET. VM's kunnen niet de ingebouwde DNS server van een ander `VNET` gebruiken. Ook kun je niet vanuit een on-prem omgeving de VNET DNS benaderen om `private DNS zones` te resolven. 
     >
-    > Er moet ten tijde van schijven dus altijd een eigen DNS server in Azure aanwezig zijn om de zones te resolven. Om dit te kunnen in een productie omgeving, moet het resolven van de `private DNS zones` via een DNS forwarder/proxy lopen in een gekoppelde `VNET`.
+    > Er moet ten tijde van schijven altijd een eigen DNS server in Azure aanwezig zijn om de zones (vanuit buiten een VNET) te resolven. Kortom, het resolven van de `private DNS zones` moet via een DNS forwarder/proxy lopen in een gekoppelde `VNET`.
     >
-    >**De enige reden dat de zone gekoppeld is aan de spokes, is dus voor de auto registratie, niet DNS resolving.**
+    >**De enige reden dat de zone gekoppeld is aan de spokes, is voor auto registratie, niet DNS resolving.**
 
     </details>
 
