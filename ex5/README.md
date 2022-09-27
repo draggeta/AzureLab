@@ -1,5 +1,9 @@
 # Dag 5 - Route server en Bastion
 
+* [Route server](#route-server)
+* [Azure Bastion](#azure-bastion)
+* [Opruimen lab](#opruimen-lab)
+
 Het gaat goed met BY Verzekeringen. Naast Nederland en Ierland, worden nu ook kantoren in het Verenigd Koninkrijk en Duitsland geopend. Deze worden ook via de SD-WAN aangesloten.
 
 | locatie | subnetten | 

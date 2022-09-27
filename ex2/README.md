@@ -1,5 +1,12 @@
 # Dag 2 - Firewalling
 
+* [Uitrol AZF](#uitrol-azf)
+* [Aanpassen interne routering](#aanpassen-interne-routering)
+* [IP groups en network rules](#ip-groups-en-network-rules)
+* [Aanpassing routering richting internet](#aanpassing-routering-richting-internet)
+* [Inbound management verkeer repareren](#inbound-management-verkeer-repareren)
+* [Opruimen lab](#opruimen-lab)
+
 ![DNS resolution](./data/dns_inspection.svg)
 
 De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met `threat intelligence`/threat detection, wordt hiervoor de `Azure Firewall` gebruikt.

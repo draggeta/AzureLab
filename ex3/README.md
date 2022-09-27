@@ -1,6 +1,12 @@
 
 # Dag 3 - SD-WAN implementatie en NAT Gateway
 
+* [NVA uitrollen](#nva-uitrollen)
+* [Load balancing voor HA](#load-balancing-voor-ha)
+* [NAT Gateway](#nat-gateway)
+* [Routeren richting SD-WAN LB](#routeren-richting-sd-wan-lb)
+* [Opruimen lab](#opruimen-lab)
+
 BY Verzekeringen heeft ook SD-WAN uitgerold over alle branch offices. Hun oplossing werkt niet samen met `Azure Virtual WAN`. Om deze reden moet er een `network virtual appliance` (`NVA`) uitgerold worden en moeten de netwerken zo aangepast worden dat de onderstaande prefixes via de appliance gerouteerd worden.
 
 | locatie | subnetten | 

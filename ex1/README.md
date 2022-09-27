@@ -1,5 +1,12 @@
 # Dag 1 - Basis netwerken
 
+* [Uitrollen hub/management netwerk](#uitrollen-hub/management-netwerk)
+* [Uitrollen spoke/applicatie netwerken](#uitrollen-spoke/applicatie-netwerken)
+* [Uitrollen applicatie server](#uitrollen-applicatie-server)
+* [NSG/ASG](#nsg/asg)
+* [Logging en archivering](#logging-en-archivering)
+* [Opruimen lab](#opruimen-lab)
+
 BY wil web applicaties in de cloud gaan draaien. De webapplicatie moet geografisch redundant neergezet worden. Er moet ook een management (hub) `virtual network` en server komen waar vandaan de applicaties beheerd kunnen worden.
 Alle servers moeten gehardened worden door middel van `network security groups`. De enige server die direct vanuit het internet benaderbaar moet zijn, is de management server. 
 

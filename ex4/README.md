@@ -1,6 +1,12 @@
 
 # Dag 4 - Load balancing en DNS
 
+* [Private DNS Zones](#private-dns-zones)
+* [Application Gateway](#application-gateway)
+* [Load Balancing](#load-balancing)
+* [Traffic Manager](#traffic-manager)
+* [Opruimen lab](#opruimen-lab)
+
 De omgeving vordert en interne IP adressen onthouden wordt vervelend. Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel. Een oplossing hiervoor is DNS. Voor interne resolving gaan we gebruik maken van een private DNS zone.
 
 ![Private DNS resolving](./data/private_dns.svg)
