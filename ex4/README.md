@@ -7,7 +7,8 @@
 * [Traffic Manager](#traffic-manager)
 * [Opruimen lab](#opruimen-lab)
 
-De omgeving vordert en interne IP adressen onthouden wordt vervelend. Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel. Een oplossing hiervoor is DNS. Voor interne resolving gaan we gebruik maken van een private DNS zone.
+De omgeving vordert en interne IP adressen onthouden wordt vervelend. Een oplossing hiervoor is DNS. Voor interne resolving gaan we gebruik maken van een private DNS zone. 
+Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downtime tijdens upgrades is steeds minder acceptabel. 
 
 ![Private DNS resolving](./data/private_dns.svg)
 
