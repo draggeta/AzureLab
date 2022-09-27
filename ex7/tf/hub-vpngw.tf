@@ -45,6 +45,10 @@ resource "azurerm_virtual_network_gateway" "hub_vpngw" {
   sku           = "VpnGw1"
   # generation    = "Generation2"
 
+  # custom_route {
+  #   address_prefixes = []
+  # }
+
   ip_configuration {
     name                          = "vnetGatewayConfig1"
     public_ip_address_id          = azurerm_public_ip.hub_vpngw_1.id

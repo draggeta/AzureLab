@@ -56,7 +56,7 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 
 > **NOTE:** We gaan geen WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder, is duurder en kan wat tijd kosten.
 
-> **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen.
+> **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen. Het is in deze opzet mogelijk om de AGW in de hub neer te zetten, indien het in meerdere VNETs gebruikt zal worden.
 
 1. Configureer de `application gateway`.
     * Kies voor een v2 application gateway

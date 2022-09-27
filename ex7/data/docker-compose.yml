@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 80:80
+    environment:
+      API_RESPONSE_1: >
+        /bin/sh -c "echo '{"service": "Finance API", "location": $LOC, "server": "$HOSTNAME"}' > /usr/share/nginx/html/index.html; mkdir -p /usr/share/nginx/html/health/; echo '{"health": "ok"}' > /usr/share/nginx/html/health/index.html; nginx -g \"daemon off;\"" 
+      API_RESPONSE_2: '{"health": "ok"}'
+    command: $${API_RESPONSE_1}
