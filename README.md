@@ -32,23 +32,23 @@ ssh admin@10.0.0.1
 
 ## Navigatie door de portal
 
-De [Azure portal](https://docs.microsoft.com/en-us/azure/azure-portal/azure-portal-overview) is de tool om [Azure Resource Management](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/overview) te leren kennen. Er zijn veel opties en instellingen. Gebruik de zoekbalk bovenin voor het vinden van items. Je kan alles vinden door te klikken, maar zoeken is vaak sneller als je niet precies weet waar iets te vinden is.
+De [Azure portal](https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview) is de tool om [Azure Resource Management](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview) te leren kennen. Er zijn veel opties en instellingen. Gebruik de zoekbalk bovenin voor het vinden van items. Je kan alles vinden door te klikken, maar zoeken is vaak sneller als je niet precies weet waar iets te vinden is.
 
 ## Voorbereiding
 
 ### Naamgeving
-De [naamgeving is van belang](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming). Je kan met een goede naamgeving veel informatie in een oogopslag zichtbaar maken.
+De [naamgeving is van belang](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming). Je kan met een goede naamgeving veel informatie in een oogopslag zichtbaar maken.
 
 Bedenk van tevoren een zinnige naamgeving voor je resources. Wat wil je erin verwerkt hebben?
 * `resource groups` zijn uniek per subscription per regio
 * resources moeten een unieke naam in een resource group hebben
 * bepaalde resources moeten een globaal unieke naam hebben (de naam is ook onderdeel van de [FQDN](https://en.wikipedia.org/wiki/Fully_qualified_domain_name "Fully Qualified Domain Name"))
 * Windows VM namen mogen maximaal 15 tekens lang zijn
-* [bepaalde resources hebben strengere eisen dan anderen](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules)
+* [bepaalde resources hebben strengere eisen dan anderen](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules)
 
 ### Resources en Resource Groups
 
-[`Resource groups`](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#what-is-a-resource-group) helpen met het groeperen van uitgerolde diensten. Goed nadenken over wat bij elkaar in een groep hoort is van belang. Het maakt de volgende zaken makkelijker:
+[`Resource groups`](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#what-is-a-resource-group) helpen met het groeperen van uitgerolde diensten. Goed nadenken over wat bij elkaar in een groep hoort is van belang. Het maakt de volgende zaken makkelijker:
 * opschonen van resources
 * uitdelen van rechten
 * categoriseren van resources

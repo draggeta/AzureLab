@@ -13,7 +13,7 @@ Het gaat goed met BY Verzekeringen. Naast Nederland en Ierland, worden nu ook ka
 | Verenigd Koninkrijk | 10.193.128.0/22 |
 | Ierland | 10.193.132.0/22 |
 
-Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch in een VNET te injecteren, is de [`route server`](https://docs.microsoft.com/en-us/azure/route-server/overview). Lees het stuk over de [beperkingen](https://docs.microsoft.com/en-us/azure/route-server/overview#route-server-limits) goed door.
+Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch in een VNET te injecteren, is de [`route server`](https://learn.microsoft.com/en-us/azure/route-server/overview). Lees het stuk over de [beperkingen](https://learn.microsoft.com/en-us/azure/route-server/overview#route-server-limits) goed door.
 
 ![Route server](./data/route_server.svg)
 
@@ -27,7 +27,7 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
 
 > **NOTE:** `Route servers` maken van de VNET stiekem een `virtual hub` lite. Dit betekent dat je ze niet continu aan kan maken en afbreken. `Virtual hubs` hebben dat je minstens een uur moet wachten na het verwijderen van een item voordat ze echt verwijderd zijn. Als je een fout maakt met de `route server`, kun je deze het best laten staan en gewoon doorgaan.
 
-1. De `route server` kan uitgerold worden in de hub. Zie indien nodig ook de [handleiding](https://docs.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-portal) in Azure. Let op de volgende instellingen:
+1. De `route server` kan uitgerold worden in de hub. Zie indien nodig ook de [handleiding](https://learn.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-portal) in Azure. Let op de volgende instellingen:
     * De subnet moet een specifieke naam hebben
     * Public IP
     * Branch-to-branch: Disabled
@@ -81,7 +81,7 @@ show bgp ipv4 neighbors <rs_peer> advertised-routes
 show bgp ipv4 neighbors <rs_peer> received-routes
 ```
 
-Vanuit de `route server` zijde kunnen de[ geleerde en geadverteerde routes](https://docs.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-powershell#troubleshooting) via PowerShell achterhaald worden (in bijvoorbeelde de [`Cloud Shell`](https://docs.microsoft.com/en-us/azure/cloud-shell/overview)). De output van de commands kan even op zich laten wachten.
+Vanuit de `route server` zijde kunnen de[ geleerde en geadverteerde routes](https://learn.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-powershell#troubleshooting) via PowerShell achterhaald worden (in bijvoorbeelde de [`Cloud Shell`](https://learn.microsoft.com/en-us/azure/cloud-shell/overview)). De output van de commands kan even op zich laten wachten.
 
 ```powershell
 $remotepeer = @{
@@ -116,15 +116,15 @@ Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewissel
 
 ## Azure Bastion
 
-BY's security afdeling vindt het idee van RDP over het internet maar niks. Na een onderzoek zijn ze tot de conclusie gekomen dat beheer verkeer altijd via een [`Azure Bastion`](https://docs.microsoft.com/en-us/azure/bastion/bastion-overview) moet lopen.
+BY's security afdeling vindt het idee van RDP over het internet maar niks. Na een onderzoek zijn ze tot de conclusie gekomen dat beheer verkeer altijd via een [`Azure Bastion`](https://learn.microsoft.com/en-us/azure/bastion/bastion-overview) moet lopen.
 
 ### Uitrollen Azure Bastion
 
 Voor BY is alleen RDP naar Windows apparaten en SSH naar Linux apparaten benodigd. Hierdoor kan gebruik worden gemaakt van de Basic SKU. De Standard SKU heeft veel meer opties zoals: SSH tunneling, file copy, scaling etc. 
 
-[Rol de `bastion` uit](https://docs.microsoft.com/en-us/azure/bastion/quickstart-host-portal#createvmset) in de hub.
+[Rol de `bastion` uit](https://learn.microsoft.com/en-us/azure/bastion/quickstart-host-portal#createvmset) in de hub.
 
-Probeer na het uitrollen te [verbinden met de VMs](https://docs.microsoft.com/en-us/azure/bastion/quickstart-host-portal#connect):
+Probeer na het uitrollen te [verbinden met de VMs](https://learn.microsoft.com/en-us/azure/bastion/quickstart-host-portal#connect):
 * management server
 * spoke VMs
 * SD-WAN appliance

@@ -53,6 +53,7 @@ resource "azurerm_application_gateway" "spoke_a_agw" {
     port                                = 80
     protocol                            = "Http"
     request_timeout                     = 60
+    probe_name                          = "pb-health"
   }
 
   probe {

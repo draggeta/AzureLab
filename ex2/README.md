@@ -15,17 +15,17 @@ De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat
 
 ## Uitrol AZF
 
-1. Deploy een [`Azure Firewall`](https://docs.microsoft.com/en-us/azure/firewall/overview). De reden hiervoor is dat er meteen een makkelijke NVA aanwezig is die ook als 'custom' DNS server/proxy kan dienen
+1. Deploy een [`Azure Firewall`](https://learn.microsoft.com/en-us/azure/firewall/overview). De reden hiervoor is dat er meteen een makkelijke NVA aanwezig is die ook als 'custom' DNS server/proxy kan dienen
     * Let op, een `AZF` heeft nog extra componenten nodig zoals een `subnet`. De subnet moet `AzureFirewallSubnet` heten en voor de deployment worden aangemaakt.
     * Standard tier
     * Firewall Policy management
     * Plaats het in de hub
     * Forced tunneling uit
-1. De configuratie van de meeste instellingen gebeurt in de **`firewall policy`**. Configureer de firewall als [DNS proxy](https://docs.microsoft.com/en-us/azure/firewall/dns-settings).
+1. De configuratie van de meeste instellingen gebeurt in de **`firewall policy`**. Configureer de firewall als [DNS proxy](https://learn.microsoft.com/en-us/azure/firewall/dns-settings).
     * DNS > Enabled
     * DNS Proxy > Enabled
     * DNS Servers > Gebruik Google DNS en Cloudflare DNS als DNS servers in plaats van de VNET default DNS.
-1. Configureer de `AZF` interne/private IP als de [DNS server voor de VNETs](https://docs.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
+1. Configureer de `AZF` interne/private IP als de [DNS server voor de VNETs](https://learn.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
     * Per VNET moet dit ingesteld worden.
     * Kan ook per NIC, maar daar heeft niemand tijd voor.
 1. Configureer de `AZF` `Diagnostics settings`. Dit moet op de firewall zelf. Log alles naar de `Log Analytics Workspace` en `storage account`. Stel een retentie van 90 dagen in.
@@ -43,7 +43,7 @@ De `AZF` wordt nu gebruikt als DNS server/proxy.
 
 > <details><summary>Threat intelligence</summary>
 >
-> Azure `firewall` kan gebruik maken van Microsoft's [`threat intelligence`](https://docs.microsoft.com/en-us/azure/firewall/threat-intel) om FQDNs en DNS queries te inspecteren. Hiervoor is wel nodig dat de firewall alle DNS queries kan onderscheppen. Hierom wordt gebruik gemaakt van de DNS proxy functionaliteit.
+> Azure `firewall` kan gebruik maken van Microsoft's [`threat intelligence`](https://learn.microsoft.com/en-us/azure/firewall/threat-intel) om FQDNs en DNS queries te inspecteren. Hiervoor is wel nodig dat de firewall alle DNS queries kan onderscheppen. Hierom wordt gebruik gemaakt van de DNS proxy functionaliteit.
 
 </details>
 
@@ -51,13 +51,13 @@ De `AZF` wordt nu gebruikt als DNS server/proxy.
 
 Zoals gewoonlijk, veranderen eisen na verloop van tijd. Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Een message queue is geen optie. De ontwikkelde communicatie methode is zo geschreven dat data uitwisseling direct tussen de hosts plaats moet vinden (al dan niet gerouteerd).
 
-BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://docs.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
+BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://learn.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
 
 ![NVA Routing](./data/internal_routing.svg)
 
 > <details><summary>Standaard route tabellen in Azure</summary>
 >
-> Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
+> Azure `virtual networks` hebben [standaard een null route](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
 >
 > Directe `VNET peers` voegen elkaars `address spaces` toe. Geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk. Zelfs met een `user defined route` werkt dit niet. 
 
@@ -77,7 +77,7 @@ BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkee
 
     > <details><summary>Next hop/effective routes</summary>
     >
-    > De [`Next hop`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
+    > De [`Next hop`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
 
     </details>
 
@@ -110,9 +110,9 @@ De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanm
 
     > <details><summary>Rule collection verificatie</summary>
     >
-    > De `Azure Firewall` heeft geen optie om te controleren of verkeer is toegestaan. Er moet dus in de logs worden gedoken. Als de `diagnostics settings` geconfigureerd zijn met een `Log Analytics Workspace`, kan gebruik worden gemaakt van de [`Logs` functionaliteit](https://docs.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) van een `AZF` om toegestane en gedropte verkeer te bekijken.
+    > De `Azure Firewall` heeft geen optie om te controleren of verkeer is toegestaan. Er moet dus in de logs worden gedoken. Als de `diagnostics settings` geconfigureerd zijn met een `Log Analytics Workspace`, kan gebruik worden gemaakt van de [`Logs` functionaliteit](https://learn.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) van een `AZF` om toegestane en gedropte verkeer te bekijken.
     >
-    > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://docs.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en examen.
+    > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://learn.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en examen.
 
     </details>
 
@@ -144,7 +144,7 @@ Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het interne
     >
     > Er is sprake van asymmetrische routering. Verkeer komt binnen via de [PIP]('' "Public IP"), maar gaat langs de AZF naar buiten. 
     >
-    > De `AZF` doet [automatisch SNAT](https://docs.microsoft.com/en-us/azure/firewall/snat-private-range) voor destination IPs buiten RFC1918.
+    > De `AZF` doet [automatisch SNAT](https://learn.microsoft.com/en-us/azure/firewall/snat-private-range) voor destination IPs buiten RFC1918.
 
     </details>
 
@@ -163,7 +163,7 @@ Om de asymmetrische routering te repareren, moet de inbound verkeer via de firew
 
     > <details><summary>NAT rule collections</summary>
     >
-    > `NAT rule collections` maken onder water voor elke match een [tijdelijke `network rule` aan](https://docs.microsoft.com/en-us/azure/firewall/rule-processing#nat-rules). Hierdoor is het niet nodig om handmatig `network rules` te genereren.
+    > `NAT rule collections` maken onder water voor elke match een [tijdelijke `network rule` aan](https://learn.microsoft.com/en-us/azure/firewall/rule-processing#nat-rules). Hierdoor is het niet nodig om handmatig `network rules` te genereren.
 
     </details>
 
@@ -183,7 +183,7 @@ Om de asymmetrische routering te repareren, moet de inbound verkeer via de firew
 
 > **Note:** de bovenstaande URL werkt niet meer.
 
-> **Optioneel:** configureer een [DNS record](https://docs.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
+> **Optioneel:** configureer een [DNS record](https://learn.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
 
 ## Opruimen lab
 

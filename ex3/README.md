@@ -27,7 +27,7 @@ We gaan een SD-WAN NVA uitrollen in het hub netwerk.
     >
     > De meeste NVAs kunnen ook firewallen. Het is vaak niet nodig om de data poorten te firewallen. Subnetten/interfaces waar HA en management verkeer overheen lopen moeten wel gefilterd worden.
     > 
-    > In pricipe zou je af kunnen zonder een NSG. Er moet echter een interne `Azure Load Balancer` (`ALB`) komen om verkeer naar de actieve node te sturen. Standard `ALBs` (niet Basic) [vereisen dat er een NSG actief is](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-overview#securebydefault) voordat ze verkeer door laten
+    > In pricipe zou je af kunnen zonder een NSG. Er moet echter een interne `Azure Load Balancer` (`ALB`) komen om verkeer naar de actieve node te sturen. Standard `ALBs` (niet Basic) [vereisen dat er een NSG actief is](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview#securebydefault) voordat ze verkeer door laten
 
     </details>
 1. Rol een Ubuntu 22.04 VM in de hub.
@@ -40,7 +40,7 @@ We gaan een SD-WAN NVA uitrollen in het hub netwerk.
 1. Probeer vanuit de management server de IP adressen te pingen.
     > <details><summary>IP Forwarding</summary>
     >
-    > VMs in Azure mogen over het algemeen niet routen. Om dit mogelijk te maken moet op de netwerkkaarten die routeren [`IP forwarding`](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#user-defined) op `Enabled` staan onder `IP configurations`.
+    > VMs in Azure mogen over het algemeen niet routen. Om dit mogelijk te maken moet op de netwerkkaarten die routeren [`IP forwarding`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#user-defined) op `Enabled` staan onder `IP configurations`.
 
     </details>
 1. Om TCP te testen, is er ook een intranetpagina geconfigureerd op de appliance. Probeer ook de HTTP pagina op de SD-WAN IP-reeksen te bekijken.
@@ -73,7 +73,7 @@ Er is gekozen voor enkel een interne load balancer, omdat het SD-WAN apparaat al
     * Kies voor een zone redundant load balancer
     > <details><summary>Zone redundancy</summary>
     >
-    > Wat voor type [redundancy](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones) je kiest hangt af van je eisen en applicatie architectuur. In de meeste gevallen is `zone-redundant` voldoende.
+    > Wat voor type [redundancy](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones) je kiest hangt af van je eisen en applicatie architectuur. In de meeste gevallen is `zone-redundant` voldoende.
     >
     > Als je echter verkeer binnen in een zone moet houden (door bijvoorbeeld latency), kan het kiezen van specifieke zones voordelen hebben
     
@@ -111,15 +111,15 @@ Het is belangrijk om diagnostics in te schakelen voor load balancers. Zonder dia
 
 > <details><summary>Interne load balancers en outbound connectivity</summary>
 >
-> Indien alleen een standard internet load balancer (niet basic) aan een VM gekoppeld wordt, v[erliest het de mogelijkheid om met het internet te verbinden](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-troubleshoot#no-outbound-connectivity-from-standard-internal-load-balancers-ilb). Dit is een veiligheidsinstelling van Azure. Om het toch outbound connectivity te hebben, kan er gekozen worden om een externe load balancer of een public IP toe te voegen. De betere oplossing is echter een NAT Gateway. 
+> Indien alleen een standard internet load balancer (niet basic) aan een VM gekoppeld wordt, v[erliest het de mogelijkheid om met het internet te verbinden](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-troubleshoot#no-outbound-connectivity-from-standard-internal-load-balancers-ilb). Dit is een veiligheidsinstelling van Azure. Om het toch outbound connectivity te hebben, kan er gekozen worden om een externe load balancer of een public IP toe te voegen. De betere oplossing is echter een NAT Gateway. 
 
 </details>
 
 ## NAT Gateway
 
-We gaan een NAT Gateway (NGW) uitrollen en deze koppelen aan de SD-WAN subnet. `NGWs` hebben het [voordeel](https://docs.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) dat ze NAT translaties aanmaken op basis van source en destination IPs en poorten, en protocol. Hierdoor kan per `public IP` meer dan de verwachtte 65535 translaties/sessies worden opgezet.
+We gaan een NAT Gateway (NGW) uitrollen en deze koppelen aan de SD-WAN subnet. `NGWs` hebben het [voordeel](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) dat ze NAT translaties aanmaken op basis van source en destination IPs en poorten, en protocol. Hierdoor kan per `public IP` meer dan de verwachtte 65535 translaties/sessies worden opgezet.
 
-Het is simpel om een gateway bij elkaar te klikken, maar indien nodig kan naar de [documentatie](https://docs.microsoft.com/en-us/azure/virtual-network/nat-gateway/quickstart-create-nat-gateway-portal) gerefereerd worden. 
+Het is simpel om een gateway bij elkaar te klikken, maar indien nodig kan naar de [documentatie](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/quickstart-create-nat-gateway-portal) gerefereerd worden. 
 1. Let bij het uitrollen van de `NGW` op de volgende punten:
     * Zone redundancy
     * Idle timeout: Hoe lang een sessie zonder verkeer actief wordt gehouden
@@ -141,7 +141,7 @@ De `UDRs` verwijzen naar de directe IP van de NVA. Om goed HA in te richten, moe
 >
 > Dit is op te lossen door naast DNAT, ook SNAT op de NVA te doen of een cluster mechanisme te gebruiken om verkeer altijd naar de juiste node te leiden.
 >
-> Beide opties hebben nadelen. Een fijnere optie kan zijn om de [`gateway load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/gateway-overview) of `route server` te gebruiken. De `gateway load balancer` zorgt ervoor dat north-south verkeer altijd symmetrisch loopt. Jammer genoeg heeft het (nog) geen ondersteuning voor east-west verkeer. De `route server` wordt later in het lab behandeld.
+> Beide opties hebben nadelen. Een fijnere optie kan zijn om de [`gateway load balancer`](https://learn.microsoft.com/en-us/azure/load-balancer/gateway-overview) of `route server` te gebruiken. De `gateway load balancer` zorgt ervoor dat north-south verkeer altijd symmetrisch loopt. Jammer genoeg heeft het (nog) geen ondersteuning voor east-west verkeer. De `route server` wordt later in het lab behandeld.
 
 </details>
 

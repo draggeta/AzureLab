@@ -10,9 +10,9 @@
 
 Na flink wat groei wil BY Verzekeringen wat workloads naar on-prem gaan verhuizen. Een deel van de IT omgeving heeft een steady state bereikt. De flexibiliteit van de cloud weegt niet op tegen de kosten van deze vaste lasten. Azure wordt niet uitgefaseerd. Het is puur een kostenbesparende maatregel. Dev omgevingen en extra capaciteit worden nog steeds in de cloud ingekocht.
 
-BY bevindt zich in een plek met uitstekende internet verbindingen en wil hierom geen [`ExpressRoute`](https://docs.microsoft.com/en-us/azure/expressroute/expressroute-introduction) gebruiken. VPNs over het internet is voldoende. Er is ervoor gekozen om de SD-WAN appliance niet te gebruiken voor verbindingen tussen de datacentra en Azure, omdat deze geen client VPNs ondersteunt en het erop lijkt dat developers dit nodig gaan hebben in de toekomst.
+BY bevindt zich in een plek met uitstekende internet verbindingen en wil hierom geen [`ExpressRoute`](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction) gebruiken. VPNs over het internet is voldoende. Er is ervoor gekozen om de SD-WAN appliance niet te gebruiken voor verbindingen tussen de datacentra en Azure, omdat deze geen client VPNs ondersteunt en het erop lijkt dat developers dit nodig gaan hebben in de toekomst.
 
-De makkelijkste oplossing is dus een [`VPN Gateway`](https://docs.microsoft.com/en-us/azure/vpn-gateway/) (`VGW`).
+De makkelijkste oplossing is dus een [`VPN Gateway`](https://learn.microsoft.com/en-us/azure/vpn-gateway/) (`VGW`).
 
 ![VPN gateway/virtual network gateway](./data/vpn_gateway.svg)
 
@@ -31,8 +31,8 @@ Het uitrollen van een `VPN gateway` duurt lang. Ga lekker lunchen of iets dergel
 1. De `VGW` kan worden uitgerold in de hub. De uitrol spreekt redelijk voor zich.
     * De subnet moet een specifieke naam hebben
     * Gateway type: VPN
-    * VPN type: de versie die [BGP](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#can-i-use-bgp-with-azure-policy-vpn-gateways) ondersteunt
-    * SKU: De [goedkoopste](https://azure.microsoft.com/en-gb/pricing/details/vpn-gateway/#pricing) **NON AZ** versie die [BGP](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#is-bgp-supported-on-all-azure-vpn-gateway-skus) ondersteunt
+    * VPN type: de versie die [BGP](https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#can-i-use-bgp-with-azure-policy-vpn-gateways) ondersteunt
+    * SKU: De [goedkoopste](https://azure.microsoft.com/en-gb/pricing/details/vpn-gateway/#pricing) **NON AZ** versie die [BGP](https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-bgp-overview#is-bgp-supported-on-all-azure-vpn-gateway-skus) ondersteunt
         * In productie wil je wel zone redundancy
     * Enable active-active mode: Enabled
     * Configure BGP: Enabled

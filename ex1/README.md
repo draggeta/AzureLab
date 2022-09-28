@@ -61,14 +61,14 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
     * Dynamic assignment (IP wisselt bij deallocaten VM).
     * Geef het een DNS label. Hierdoor is het intikken van een IP niet meer nodig.
   
-  De VM heeft nu een rechtstreekse internet verbinding. Ook zonder de publieke IP zou outbound internet verkeer mogelijk zijn. [Verbind](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/connect-logon) met de management VM.
+  De VM heeft nu een rechtstreekse internet verbinding. Ook zonder de publieke IP zou outbound internet verkeer mogelijk zijn. [Verbind](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/connect-logon) met de management VM.
 * De publieke IP is te achterhalen: 
     * linux: `curl https://api.ipify.org`
     * windows: `irm https://api.ipify.org`
 
 > <details><summary>NSG verificatie</summary>
 >
-> Bij problemen kan er gebruik worden gemaakt van de [`IP flow verify`](https://docs.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem#use-ip-flow-verify) of [`NSG diagnostic`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-network-configuration-diagnostics-overview) functionaliteit van de [`Network Watcher`](https://docs.microsoft.com/en-us/azure/network-watcher/) om de `NSGs` te troubleshooten. 
+> Bij problemen kan er gebruik worden gemaakt van de [`IP flow verify`](https://learn.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem#use-ip-flow-verify) of [`NSG diagnostic`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-network-configuration-diagnostics-overview) functionaliteit van de [`Network Watcher`](https://learn.microsoft.com/en-us/azure/network-watcher/) om de `NSGs` te troubleshooten. 
 >* `IP flow verify` geeft aan of de `NSGs` gekoppeld aan de VM het verkeer toe staan
 > * `NSG diagnostic` controleert alle `NSGs` in het pad. Het is een betere tool dan `IP flow verify`, maar vereist rechten om alle `NSGs` in het pad te kunnen lezen. Het geeft niet weer of het verkeer door een NVA mag. Ook niet de `Azure firewall`.
 
@@ -84,7 +84,7 @@ Het netwerk moet bestaan uit twee spokes gekoppeld aan een hub netwerk waar vand
 
 1. Rol spoke A `virtual network` uit in West Europe, met een /16.
 1. Rol spoke B `virtual network` uit in North Europe, met een /16.
-1. Nadat de VNETs zijn aangemaakt, kan je onder de `virtual network` `Peering` selecteren en een [peering toevoegen](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) om de spokes netwerken aan de hub `virtual network` te koppelen. Doe dit voor elke spoke
+1. Nadat de VNETs zijn aangemaakt, kan je onder de `virtual network` `Peering` selecteren en een [peering toevoegen](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) om de spokes netwerken aan de hub `virtual network` te koppelen. Doe dit voor elke spoke
     * Sta verkeer naar remote netwerken toe.
     * Sta verkeer van andere netwerken toe.
 
@@ -154,7 +154,7 @@ De applicatie servers zijn nu vanuit elke resource te benaderen die een pad naar
 Wat gaat er hier mis en waarom?
 > <details><summary>ASG beperkingen</summary>
 >
-> Indien in een regel een `ASG` gebruikt wordt, moeten andere ASGs (indien aanwezig) in dezelfde regel alleen VMs bevatten die zich in dezelfde VNET bevinden als de eerst gebruikte ASG. Dit is een van [de (grote) beperking](https://docs.microsoft.com/en-us/azure/virtual-network/application-security-groups#allow-database-businesslogic) van `ASGs`. Voor verkeer tussen VNETs, zijn ASGs geen goede keuze.
+> Indien in een regel een `ASG` gebruikt wordt, moeten andere ASGs (indien aanwezig) in dezelfde regel alleen VMs bevatten die zich in dezelfde VNET bevinden als de eerst gebruikte ASG. Dit is een van [de (grote) beperking](https://learn.microsoft.com/en-us/azure/virtual-network/application-security-groups#allow-database-businesslogic) van `ASGs`. Voor verkeer tussen VNETs, zijn ASGs geen goede keuze.
 
 </details>
 
@@ -175,7 +175,7 @@ Wat gaat er hier mis en waarom?
 
     > <details><summary>Standaard route tabellen in Azure</summary>
     >
-    > Azure `virtual networks` hebben [standaard een null route](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
+    > Azure `virtual networks` hebben [standaard een null route](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
     >
     > Directe `VNET peers` voegen elkaars `address spaces` toe. Van een peer geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk.
 
@@ -183,7 +183,7 @@ Wat gaat er hier mis en waarom?
 
     > <details><summary>Next hop/effective routes</summary>
     >
-    > De [`Next hop`](https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
+    > De [`Next hop`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
 
     </details>
 

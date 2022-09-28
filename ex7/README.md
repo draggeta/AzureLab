@@ -121,4 +121,8 @@ Test nadat de uitrol gelukt is, de DNS resolving en of de website bereikbaar is 
 
 </details>
 
-Repareer de externe toegang tot de spoke A API. Iederen moet erbij kunnen.
+Repareer de externe toegang tot de spoke A API. Iedereen moet erbij kunnen.
+
+## VNET integration
+
+De `function apps` in Azure zijn nu benaderbaar vanuit de VNET. De apps kunnen echter niet bij interne bronnen. Private en service endpoints faciliteren alleen verkeer richting de dienst, niet omgekeerd. 

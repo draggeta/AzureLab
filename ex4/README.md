@@ -14,18 +14,18 @@ Ook zullen de servers binnenkort redundant uitgevoerd moeten worden, want downti
 
 ## Private DNS Zones
 
-We gaan een [`private DNS zone`](https://docs.microsoft.com/en-us/azure/dns/private-dns-privatednszone) maken waar we VMs en andere resources in kunnen registeren. De registratie van VMs moet automatisch zodat de kans op fouten kleiner is. Wel moeten alle requests nog steeds door de `AZF` geinspecteerd blijven worden.
+We gaan een [`private DNS zone`](https://learn.microsoft.com/en-us/azure/dns/private-dns-privatednszone) maken waar we VMs en andere resources in kunnen registeren. De registratie van VMs moet automatisch zodat de kans op fouten kleiner is. Wel moeten alle requests nog steeds door de `AZF` geinspecteerd blijven worden.
 
 Er is gekozen voor de DNS zone `by.cloud`.
 
-1. [Maak](https://docs.microsoft.com/en-us/azure/dns/private-dns-getstarted-portal) een `private DNS zone` aan.
-1. [Koppel](https://docs.microsoft.com/en-us/azure/dns/private-dns-virtual-network-links) de DNS Zone aan elke VNET waar [`auto registration`](https://docs.microsoft.com/en-us/azure/dns/private-dns-autoregistration) plaats moet vinden (hub en beide spokes).
+1. [Maak](https://learn.microsoft.com/en-us/azure/dns/private-dns-getstarted-portal) een `private DNS zone` aan.
+1. [Koppel](https://learn.microsoft.com/en-us/azure/dns/private-dns-virtual-network-links) de DNS Zone aan elke VNET waar [`auto registration`](https://learn.microsoft.com/en-us/azure/dns/private-dns-autoregistration) plaats moet vinden (hub en beide spokes).
     * Via de private DNS zone > Virtual network links > Add
     * Schakel `auto registration` in
 
     > <details><summary>Auto-registration</summary>
     >
-    > `Auto registration` is handig, maar het kan voor elke zone maar voor [100 `VNETs`](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#azure-dns-limits) ingeschakeld worden. 
+    > `Auto registration` is handig, maar het kan voor elke zone maar voor [100 `VNETs`](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#azure-dns-limits) ingeschakeld worden. 
 
     </details>
 
@@ -33,7 +33,7 @@ Er is gekozen voor de DNS zone `by.cloud`.
 1. Resolve nu een van de servers:
     * linux: `dig <host>.by.cloud`
     * windows: `Resolve-DnsName <host>.by.cloud`
-1. Dit [werkt niet](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances#name-resolution-that-uses-your-own-dns-server), waarom?
+1. Dit [werkt niet](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances#name-resolution-that-uses-your-own-dns-server), waarom?
 
     > <details><summary>DNS resolution</summary>
     >
@@ -57,30 +57,26 @@ De applicatie in spoke A moet extern benaderbaar worden. We hebben hiervoor enke
 * Gebruik maken van een externe/publieke `load balancer`
 * Gebruik maken van een `application gateway` (`AGW`)
 
-De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen met het testdraaien van de [`AGW`](https://docs.microsoft.com/en-us/azure/application-gateway/overview) en zijn L7 (WAF) beveiliging.
+De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen met het testdraaien van de [`AGW`](https://learn.microsoft.com/en-us/azure/application-gateway/overview) en zijn L7 (WAF) beveiliging.
 
 ![Load balancing](./data/load_balancing.svg)
 
 > **NOTE:** We gaan geen WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder, is duurder en kan wat tijd kosten.
 
-> **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://docs.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen. Het is in deze opzet mogelijk om de AGW in de hub neer te zetten, indien het in meerdere VNETs gebruikt zal worden.
+> **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen. Het is in deze opzet mogelijk om de AGW in de hub neer te zetten, indien het in meerdere VNETs gebruikt zal worden.
 
 1. Configureer de `application gateway`.
     * Kies voor een v2 application gateway
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VM(s) erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
-    > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
+    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/`. API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
+        * protocol: Http
+        * pick host name from backend http settings: true
+        * path: `/health/`
+        > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
+    * Koppel de health probe aan de HTTP setting
 
-    > <details><summary>Floating IP/Direct Server Return</summary>
-    >
-    > Azure kent het concept van een floating IP niet. Gratuitous ARPs kunnen niet in een VNET. Zelfs normale ARPs worden niet gebroadcast maar gevijnsd door de onderliggende hypervisors. Een ander IP adres configureren in de `VM` dan dat geconfigureerd is op de `NIC` via de portal, maakt het mogelijk onbereikbaar.
-    >
-    > Om dit toch mogelijk te maken, kan een `load balancer` gebruikt worden met floating IP/Direct Server Return aan. Hiermee voert de LB geen DNAT uit. De frontend IP wordt as-is doorgegeven aan de achterliggende `VMs`. 
-    >
-    > Dit betekent dat de `VMs` de IPs moeten accepteren. Voor een firewall kan dit in de vorm zijn van een VIP. In een Windows Failover Cluster is dit een cluster IP.
 
-    </details>
 1. Configureer `diagnostics settings` conform de DHB standaarden.
 1. Bezoek de webserver/API via de management server. Gebruik hiervoor de DNS naam die bij de `public IP` van de `AGW` hoort.
     * Afhankelijk van de gekozen type session persistence kan je verschillende hosts tegen komen of steeds dezelfde.
@@ -97,9 +93,9 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 
 ## Load Balancing
 
-De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways zijn duur en die als standby hebben draaien kost teveel. Voor de backup site is daarom gekozen voor een publieke load balancer. Een [`load balancer`](https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) moet de load kunnen verdelen en bij uitval moet de uitgevallen server uit de pool gehaald worden.
+De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways zijn duur en die als standby hebben draaien kost teveel. Voor de backup site is daarom gekozen voor een publieke load balancer. Een [`load balancer`](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) moet de load kunnen verdelen en bij uitval moet de uitgevallen server uit de pool gehaald worden.
 
-1. [Rol](https://docs.microsoft.com/en-us/azure/load-balancer/quickstart-load-balancer-standard-public-portal#create-load-balancer) een `load balancer` uit.
+1. [Rol](https://learn.microsoft.com/en-us/azure/load-balancer/quickstart-load-balancer-standard-public-portal#create-load-balancer) een `load balancer` uit.
     * Type: Public
     * SKU: Standard (Basic kan niet, want de VMs maken geen gebruik van een `availability set`)
     * IP address assignment: Dynamic
@@ -117,7 +113,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     >
     > De Azure ELB's doen aan DNAT, maar geen SNAT. De reden hiervoor is dat het, in tegenstelling tot de AGW, geen interne IP-adres heeft. Wanneer jouw server dit verkeer ontvangt, zal het dus het antwoord terugsturen via zijn beste route. In dit geval, is dat de default route via de Azure Firewall. Dit is duidelijk een voorbeeld van asymmetrisch verkeer.
     > 
-    > Het is op te lossen [door het verkeer als volgt](https://docs.microsoft.com/en-us/azure/firewall/integrate-lb#public-load-balancer) te laten lopen: 
+    > Het is op te lossen [door het verkeer als volgt](https://learn.microsoft.com/en-us/azure/firewall/integrate-lb#public-load-balancer) te laten lopen: 
     > * Azure Firewall PIP
     > * DNAT richting ELB PIP
     > * ELB load balancet verkeer naar server
@@ -135,10 +131,10 @@ Kies een van de twee opties om het op te lossen:
 
 ## Traffic Manager
 
-[`Traffic Manager`](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal verkeer kan afhandelen. Het is vooral handig voor load balancing tussen datacentra. BY wil dat verkeer altijd in `West Europe` binnenkomt, tenzij er een probleem is in deze regio. In die gevallen moet het verkeer naar `North Europe`. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer over de regio's verdeelt.
+[`Traffic Manager`](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal verkeer kan afhandelen. Het is vooral handig voor load balancing tussen datacentra. BY wil dat verkeer altijd in `West Europe` binnenkomt, tenzij er een probleem is in deze regio. In die gevallen moet het verkeer naar `North Europe`. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer over de regio's verdeelt.
 
 1. Maak een nieuwe `Traffic Manager profile` aan.
-    * [Routing method](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods): Priority
+    * [Routing method](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods): Priority
     * Zet de probing interval op 10 secondes (scheelt met testen).
     > <details><summary>Routing Methods</summary>
     >
