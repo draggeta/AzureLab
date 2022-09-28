@@ -57,10 +57,12 @@ Log in op de SD-WAN appliance en tik `sudo vtysh` in de terminal. Dit zorgt ervo
 
 De route server heeft twee IP adressen (zie tab `Overview`) die als neighbors gebruikt moeten worden. Elke peer zal een peering sessie naar beide instances op moeten zetten en naar beide instances dezelfde adressen moeten adverteren.
 
-Plak hier de volgende command-blok (na vervanging van de `route server` IP-adressen):
+Plak hier de volgende command-blok (na vervanging van de `route server` en default gateway van de SD-WAN IP-adressen):
 
 ```cisco
 configure terminal
+ip route <rs_peer_1>/32 <default_gw_sd_wan_apparaat>
+ip route <rs_peer_2>/32 <default_gw_sd_wan_apparaat>
 router bgp 65002
 neighbor <rs_peer_1> peer-group ROUTESRV
 neighbor <rs_peer_2> peer-group ROUTESRV

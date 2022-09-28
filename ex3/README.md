@@ -20,7 +20,8 @@ BY Verzekeringen heeft ook SD-WAN uitgerold over alle branch offices. Hun oploss
 
 > **NOTE:** Hoewel er voor het lab maar een apparaat wordt uitgerold, gaan we het behandelen alsof het in een active/passive opstelling draait
 
-We gaan een SD-WAN NVA uitrollen in het hub netwerk.
+We gaan een SD-WAN NVA uitrollen in het hub netwerk. 
+> **NOTE:** De SD-WAN appliance is een Ubuntu VM met wat scripts die wat netwerken erachter simuleert. Het is geen echte SD-WAN appliance van een vendor.
 
 1. Maak een subnet voor de NVAs aan in het hub netwerk. Koppel een NSG aan de NVA die **alle** verkeer toe staat, niet alleen `VirtualNetwork` naar `VirtualNetwork`
     > <details><summary>NSGs en NVAs</summary>
