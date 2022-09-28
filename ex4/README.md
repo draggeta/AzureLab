@@ -118,8 +118,8 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     > * DNAT richting ELB PIP
     > * ELB load balancet verkeer naar server
     > * Server heeft UDR voor AZF PIP direct naar het internet
-    >   * Azure SDN NAT de server IP terug naar LB IP
-    >   * AZF NAT het weer naar zijn IP en stuurt het door naar de client
+    >   * Azure SDN SNAT de server IP terug naar LB IP
+    >   * AZF SNAT het weer naar zijn IP en stuurt het door naar de client
     > 
     > Dit is best onzinnig om verschillende redenen.
 
@@ -150,7 +150,7 @@ Kies een van de twee opties om het op te lossen:
 1. Ga naar Traffic Manager > Endpoints en voeg een nieuwe endpoint toe.
     * Gebruik Azure endpoints en kies de AGW IP.
 1. Herhaal dit voor de AZF PIP.
-    * Geef het een lagere prioriteit (hogere metric) dan de AGW IP
+    * Geef het een hogere metric dan de AGW IP. Hierdoor is de AGW preferred.
 1. Test nu het browsen naar de website vanuit een externe client door gebruik te maken van jouw DNS name, te vinden bij 'Overview'.
     * Schakel de VM in spoke A uit en controleer of je in spoke B uit komt.
 1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.
