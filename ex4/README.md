@@ -69,7 +69,7 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
     * Kies voor een v2 application gateway
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VM(s) erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/`. API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
+    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
         * protocol: Http
         * pick host name from backend http settings: true
         * path: `/health/`
