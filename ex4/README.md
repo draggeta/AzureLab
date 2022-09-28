@@ -66,6 +66,7 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 > **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen. Het is in deze opzet mogelijk om de AGW in de hub neer te zetten, indien het in meerdere VNETs gebruikt zal worden.
 
 1. Configureer de `application gateway`.
+    * Bepaal waar je de AGW uit wilt rollen. Hub of spoke A.
     * Kies voor een v2 application gateway
     * Controleer de frontend IP configuration
     * Maak een backend pool aan. Zet de VM(s) erin
@@ -75,7 +76,6 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
         * path: `/health/`
         > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
     * Koppel de health probe aan de HTTP setting
-
 
 1. Configureer `diagnostics settings` conform de DHB standaarden.
 1. Bezoek de webserver/API via de management server. Gebruik hiervoor de DNS naam die bij de `public IP` van de `AGW` hoort.
