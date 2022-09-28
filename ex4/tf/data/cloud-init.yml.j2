@@ -83,9 +83,6 @@ write_files:
       ip forwarding
       no ipv6 forwarding
       !
-      ip route {{ rs_peer_1 }}/32 {{ default_gw }}
-      ip route {{ rs_peer_2 }}/32 {{ default_gw }}
-      !
       ip prefix-list ROUTESRV-PL-OUT seq 10 permit 10.192.0.0/21 ge 24
       ip prefix-list ROUTESRV-PL-OUT seq 20 permit 10.193.128.0/21 ge 24
       ip prefix-list ROUTESRV-PL-IN seq 10 permit 10.32.0.0/14 ge 16
