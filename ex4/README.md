@@ -69,8 +69,9 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
     * Bepaal waar je de AGW uit wilt rollen. Hub of spoke A.
     * Kies voor een v2 application gateway
     * Controleer de frontend IP configuration
-    * Maak een backend pool aan. Zet de VM(s) erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
+    * Maak een *listener* en *backend pool* aan. Zet de spoke A VM(s) in de backend pool.
+1. (Optioneel) Na het uitrollen van de gateway, kan ook een custom health probe worden aangemaakt.
+    * Maak een uitgebreidere health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
         * protocol: Http
         * pick host name from backend http settings: true
         * path: `/health/`
@@ -128,6 +129,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 Kies een van de twee opties om het op te lossen:
 1. Richt het verkeer in conform de microsoft documentatie.
 1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver.
+1. Verwijder de ELB en NAT verkeer vanuit de AZF richting een interne load balancer waar de spoke B webserver achter hangt.
 
 ## Traffic Manager
 

@@ -65,7 +65,7 @@ resource "azurerm_route_table" "spoke_b" {
   }
 }
 
-# resource "azurerm_subnet_route_table_association" "spoke_b_web" {
-#   subnet_id      = azurerm_subnet.spoke_b_web.id
-#   route_table_id = azurerm_route_table.spoke_b.id
-# }
+resource "azurerm_subnet_route_table_association" "spoke_b_fa_pe" {
+  subnet_id      = azurerm_subnet.spoke_b_fa_pe.id
+  route_table_id = azurerm_route_table.spoke_b.id
+}
