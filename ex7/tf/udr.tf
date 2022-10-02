@@ -35,10 +35,10 @@ resource "azurerm_route_table" "spoke_a" {
   }
 }
 
-# resource "azurerm_subnet_route_table_association" "spoke_a_web" {
-#   subnet_id      = azurerm_subnet.spoke_a_web.id
-#   route_table_id = azurerm_route_table.spoke_a.id
-# }
+resource "azurerm_subnet_route_table_association" "spoke_a_fa_vi" {
+  subnet_id      = azurerm_subnet.spoke_a_fa_vi.id
+  route_table_id = azurerm_route_table.spoke_a.id
+}
 
 resource "azurerm_route_table" "spoke_b" {
   name                = "${var.secondary_prefix}-${var.org}-spoke-b-udr-01"

@@ -2,9 +2,9 @@
 
 De rekeningen vanuit Azure zijn niet mals. BY beseft dat alles in VMs draaien niet kosten efficient is. Ze willen `Azure Functions` (PaaS API webservers) gaan gebruiken voor hun API. Ook vindt security dat outbound internet verkeer standaard geblokkeerd moet worden. Met de PII waar de verzekeraar mee te maken heeft, moet alles zo dicht mogelijk staan en zo min mogelijk verkeer over het internet gaan.
 
-De huidige webservers, `AGW` en `ELB` zullen vervangen worden door `function apps`.
+Om aan deze eisen te voldoen zal gebruik worden gemaakt van Function Apps om de web servers te vervangen en service endpoints en private endpoints om aan de security eisen te voldoen.
 
-![VPN gateway/virtual network gateway](./data/vpn_gateway.svg)
+![Private and service endpoint topology](./data/pe_se.svg)
 
 ## Azure Functions
 
@@ -25,6 +25,8 @@ Verwijder de volgende resources:
 * spoke B webserver en toebehoren
 * application gateway en toebehoren
 * external load balancer en toebehoren
+* Verwijder de VM en AGW subnetten
+* behoud de NSGs en UDRs
 
 ### Aanpassen firewall
 
@@ -86,6 +88,8 @@ De management server kan nu bij alle app services/function apps. Limiteer voor d
 > Je hebt hier meer dan een outbound rule voor nodig.
 
 </details>
+
+Waarom kan dit niet op de `Azure firewall` geblokkeerd worden?
 
 ## Private endpoint
 
@@ -159,12 +163,66 @@ Repareer de externe toegang tot de spoke B API. Iedereen moet erbij kunnen.
 
 ## VNET integration
 
-De `function apps` in Azure zijn nu benaderbaar vanuit de VNET. De apps kunnen echter niet bij interne bronnen. Private en service endpoints faciliteren alleen verkeer richting de dienst, niet omgekeerd. Voor outbound verkeer vanuit de app services richting de VNET, kan gebruik worden gemaakt van VNET integration. De dienst zorgt ervoor dat een app service/function app een subnet toegewezen krijgt waar vandaan het verkeer kan sturen.
+De `function apps` in Azure zijn nu benaderbaar vanuit de VNET. De apps kunnen echter niet bij interne bronnen. Private en service endpoints faciliteren alleen verkeer richting de dienst, niet omgekeerd. Voor outbound verkeer vanuit de app services richting de VNET, kan gebruik worden gemaakt van [`VNET integration`](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration) (VI). De dienst zorgt ervoor dat een app service/function app een subnet toegewezen krijgt waar vandaan het verkeer kan sturen.
 
-De grootte van het subnet bepaalt in welke mate de function app horizontaal kan schalen. Ook kan het subnet niks anders bevatten dan de VNET integration. Verder kan elk IP in de subnet als source dienen voor verkeer dat van de function app af komt.
+De[ grootte van het subnet](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#subnet-requirements) bepaalt in welke mate de function app horizontaal kan schalen. Ook kan het subnet niks anders bevatten dan de VNET integration. Verder kan elk IP in de subnet als source dienen voor verkeer dat van de function app af komt.
 
-> **NOTE:** Voor het lab gaan we VNET integration uitrollen voor alleen de spoke B function. Dit is puur om tijd te besparen. 
+![VNET integration](./data/vnet_integration.svg)
+
+> **NOTE:** Voor het lab gaan we VNET integration uitrollen voor alleen de spoke A function. Dit is puur om tijd te besparen.
+> De integration rolt snel uit, maar het kan 1-2 minuten duren voordat de instance herstart wordt en de VNET DNS gebruikt.
 
 ### Uitrollen VNET integration
 
-De VNET integration functionaliteit moet een subnet voor zichzelf hebben. Maak een subnet in spoke B aan voor VNET integration.
+> **NOTE:** De function ap heeft een endpoint (`/api/getweb`) die websites op kan halen. Het is een slechte, onveilige proxy.
+
+Configureer nu de VNET integration:
+1. Maak een subnet in spoke A aan voor VNET integration.
+1. Ga naar de `function app` > Networking > VNET integration en voeg een nieuwe VI toe.
+    * Let op de VNET en gebruikte subnet
+    * Controleer dat `Route All` uit staat na het configureren van de VNET Integration
+1. Bezoek de volgende pagina's via een browser (vanuit waar maakt niet uit)
+    * `https://<func a endpoint>/api/getweb?url=https://dilbert.com`
+    * `https://<func a endpoint>/api/getweb?url=http://sdwan01.by.cloud`
+    * `https://<func a endpoint>/api/getweb?url=http://10.32.1.1` # 'on-prem' datacenter
+    * `https://<func a endpoint>/api/getweb?url=https://<func b endpoint>/api/info`
+
+Welke websites werken en welke niet? Waarom?
+
+> <details><summary>VNET Integration en routing</summary>
+>
+> [VI routing is best ingewikkeld](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#routes). Kort gezegd komt het neer op het volgende:
+> 1. Route All uit, routeert alleen RFC1918 netwerken het netwerk in. Dit verkeer is onderheving aan NSGs/UDRs
+> 1. Route All aan, kan alle verkeer het netwerk in routeren. Welk verkeer het netwerk in wordt gerouteert is afhankelijk van de gekoppelde UDR. Alle verkeer dat intern gerouteerd wordt is ook onderheving aan NSGs.
+> 
+> De spoke B API is niet bereikbaar omdat het subnet geen route heeft voor dit netwerk. De route voor de SD-WAN en on-prem DC worden wel automatisch geleerd. Het verkeer richting Dilbert gaat direct het internet op.
+
+</details>
+
+1. Koppel de spoke A UDR aan de VI subnet.
+1. Bezoek de volgende pagina's via een browser (vanuit waar maakt niet uit)
+    * `https://<func a endpoint>/api/getweb?url=https://dilbert.com`
+    * `https://<func a endpoint>/api/getweb?url=http://sdwan01.by.cloud`
+    * `https://<func a endpoint>/api/getweb?url=http://10.32.1.1` # 'on-prem' datacenter
+    * `https://<func a endpoint>/api/getweb?url=https://<func b endpoint>/api/info`
+
+Alle webpagina's, inclusief de spoke B API zijn nu bereikbaar. Waarom?
+
+1. Configureer de VNET integration: zet `Route All` aan.
+1. Bezoek de volgende pagina's via een browser (vanuit waar maakt niet uit)
+    * `https://<func a endpoint>/api/getweb?url=https://dilbert.com`
+    * `https://<func a endpoint>/api/getweb?url=http://sdwan01.by.cloud`
+    * `https://<func a endpoint>/api/getweb?url=http://10.32.1.1` # 'on-prem' datacenter
+    * `https://<func a endpoint>/api/getweb?url=https://<func b endpoint>/api/info`
+
+Nu werkt Dilbert niet. Waarom niet?
+
+## (Optioneel) Traffic manager aanpassingen
+
+Repareer `traffic manager`. Verkeer mag nu gelijk over West Europe en North Europe worden verdeeld (Weighted). Door de verschillen tussen de function apps en on-prem, kan on-prem weggelaten worden uit de TM policies.
+
+> **NOTE:** De health checks zullen lukken, maar de API is niet bereikbaar via de TM FQDN. De reden hiervoor is dat function apps alleen verkeer binnen krijgen via geregistreerde FQDNs. Om dit werkende te krijgen, moet je een eigen DNS zone hebben en de gewenste FQDN configureren op de function en instellen als CNAME voor de traffic manager FQDN.
+
+## Opruimen lab
+
+Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).

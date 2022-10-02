@@ -1,9 +1,19 @@
-# resource "azurerm_subnet" "spoke_a_fa_pe" {
-#   name                 = "privateEndpoint"
-#   resource_group_name  = azurerm_resource_group.spoke_a.name
-#   virtual_network_name = azurerm_virtual_network.spoke_a.name
-#   address_prefixes     = ["10.129.5.0/24"]
-# }
+resource "azurerm_subnet" "spoke_a_fa_vi" {
+  name                 = "vnetIntegration"
+  resource_group_name  = azurerm_resource_group.spoke_a.name
+  virtual_network_name = azurerm_virtual_network.spoke_a.name
+  address_prefixes     = ["10.129.5.0/24"]
+
+  delegation {
+    name = "Microsoft.Web.serverFarms"
+    service_delegation {
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+      ]
+      name = "Microsoft.Web/serverFarms"
+    }
+  }
+}
 
 resource "azurerm_storage_account" "spoke_a_fa" {
   name                     = substr(replace(join("", [var.prefix, var.org, "afap", random_id.unique.hex]), "/[-_\\s\\+]/", ""), 0, 24)
@@ -32,10 +42,13 @@ resource "azurerm_linux_function_app" "spoke_a_fa" {
 
   functions_extension_version = "~4"
 
+  virtual_network_subnet_id = azurerm_subnet.spoke_a_fa_vi.id
+
   site_config {
     application_stack {
       python_version = "3.9"
     }
+    vnet_route_all_enabled = true
   }
 }
 
