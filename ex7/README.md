@@ -1,5 +1,12 @@
 # Dag 7 - Private/service endpoints en VNET integration
 
+* [Azure Functions](#azure-functions)
+* [Service endpoint](#service-endpoint)
+* [Private endpoint](#private-endpoint)
+* [VNET integration](#vnet-integration)
+* [(Optioneel) Traffic manager aanpassingen](#optioneel-traffic-manager-aanpassingen)
+* [Opruimen lab](#opruimen-lab)
+
 De rekeningen vanuit Azure zijn niet mals. BY beseft dat alles in VMs draaien niet kosten efficient is. Ze willen `Azure Functions` (PaaS API webservers) gaan gebruiken voor hun API. Ook vindt security dat outbound internet verkeer standaard geblokkeerd moet worden. Met de PII waar de verzekeraar mee te maken heeft, moet alles zo dicht mogelijk staan en zo min mogelijk verkeer over het internet gaan.
 
 Om aan deze eisen te voldoen zal gebruik worden gemaakt van Function Apps om de web servers te vervangen en service endpoints en private endpoints om aan de security eisen te voldoen.
