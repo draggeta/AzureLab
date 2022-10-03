@@ -33,24 +33,24 @@ resource "azurerm_private_dns_zone_virtual_network_link" "priv_dns_to_spoke_b" {
   registration_enabled  = true
 }
 
-# resource "azurerm_private_dns_cname_record" "spoke_a" {
-#   name                = "api-pri"
-#   zone_name           = azurerm_private_dns_zone.priv_dns.name
-#   resource_group_name = azurerm_private_dns_zone.priv_dns.resource_group_name
-#   ttl                 = 300
-#   record              = azurerm_public_ip.spoke_a_agw.fqdn
-# }
-# resource "azurerm_private_dns_cname_record" "spoke_b" {
-#   name                = "api-sec"
-#   zone_name           = azurerm_private_dns_zone.priv_dns.name
-#   resource_group_name = azurerm_private_dns_zone.priv_dns.resource_group_name
-#   ttl                 = 300
-#   record              = azurerm_public_ip.spoke_b_web_lb.fqdn
-# }
 resource "azurerm_private_dns_cname_record" "tm" {
   name                = "api"
   zone_name           = azurerm_private_dns_zone.priv_dns.name
   resource_group_name = azurerm_private_dns_zone.priv_dns.resource_group_name
   ttl                 = 30
   record              = azurerm_traffic_manager_profile.tm.fqdn
+}
+
+# privateLink DNS
+resource "azurerm_private_dns_zone" "priv_az_web" {
+  name                = "privatelink.azurewebsites.net"
+  resource_group_name = azurerm_resource_group.dns.name
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "priv_az_web_to_hub" {
+  name                = "priv-az-web-to-hub"
+  resource_group_name = azurerm_private_dns_zone.priv_az_web.resource_group_name
+
+  private_dns_zone_name = azurerm_private_dns_zone.priv_az_web.name
+  virtual_network_id    = azurerm_virtual_network.hub.id
+  registration_enabled  = false
 }

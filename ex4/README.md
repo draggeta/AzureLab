@@ -66,16 +66,17 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 > **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen. Het is in deze opzet mogelijk om de AGW in de hub neer te zetten, indien het in meerdere VNETs gebruikt zal worden.
 
 1. Configureer de `application gateway`.
+    * Bepaal waar je de AGW uit wilt rollen. Hub of spoke A.
     * Kies voor een v2 application gateway
     * Controleer de frontend IP configuration
-    * Maak een backend pool aan. Zet de VM(s) erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
+    * Maak een *listener* en *backend pool* aan. Zet de spoke A VM(s) in de backend pool.
+1. (Optioneel) Na het uitrollen van de gateway, kan ook een custom health probe worden aangemaakt.
+    * Maak een uitgebreidere health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
         * protocol: Http
         * pick host name from backend http settings: true
         * path: `/health/`
         > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
     * Koppel de health probe aan de HTTP setting
-
 
 1. Configureer `diagnostics settings` conform de DHB standaarden.
 1. Bezoek de webserver/API via de management server. Gebruik hiervoor de DNS naam die bij de `public IP` van de `AGW` hoort.
@@ -118,8 +119,8 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     > * DNAT richting ELB PIP
     > * ELB load balancet verkeer naar server
     > * Server heeft UDR voor AZF PIP direct naar het internet
-    >   * Azure SDN NAT de server IP terug naar LB IP
-    >   * AZF NAT het weer naar zijn IP en stuurt het door naar de client
+    >   * Azure SDN SNAT de server IP terug naar LB IP
+    >   * AZF SNAT het weer naar zijn IP en stuurt het door naar de client
     > 
     > Dit is best onzinnig om verschillende redenen.
 
@@ -128,6 +129,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 Kies een van de twee opties om het op te lossen:
 1. Richt het verkeer in conform de microsoft documentatie.
 1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver.
+1. Verwijder de ELB en NAT verkeer vanuit de AZF richting een interne load balancer waar de spoke B webserver achter hangt.
 
 ## Traffic Manager
 
@@ -150,7 +152,7 @@ Kies een van de twee opties om het op te lossen:
 1. Ga naar Traffic Manager > Endpoints en voeg een nieuwe endpoint toe.
     * Gebruik Azure endpoints en kies de AGW IP.
 1. Herhaal dit voor de AZF PIP.
-    * Geef het een lagere prioriteit (hogere metric) dan de AGW IP
+    * Geef het een hogere metric dan de AGW IP. Hierdoor is de AGW preferred.
 1. Test nu het browsen naar de website vanuit een externe client door gebruik te maken van jouw DNS name, te vinden bij 'Overview'.
     * Schakel de VM in spoke A uit en controleer of je in spoke B uit komt.
 1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.

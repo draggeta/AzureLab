@@ -89,6 +89,13 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_firewall_default" 
     action   = "Allow"
 
     rule {
+      name              = "allow-all-to-kms"
+      protocols         = ["TCP"]
+      source_ip_groups  = [azurerm_ip_group.supernet.id]
+      destination_fqdns = ["azkms.core.windows.net", "kms.windows.core.net"]
+      destination_ports = [1688]
+    }
+    rule {
       name                  = "allow-spoke-to-spoke"
       protocols             = ["Any"]
       source_ip_groups      = [azurerm_ip_group.supernet.id]
@@ -97,33 +104,33 @@ resource "azurerm_firewall_policy_rule_collection_group" "hub_firewall_default" 
     }
   }
 
-  network_rule_collection {
-    name     = "deny-internal"
-    priority = 510
-    action   = "Deny"
+  # network_rule_collection {
+  #   name     = "deny-internal"
+  #   priority = 510
+  #   action   = "Deny"
 
-    rule {
-      name                  = "deny-internal"
-      protocols             = ["Any"]
-      source_ip_groups      = [azurerm_ip_group.supernet.id]
-      destination_ip_groups = [azurerm_ip_group.rfc1918.id]
-      destination_ports     = ["*"]
-    }
-  }
+  #   rule {
+  #     name                  = "deny-internal"
+  #     protocols             = ["Any"]
+  #     source_ip_groups      = [azurerm_ip_group.supernet.id]
+  #     destination_ip_groups = [azurerm_ip_group.rfc1918.id]
+  #     destination_ports     = ["*"]
+  #   }
+  # }
 
-  network_rule_collection {
-    name     = "allow-internet"
-    priority = 520
-    action   = "Allow"
+  # network_rule_collection {
+  #   name     = "allow-internet"
+  #   priority = 520
+  #   action   = "Allow"
 
-    rule {
-      name                  = "allow-internet"
-      protocols             = ["Any"]
-      source_ip_groups      = [azurerm_ip_group.supernet.id]
-      destination_addresses = ["0.0.0.0/0"]
-      destination_ports     = ["*"]
-    }
-  }
+  #   rule {
+  #     name                  = "allow-internet"
+  #     protocols             = ["Any"]
+  #     source_ip_groups      = [azurerm_ip_group.supernet.id]
+  #     destination_addresses = ["0.0.0.0/0"]
+  #     destination_ports     = ["*"]
+  #   }
+  # }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "hub_firewall" {

@@ -37,6 +37,29 @@ resource "azurerm_network_security_group" "hub_management" {
     destination_address_prefix = "VirtualNetwork"
   }
 
+  security_rule {
+    name                       = "AllowAppServiceWeuOutbound"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "AppService.WestEurope"
+  }
+  security_rule {
+    name                       = "DenyAppServiceOutbound"
+    priority                   = 200
+    direction                  = "Outbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "AppService"
+  }
+
   tags = var.tags
 }
 
