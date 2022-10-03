@@ -234,7 +234,8 @@ Nu werkt Dilbert niet. Waarom niet?
 
 Repareer `traffic manager`. Verkeer mag nu gelijk over West Europe en North Europe worden verdeeld (Weighted). Door de verschillen tussen de function apps en on-prem, kan on-prem weggelaten worden uit de TM policies.
 
-> **NOTE:** De health checks zullen lukken, maar de API is niet bereikbaar via de TM FQDN. De reden hiervoor is dat function apps alleen verkeer binnen krijgen via geregistreerde FQDNs. Om dit werkende te krijgen, moet je een eigen DNS zone hebben en de gewenste FQDN configureren op de function en instellen als CNAME voor de traffic manager FQDN.
+> **NOTE:** De health checks zullen lukken, maar de API is niet bereikbaar via de TM FQDN. De reden hiervoor is dat function apps alleen verkeer accepteren waarvan de FQDN geregistereerd is bij de function app. 
+> Om dit werkende te krijgen, moet je een eigen DNS zone hebben en de gewenste FQDN configureren op de `function app` en instellen als CNAME voor de traffic manager FQDN.
 
 ## Opruimen lab
 
