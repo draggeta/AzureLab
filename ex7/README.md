@@ -8,7 +8,7 @@ Om aan deze eisen te voldoen zal gebruik worden gemaakt van Function Apps om de 
 
 ## Azure Functions
 
-De migratie mag met downtime. Er hoeft geen langzame migratie plaats te van de webservers naar de `app services`.
+De migratie mag met downtime plaats vinden. Er hoeft geen langzame, ononderbroken migratie plaats te van de webservers naar de `function apps`.
 
 Hoe zou de migratie met minimale downtime uitgevoerd kunnen worden?
 
@@ -61,7 +61,8 @@ Nadat de `functions` succesvol uitgerold zijn, gaan we de API deployen. Ga naar 
 
 ## Service endpoint
 
-[`Service endpoints`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) hebben niet meer de voorkeur, maar ze kunnen nog wel gebruikt worden. `Service endpoints` voegen een directe route over de Microsoft backbone toe richting bepaalde PaaS diensten. Het verkeer gaat niet over het internet en apparaten die gebruik hiervan maken hoeven geen internet verbinding te hebben. In de meeste gevallen omzeilt dit verkeer ook een NVA.
+Het is niet mogelijk om vanuit de management server de APIs te benaderen. Het is wel gewenst, maar Security wil niet dat de management server het internet op kan. 
+[`Service endpoints`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) hebben niet meer de voorkeur, maar ze kunnen prima gebruikt worden. `Service endpoints` voegen een directe route over de Microsoft backbone toe richting bepaalde PaaS diensten. Het verkeer gaat niet over het internet en apparaten die gebruik hiervan maken hoeven geen internet verbinding te hebben. In de meeste gevallen omzeilt dit verkeer ook een NVA.
 
 Een nadeel is dat alleen apparaten die in een subnet met een `service endpoint` zitten, gebruik kunnen maken van deze `service endpoints`. Andere subnetten en vanuit on-prem kunnen niet een willekeurige `service endpoint` gebruiken.
 
@@ -81,11 +82,11 @@ Ga naar het hub netwerk en open het subnet waar de management server zich in bev
 
 </details>
 
-De management server kan nu bij alle app services/function apps. Limiteer voor de management server de toegang tot alleen function apps in 'West Europe' en blokkeer alle overige function apps. Dit kan door gebruik te maken van de juiste `service tags` en de bestaande `NSG`. 
+De management server kan nu bij alle app services/function apps. Limiteer voor de management server de toegang tot alleen function apps in 'West Europe' (spoke A) en blokkeer alle overige function apps. Dit kan door gebruik te maken van de juiste `service tags` en de bestaande `NSG`. 
 
 > <details><summary>Hint</summary>
 >
-> Je hebt hier meer dan een outbound rule voor nodig.
+> Je hebt hier meer dan één outbound rule voor nodig.
 
 </details>
 
@@ -93,7 +94,7 @@ Waarom kan dit niet op de `Azure firewall` geblokkeerd worden?
 
 ## Private endpoint
 
-Het is niet mogelijk om vanuit de management server de API in Spoke B te benaderen. Het is wel gewenst, maar Security wil niet dat de management zone het internet op kan. De door Microsoft aangerade oplossing is om [`private endpoints`](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview) te gebruiken. Voor het lab wordt de 'West Europe' `function app` met een `private endpoint` gekoppeld aan de spoke B `VNET`.
+Het is nog steeds niet mogelijk om vanuit de management server de API in Spoke B te benaderen. De door Microsoft aangerade oplossing om diensten intern te ontsluiten is om [`private endpoints`](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview) te gebruiken. Voor het lab wordt de 'West Europe' `function app` met een `private endpoint` gekoppeld aan de spoke B `VNET`.
 
 ### Uitrollen private endpoint
 
@@ -101,8 +102,9 @@ Private endpoints kunnen uitgerold worden in subnets met andere resources. Zorg 
 
 Ga naar de spoke B `function app` > Networking > `Private endpoints` en voeg een endpoint toe
 * Integrate with private DNS zone: No
+    * Dit gaan we handmatig doen
 
-Wacht totdat de endpoint uitgerold is. Probeer vanaf de management server `https://<fqdn>` te bereiken of een van de API calls uit te voeren. Resolve ook de DNS met:
+Wacht totdat de endpoint uitgerold is. Probeer vanaf de management server `https://<fqdn>` te bereiken of een van de API calls uit te voeren. Resolve ook de FQDN met:
 
 ```powershell
 Resolve-DnsName <fqdn>
@@ -114,9 +116,13 @@ Wat gaat er mis? Lukt het wel op de private endpoint IP?
 >
 > Je krijgt vooralsnog het externe IP-adres terug, waar je niet bij mag. De `private endpoint` heeft wel een interne IP, maar niks resolvet er nog naar. Om het werkende te krijgen, moet een [privatelink.* DNS zone](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns#azure-services-dns-zone-configuration) worden aangemaakt specifiek voor de resource type en gekoppeld worden aan de VNET waar DNS resolvet wordt. Ook moet de `private endpoint` zijn DNS in deze zone registreren.
 >
-> Er gebeurt hierna iets 'magisch'. Intern is de DNS resolving als volgt: <function app name>.azurewebsites.net wordt aan AZF gevraagd > recursive query naar VNET > dit is een CNAME voor <function app name>.privatelink.azurewebsites.net > dit is een A record voor de endpoint IP.
+> Er gebeurt hierna iets 'magisch'. Resource met een private link krijgen automatisch een privatelink CNAME. 
+> ```
+> storageaccount.core.windows.net > storageaccount.privatelink.core.windows.net
+> ```
+> > Extern is de resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door publieke DNS resolving een A record voor externe IP storage account.
 >
-> Extern is de resolving als volgt: <function app name>.azurewebsites.net wordt aan AZF gevraagd > recursive query naar resolver > dit is een CNAME voor <function app name>.privatelink.azurewebsites.net > CNAME voor andere FQDNs > A record voor externe IP function app.
+> Intern is de DNS resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door de private DNS zone resolved naar interne IP storage account.
 >
 > Resources zonder private endpoint hebben geen privatelink CNAME en zullen hierdoor altijd extern benaderd worden.
 
@@ -170,11 +176,11 @@ De[ grootte van het subnet](https://learn.microsoft.com/en-us/azure/app-service/
 ![VNET integration](./data/vnet_integration.svg)
 
 > **NOTE:** Voor het lab gaan we VNET integration uitrollen voor alleen de spoke A function. Dit is puur om tijd te besparen.
-> De integration rolt snel uit, maar het kan 1-2 minuten duren voordat de instance herstart wordt en de VNET DNS gebruikt.
+> De integration rolt snel uit, maar het kan 1-2 minuten duren voordat de instance herstart wordt en de in de **VNET geconfigureerde DNS** gebruikt.
 
 ### Uitrollen VNET integration
 
-> **NOTE:** De function ap heeft een endpoint (`/api/getweb`) die websites op kan halen. Het is een slechte, onveilige proxy.
+> **NOTE:** De function app heeft een endpoint (`/api/getweb`) die websites op kan halen. Het is een slechte, onveilige proxy.
 
 Configureer nu de VNET integration:
 1. Maak een subnet in spoke A aan voor VNET integration.
