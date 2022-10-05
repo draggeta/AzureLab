@@ -98,6 +98,7 @@ De management server kan nu bij alle app services/function apps. Limiteer voor d
 </details>
 
 Waarom kan dit niet op de `Azure firewall` geblokkeerd worden?
+Hoe loopt het verkeer vanuit de on-prem firewall richting de function app?
 
 ## Private endpoint
 
