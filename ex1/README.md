@@ -18,15 +18,15 @@ Voor een nieuwe startup een architectuur die past bij cloud-native workloads.
 
 ## Uitrollen hub/management netwerk
 
-> **NOTE:** Elke `virtual network` komt in een eigen resource group terecht. Dit helpt met het overzicht.
+> **NOTE:** Elke `virtual network` komt in een eigen `resource group` terecht. Dit helpt met het overzicht.
+
+Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders servers benaderen en beheren. Vervolgens rollen we een kleine kleine management server uit. De server moet vanuit het internet bereikbaar zijn, maar alleen voor werknemers. Er is nog geen client VPN oplossing aanwezig en het heeft geen prioriteit vanuit de business. Daarnaast moeten de kosten gedrukt worden. Schakel apparaten automatisch uit wanneer ze niet nodig zijn.
 
 > **NOTE:** Gebruik `Standard_SSD` of `Standard_HDD` schijven. Gebruik geen `premium` disks.
 
 > **NOTE:** Kies voor de size van de management server `Standard_B2ms`.
 
-Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders servers benaderen en beheren. Vervolgens rollen we een kleine kleine management server uit. De server moet vanuit het internet bereikbaar zijn, maar alleen voor werknemers. Er is nog geen client VPN oplossing aanwezig en het heeft geen prioriteit vanuit de business. Daarnaast moeten de kosten gedrukt worden. Schakel apparaten automatisch uit wanneer ze niet nodig zijn.
-
-1. Bouw een core `virtual network` met een /16 IP.
+1. Bouw een hub `virtual network` met een /16 `address space`.
 
 1. Deploy een Windows Server 2022 management server. 
     * Maak geen gebruik van `availability zones` of `availability sets`.
@@ -37,12 +37,6 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
     >
     > De B-serie is goedkoop en bedoeld voor workloads met een over het algemeen lage load en korte pieken. Bij CPU gebruik lager dan 5-10% spaar je credits op. Deze credits kan je inzetten om met CPU te bursten tijdens piek momenten.
 
-    </details>
-
-    > <details><summary>Availability</summary>
-    >
-    > Basic SKU IPs werken alleen met resources die niet `zone  redundant` zijn. Dit is de reden waarom de VM geen gebruik maakt van `availability zones`. Basic IPs werken wel met `availability sets`. Echter hebben `availability sets` weinig nut (en zelfs  nadelen) als je maar één VM hebt draaien. Hetzelfde geldt voor `zones`.
-    
     </details>
 
 1. Maak een `NSG` voor management.
@@ -60,7 +54,11 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
     * Basic SKU
     * Dynamic assignment (IP wisselt bij deallocaten VM).
     * Geef het een DNS label. Hierdoor is het intikken van een IP niet meer nodig.
-  
+    > <details><summary>Availability</summary>
+    >
+    > Basic SKU IPs werken alleen met resources die niet `zone  redundant` zijn. Dit is de reden waarom de VM geen gebruik maakt van `availability zones`. Basic IPs werken wel met `availability sets`. Echter hebben `availability sets` weinig nut (en zelfs  nadelen) als je maar één VM hebt draaien. Hetzelfde geldt voor `zones`.
+    
+    </details>
   De VM heeft nu een rechtstreekse internet verbinding. Ook zonder de publieke IP zou outbound internet verkeer mogelijk zijn. [Verbind](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/connect-logon) met de management VM.
 * De publieke IP is te achterhalen: 
     * linux: `curl https://api.ipify.org`

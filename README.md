@@ -30,7 +30,7 @@ ssh <username>@<ip/fqdn>
 ssh admin@10.0.0.1
 ```
 
-## Navigatie door de portal
+## Azure portal navigation
 
 De [Azure portal](https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview) is de tool om [Azure Resource Management](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview) te leren kennen. Er zijn veel opties en instellingen. Gebruik de zoekbalk bovenin voor het vinden van items. Je kan alles vinden door te klikken, maar zoeken is vaak sneller als je niet precies weet waar iets te vinden is.
 
