@@ -1,4 +1,4 @@
-# LAB opdrachten
+# Lab opdrachten
 
 * [Inleiding](#inleiding)
 * [Vereisten](#vereisten)
@@ -37,6 +37,7 @@ De [Azure portal](https://learn.microsoft.com/en-us/azure/azure-portal/azure-por
 ## Voorbereiding
 
 ### Naamgeving
+
 De [naamgeving is van belang](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming). Je kan met een goede naamgeving veel informatie in een oogopslag zichtbaar maken.
 
 Bedenk van tevoren een zinnige naamgeving voor je resources. Wat wil je erin verwerkt hebben?
