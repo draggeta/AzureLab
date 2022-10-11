@@ -116,7 +116,7 @@ Inbound SSH will always only be allowed from the management server.
     * **DO NOT** assign the VMs `public IPs`.
     * **DO NOT** assign the VMs `network security groups`. We'll one later.
     * Turn on `Auto-shutdown` and configure it to shutdown the server at 00:00 local time.
-    * A script for the initial deployment can be provided to configure the VMs. On the `Advanced` tab, paste the script below in the **USER DATA** field, not **CUSTOM DATA**.
+    * A script for the initial deployment can be provided to configure the VMs. On the `Advanced` tab, paste the bash script below in the **USER DATA** field, not **CUSTOM DATA**.
       * Custom scripts can be used to bootstrap a lot of devices, even network appliances.
 
     ```bash
@@ -131,59 +131,67 @@ Inbound SSH will always only be allowed from the management server.
     echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
     ```
 
-After deploying the application servers, log in to the management server. Then hopNa het uitrollen van de applicatie servers, kan je via de management server inloggen op de API servers:
+After deploying the application servers, log in to the management server. Then SSH from the management servers to the application servers:
 ```powershell
 ssh <username>@<ip/fqdn>
 ssh admin@10.0.0.1
 ```
 
-1. Vergelijk de externe IPs tussen de spokes en management
-    * De publieke IP is te achterhalen: 
+1. Compare the external IPs used by the spokes and management. 
+    * From the API servers run:
     * linux: `curl https://api.ipify.org`
-1. Controleer hoe de verkeersstromen lopen:
-    * Verkeer tussen spokes en hub
-    * Verkeer richting internet vanuit de webservers
+1. How is the traffic flow
+    * Traffic between hub and spokes
+    * Traffic to the internet
 
 ## NSG/ASG
 
-De applicatie servers zijn nu vanuit elke resource te benaderen die een pad naar ze heeft. Om dit te fixen, gaan we `NSGs` en `Application Security Groups` (ASG) gebruiken om verkeer te limiteren.
+The API servers are now reachable from any resource with a path their IP addresses. To limit traffic to what is specified in the design specs, we're going to use `NSGs` and `Application Security Groups` (ASG).
 
-1. Maak een `ASG` aan voor de servers.
-    * een voor applicatie servers in spoke A
-    * een voor applicatie servers in spoke B
-    * een voor de management server in de hub
-1. Voeg de servers aan hun respectievelijke `ASGs` toe.
-    * VM > Networking > kopje Application Security Groups
-1. Maak een `NSG` aan per spoke `VNET` en sta het onderstaande verkeer toe. Maak gebruik van de ASGs als source en destination in plaats van subnetten/IP-reeksen/IP-adressen voor de webservers en management server.
-    * SSH vanuit de management server
-    * HTTP vanuit overal
-    * Al het andere inbound verkeer moet worden geblokkeerd.
+1. Create an `ASG` for the servers
+    * One for the application server(s) in spoke A
+    * One for the application server(s) in spoke B
+    * One for the management server(s) in the hub
+1. Add the servers to their respective `ASGs`.
+    * VM > Networking > heading Application Security Groups
+1. Create an `NSG` per **spoke** `VNET` and configure the ACEs. Use `ASGs` as source and destination instead of CIDR prefixes/IP-ranges/IP-addresses.
+    * Allow inbound SSH from the management server.
+    * Allow HTTP from everywhere.
+    * All other inbound traffic should be denied.
+    * Take care not to block Azure load balancer inbound.
 
-Wat gaat er hier mis en waarom?
-> <details><summary>ASG beperkingen</summary>
+There seem to be issues creating these resources. What and why is this happening?
+> <details><summary>ASG limitations</summary>
 >
-> Indien in een regel een `ASG` gebruikt wordt, moeten andere ASGs (indien aanwezig) in dezelfde regel alleen VMs bevatten die zich in dezelfde VNET bevinden als de eerst gebruikte ASG. Dit is een van [de (grote) beperking](https://learn.microsoft.com/en-us/azure/virtual-network/application-security-groups#allow-database-businesslogic) van `ASGs`. Voor verkeer tussen VNETs, zijn ASGs geen goede keuze.
+> Understanding ASG usage is complicated. There are some [big limitations](https://learn.microsoft.com/en-us/azure/virtual-network/application-security-groups#allow-database-businesslogic) you need to know:
+> * ASGs can only work when they contain resources in one VNET.
+> * NSGs can only use ASGs from the same region.
+> * If an ASG is used in a rule in an NSG, all other ASGs used in that same rule must have only resources in the same VNET as the first added ASG.
+>
+> Sometimes no error will be returned. However, the rule still doesn't work in those cases. One example is when ASGs from different regions are used.
+>
+> All in all, ASGs are not a good fit to limit traffic between VNETs.
 
 </details>
 
-1. Pas de `NSG` aan. Gebruik per spoke zoveel mogelijk ASGs en IP adressen alleen wanneer nodig. 
+1. Edit the `NSGs`. Use ASGs where possible. Fall back to IP-addresses/CIDR prefixes as needed.
     
-    > <details><summary>NSG hergebruiken</summary>
+    > <details><summary>Reusing NSGs</summary>
     >
-    > NSGs zelf kunnen hergebruikt worden tussen `virtual networks` en VMs, mits deze zich in dezelfde subscription bevinden.
+    > NSGs can be used in multiple `virtual networks`, as long as they are in the same subscription. 
 
     </details>
 
-1. Koppel de `NSG` aan de subnetten waar de web servers in zitten.
-1. Bezoek de websites intern via de management VM.
-1. Controleer hoe de verkeersstromen lopen:
-    * Verkeer tussen spokes en hub
-    * Verkeer tussen spokes
-    * Verkeer richting internet vanuit de webservers
+1. Attach the `NSG` to the API server subnets. **DO NOT** attach them to the VM NICs.
+1. Try to access the APIs from the management VM.
+1. Check the traffic flows:
+    * Between spokes and hub.
+    * Between spokes.
+    * To the internet from the spokes.
 
-    > <details><summary>Standaard route tabellen in Azure</summary>
+    > <details><summary>Default route tables in Azure</summary>
     >
-    > Azure `virtual networks` hebben [standaard een null route](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
+    > Azure `virtual networks` have a [default null route](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) for RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and the RFC6598 prefix (100.64.0.0/10). By adding a prefix to a `VNET`'s `address space`, specific routes are added. These routes override the system defaults.
     >
     > Directe `VNET peers` voegen elkaars `address spaces` toe. Van een peer geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk.
 
