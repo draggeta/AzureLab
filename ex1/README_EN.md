@@ -33,86 +33,91 @@ There is no client VPN solution available yet and it isn't a business priority d
 
 1. Create a hub `virtual network` with a /16 `address space`.
 
+1. Create an `NSG` for the management subnet. It's better to configure your security before creating the workload.
+    * Allow inbound RDP from your public IP. We'll use this for management of the environment.
+    * Deny all other inbound traffic from the internet
+    * **DO NOT** block internal inbound traffic.
+    > <details><summary>Network Security Groups</summary>
+    >
+    > NSG rules can make us of `tags` to specify sources and destinations. One of the more interesting tags is the `VirtualNetwork` tag. This tag doesn't only contain the VNET address space, but also all directly peered networks' address spaces and any network advertised by `virtual network gateways` or `route servers`.
+
+    </details>
+
+1. Attach/associate the NSG with the management subnet. 
+
 1. Deploy a Windows Server 2022 management server into the  . 
     * **DO NOT** use `availability zones` or `availability sets`.
     * **DO NOT** assign the VM a `public IP`. It will be added later manually.
-    * **DO NOT** assign a `network security group` to the VM. It'll be added later manually. 
+    * **DO NOT** assign a `network security group` to the VM. We've added an NSG to the subnet the VM'll be deployed in in the previous step.
     * Turn on `Auto-shutdown` and configure it to shut down the VM at 00:00 local time. It's possible to configure this after the deployment.
     > <details><summary>B-series VMs</summary>
     >
-    > The B-series is cheap and is meant for workloads with low constant CPU usage, that sometimes bursts. When the CPU usage is lower than 5%, the VM accumulates credits. These credits can be spent to burst above 10% CPU usage. Between 5% and 10%, no credits are spent or earned.
+    > The B-series is cheap and is meant for workloads with low, constant CPU usage, but occasionally bursts. When the CPU usage is lower than 5%, the VM accumulates credits. These credits can be spent to burst above 10% CPU usage. Between 5% and 10%, no credits are spent or earned.
 
     </details>
 
-1. Maak een `NSG` voor management.
-    * Sta inbound RDP vanuit jouw publieke IP adres toe. Dit gaan we gebruiken voor management.
-    * Overig inbound internet verkeer mag niet.
-    * Blokkeer interne inbound verkeer niet!
-    > <details><summary>Network Security Groups</summary>
-    >
-    > NSG rules kunnen gebruik maken van `tags` om bepaalde sources en destinations aan te duiden. Een van de interessante tags is de `VirtualNetwork` tag. Deze tag staat niet alleen verkeer vanuit jouw `VNET` toe, maar ook alle direct gepeerde `VNETs` en alle netwerken die door een `virtual network gateway`, `ExpressRoute gateway` of `route server` worden geleerd.
-
-    </details>  
-
-1. Koppel de `NSG` aan het subnet.
-1. Maak een `public IP` en koppel deze aan de NIC van de management VM.
+1. The server is now created and the NSG allows inboud RDP. However, it doesn't have a public IP address and as such, is unreachable. To remediate this, create a `public IP` and attach it to the management VM's `NIC`.
     * Basic SKU
-    * Dynamic assignment (IP wisselt bij deallocaten VM).
-    * Geef het een DNS label. Hierdoor is het intikken van een IP niet meer nodig.
+    * Dynamic assignment (IP changes when the VM is deallocated).
+    * Assign the `PIP` a DNS label. This allows for a constant FQDN even after deallocating the VM.
+
     > <details><summary>Availability</summary>
     >
-    > Basic SKU IPs werken alleen met resources die niet `zone  redundant` zijn. Dit is de reden waarom de VM geen gebruik maakt van `availability zones`. Basic IPs werken wel met `availability sets`. Echter hebben `availability sets` weinig nut (en zelfs  nadelen) als je maar één VM hebt draaien. Hetzelfde geldt voor `zones`.
+    > Basic SKU IPs only work with non-`zone redundant` resources. This is the reason the management server isn't placed in an `availability zone`. Basic IPs do support the usage of `availability sets`. Sets and zones don't have much use when deploying one VM and in some cases are detrimental.
     
     </details>
-  De VM heeft nu een rechtstreekse internet verbinding. Ook zonder de publieke IP zou outbound internet verkeer mogelijk zijn. [Verbind](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/connect-logon) met de management VM.
-* De publieke IP is te achterhalen: 
+
+The VM can now access the internet directly. The public IP is however, not needed for outbound connectivity. [Connect](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/connect-logon) to the VM and check what IP it's using to access internet resources.
+* Use the following commands to retrieve your extnal IP: 
     * linux: `curl https://api.ipify.org`
     * windows: `irm https://api.ipify.org`
 
-> <details><summary>NSG verificatie</summary>
+> <details><summary>NSG verification</summary>
 >
-> Bij problemen kan er gebruik worden gemaakt van de [`IP flow verify`](https://learn.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem#use-ip-flow-verify) of [`NSG diagnostic`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-network-configuration-diagnostics-overview) functionaliteit van de [`Network Watcher`](https://learn.microsoft.com/en-us/azure/network-watcher/) om de `NSGs` te troubleshooten. 
->* `IP flow verify` geeft aan of de `NSGs` gekoppeld aan de VM het verkeer toe staan
-> * `NSG diagnostic` controleert alle `NSGs` in het pad. Het is een betere tool dan `IP flow verify`, maar vereist rechten om alle `NSGs` in het pad te kunnen lezen. Het geeft niet weer of het verkeer door een NVA mag. Ook niet de `Azure firewall`.
+> A few of the [`Network Watcher`](https://learn.microsoft.com/en-us/azure/network-watcher/) capabilities can be used to troubleshoot network connectivity. 
+> * [`IP flow verify`](https://learn.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-traffic-filtering-problem#use-ip-flow-verify) can be used to check if the subnet attached `NSGs` allows the queried traffic.
+> * [`NSG diagnostic`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-network-configuration-diagnostics-overview) can be used to check all `NSGs` in the path. It provides more information than `IP flow verify`, but requires permissions to be able to access all `NSGs`. Otherwise, the information will be incomplete. This tool doesn't support the `Azure firewall`.
 
 </details>
 
-## Uitrollen spoke/applicatie netwerken
+## Deploying the spoke/application networks
 
-Een ontwerp doelstelling is dat voor applicaties, zoveel mogelijk gebruik wordt gemaakt van de redundantie mogelijkheden van Azure. Applicatie servers moeten verspreid worden over availability zones en uitgerold over twee regio's. De secundaire regio staat standby.
+One of the design decisions is that all applications should use (within reason) the redundancy capabilities provided by Azure. When possible, use `availability zones` and spread workloads over two `regions`. The secondary region should be on standby.
 
-Het netwerk moet bestaan uit twee spokes gekoppeld aan een hub netwerk waar vandaan beheer wordt uitgevoerd. De webservers moeten niet met elkaar kunnen communiceren, maar wel met gedeelde diensten in de hub.
+Each application will consist of two spokes attached to a the hub/management network. The spoke networks shouldn't be able to communicate with eachother, but should be able to access managed services in the hub.
 
-> **NOTE:** Dit is een lab en we hebben geen ruimte om veel servers en databases neer te zetten. We gaan er even van uit dat data tussen de regio's automagisch gerepliceerd wordt. Een voorbeeld hiervan is `Read-Access Geo Redundant Storage` .
+> **NOTE:** This is a lab and we're trying to minimize costs. Deploying a sort of replicating database is outside of the scope. For now assume that data between regions is automagically replicated. Something similar to a database or a `Read-Access Geo Redundant storage account` could be used for this.
 
-1. Rol spoke A `virtual network` uit in West Europe, met een /16.
-1. Rol spoke B `virtual network` uit in North Europe, met een /16.
-1. Nadat de VNETs zijn aangemaakt, kan je onder de `virtual network` `Peering` selecteren en een [peering toevoegen](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) om de spokes netwerken aan de hub `virtual network` te koppelen. Doe dit voor elke spoke
-    * Sta verkeer naar remote netwerken toe.
-    * Sta verkeer van andere netwerken toe.
+1. Deploy the spoke A `virtual network` in West Europe, with a /16 address space.
+1. Deploy the spoke B `virtual network` in North Europe, with a /16 address space.
+1. Select `Peering` each newly created `virtual network`. [Add a peering](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) to couple the spokes to the hub `VNET`.  
+    * Allow traffic to remote networks. 
+    * Allow traffic from remote networks.
 
 ><details>
 >  <summary>VNET peering</summary>  
 >
-> Peerings verbinden twee [`VNETs`](a "Virtual Networks") met elkaar. De peering moet in beide VNETs worden aangemaakt. In de [`portal`](a "Azure Portal") gebeurt dit automatisch wanneer je rechten hebt op beide VNETs. Doe je dit op een andere wijze (API/PowerShell/Azure CLI), moet elke zijde van de peering los worden opgezet.
+> Peerings connect two [`VNETs`](a "Virtual Networks"). The peering must be created on both VNETs. When creating a peering via the [`portal`](a "Azure Portal"), both sides are created automatically. When using any other method (API/PowerShell/Azure CLI), each side of the peering must be created separately.
 
 </details>
 
-## Uitrollen applicatie server
+## Create the application servers
 
-Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen APIs aanbieden voor financiele gegevens en risk assessments. De APIs horen publiekelijk beschikbaar te zijn in de toekomst. Inbound SSH verkeer mag alleen vanuit de management server.
+In each spoke, one application server will be created. These servers provide the API for financial information and risk assessments. These will be public APIs, but during development they should only be available from the internal network.
 
-> **NOTE:** gebruik `Standard_SSD` of `Standard_HDD` schijven. Gebruik geen `premium` disks.  
+Inbound SSH will always only be allowed from the management server.
 
-> **NOTE:** Kies voor de size van de web server `Standard_B1s`.
+> **NOTE:** use `Standard_SSD` or `Standard_HDD` drives. **DO NOT** use `premium` disks.  
 
-1. Deploy twee Ubuntu 22.04 VMs, elk in een van de twee spokes. In spoke A moet de server in `West Europe` worden uitgerold. In spoke B in `North Europe`.  De VMs doen dienst als web servers.
-    * Rol de VMs in een `availability zone` uit.
-    * Geef de VMs geen `public IP`.
-    * Geef de VMs geen `network security group`. Deze gaan we apart toevoegen.
-    * Schakel `Auto-shutdown` in en zet deze op 00:00 in jouw lokale tijdzone.
-    * Bij de `Advanced` tab tijdens de configuratie kan een script worden ingevoerd. Plak onderstaande script in de **USER DATA**, niet **CUSTOM DATA**. Hiermee gaan we de servers configureren.
-      * Custom scripts zijn ook te gebruiken voor het bootstrappen van bijv. netwerk apparatuur.
+> **NOTE:** Use `Standard_B1s` as the VM size.
+
+1. Deploy two Ubuntu 22.04 VMs as the API servers, one in each of the spokes. The spoke A server must be placed in `West Europe`. The spoke B server in `North Europe`. 
+    * Place the VMs in `availability zones`.
+    * **DO NOT** assign the VMs `public IPs`.
+    * **DO NOT** assign the VMs `network security groups`. We'll one later.
+    * Turn on `Auto-shutdown` and configure it to shutdown the server at 00:00 local time.
+    * A script for the initial deployment can be provided to configure the VMs. On the `Advanced` tab, paste the script below in the **USER DATA** field, not **CUSTOM DATA**.
+      * Custom scripts can be used to bootstrap a lot of devices, even network appliances.
 
     ```bash
     #!/bin/bash
@@ -126,7 +131,7 @@ Twee servers worden uitgerold, elk in een eigen spoke netwerk. De servers zullen
     echo "{\"health\": \"ok\"}" | sudo tee /var/www/html/health/index.html
     ```
 
-Na het uitrollen van de applicatie servers, kan je via de management server inloggen op de API servers:
+After deploying the application servers, log in to the management server. Then hopNa het uitrollen van de applicatie servers, kan je via de management server inloggen op de API servers:
 ```powershell
 ssh <username>@<ip/fqdn>
 ssh admin@10.0.0.1
