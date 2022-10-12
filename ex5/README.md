@@ -102,7 +102,7 @@ Get-AzRouteServerPeerLearnedRoute @remotepeer
 1. Controleer de route tabellen voor enkele subnets. Wat valt op?
    * Controleer ook de spokes
 
-> **NOTE:** Indien de spokes de SD-WAN routes niet kennen, is de VNET peering de schuldige. VNET peerings moeten toegang tot route servers toestaan. Ga naar de hub VNET en pas de peerings aan. Zorg ervoor dat de hub toegang tot de route server/virtual network gateway toe staat en dat de spokes gebruik mogen maken van remote route servers/virtual network gateways.
+> **NOTE:** Indien de spokes de SD-WAN routes niet kennen, is de VNET peering de schuldige. VNET peerings moeten toegang tot route servers toestaan. Ga naar de hub en spoke VNETs en pas de peerings aan. Zorg ervoor dat de hub toegang tot de route server/virtual network gateway toe staat en dat de spokes gebruik mogen maken van remote route servers/virtual network gateways.
 
 ### Verwijderen UDRs/load balancer
 
