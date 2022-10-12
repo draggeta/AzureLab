@@ -71,7 +71,8 @@ Wacht totdat de `VGW` uitgerold is en haal zijn publieke IP-adres op.
     * Geef de VM een public IP
     * Gebruik de gegevens uit de [cloud-init](./tf/data/cloud-init.vpn.yml.j2) file in **CUSTOM DATA**, niet **USER DATA**.
       
-      > **NOTE:** pas de `${vgw_peer_1}`, `${vgw_bgp_peer_1}`, `${vgw_peer_2}` en `${vgw_bgp_peer_2}` variabelen aan naar de `VGW` public IPs (vgw_peer) en de `(Secondary) Default Azure BGP peer IP addresses` (vgw_bgp_peer_1) onder `Configuration` bij de `virtual network gateway`.
+      > **NOTE:** pas de `${vgw_peer_1}` en `${vgw_peer_2}` variabelen aan naar de `VGW` public IPs. 
+      > Pas de `${vgw_bgp_peer_1}` en `${vgw_bgp_peer_2}` variabelen aan naar de `(Secondary) Default Azure BGP peer IP addresses` onder de `virtual network gateway` > `Configuration`.
 
 Er is nu een 'datacentrum' die als remote netwerk gebruikt kan worden. Test voor de zekerheid of je op de 'firewall' in kan loggen.
 
