@@ -36,9 +36,9 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
 1. Configureer de peering vanuit de `route server` zijde. De SD-WAN appliance (niet de interne load balancer ervoor) kan als peer gebruikt worden.
     * Gebruik `65002` als ASN
 
-> **NOTE:** Indien je ook opdracht 6 wilt doen, is het nu een goed moment om de `VPN gateway` uit te rollen in de hub. Maak hiervoor echter eerst een 'AzureBastionSubnet' aan in de hub waar de Bastion in terecht komt. Het is niet mogelijk om netwerkaanpassingen te doen terwijl de `VPN gateway` wordt uitgerold. 
+> **NOTE:** Indien je na deze opdracht direct door wilt gaan met opdracht 6, is het nu een goed moment om de `VPN gateway` uit te rollen in de hub. Maak, voordat je dit doet, eerst een 'AzureBastionSubnet' aan in de hub waar de `bastion` in terecht komt. Het is niet mogelijk om netwerkaanpassingen te doen terwijl de `VPN gateway` wordt uitgerold. 
 >
-> Klik hier voor de `VGW` [configuratie](../ex6#vpn-gateway-uitrollen).
+> Rol vervolgens de `VGW` uit volgens deze [configuratie](../ex6#vpn-gateway-uitrollen).
 
 ### SD-WAN BGP neighbors
 
