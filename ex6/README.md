@@ -127,7 +127,7 @@ De VPN verbinding wil niet actief worden. Dit zie je onder de `connection` bij `
 Wacht totdat je een status terug krijgt onder kolom `Troubleshooting status`. Selecteer de `connection` en niet de gateway en controleer onder `Details` het `Action` tabblad.
 
 > <details><summary>Oorzaak en oplossing</summary>
-> ![Connection Action](./data/connection_action.png)
+> <img src="./data/connection_action.png" alt="Connection Action">
 >
 > Het lijkt erop dat de PSK verkeerd is. Na wat aandringen geeft het NOC aan dat ze het laatste karakter niet mee hadden gekopieerd. De correcte PSK is `DitIsEENV4ilugP0sSwerd!`.
 > 
