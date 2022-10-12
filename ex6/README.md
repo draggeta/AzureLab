@@ -59,7 +59,7 @@ Het volgende stuk is puur om in Azure een simulatie te maken van een datacenter 
 1. Maak een `NSG` aan:
     * IKE/IPSec in en outbound
     * SSH vanuit jouw eigen publieke IP. 
-    * HTTP om de API ook vanuit het datacenrum beschikbaar te maken.
+    * HTTP om de API ook vanuit het datacentrum beschikbaar te maken.
 1. BGP hoeft niet, dit gebeurt binnen in de tunnel.
 
 ### Uitrollen on-prem firewall
