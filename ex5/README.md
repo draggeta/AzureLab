@@ -11,7 +11,7 @@ Het gaat goed met BY Verzekeringen. Naast Nederland en Ierland, worden nu ook ka
 | Nederland | 10.192.0.0/22 |
 | Ierland | 10.192.4.0/22 |
 | Verenigd Koninkrijk | 10.193.128.0/22 |
-| Ierland | 10.193.132.0/22 |
+| Duitsland | 10.193.132.0/22 |
 
 Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch in een VNET te injecteren, is de [`route server`](https://learn.microsoft.com/en-us/azure/route-server/overview). Lees het stuk over de [beperkingen](https://learn.microsoft.com/en-us/azure/route-server/overview#route-server-limits) goed door.
 
