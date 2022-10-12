@@ -35,7 +35,6 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
     > **NOTE:** De route server is niet extern benaderbaar en is niet hetgeen wat routeert. Het is een BGP route server. De `public IP` wordt gebruikt voor communicatie met het Azure platform.
 1. Configureer de peering vanuit de `route server` zijde. De SD-WAN appliance (niet de interne load balancer ervoor) kan als peer gebruikt worden.
     * Gebruik `65002` als ASN
-1. Controleer de route tabellen voor enkele subnets. Wat valt op?
 
 > **NOTE:** Indien je ook opdracht 6 wilt doen, is het nu een goed moment om de `VPN gateway` uit te rollen in de hub. Klik hier voor [configuratie](../ex6#vpn-gateway-uitrollen).
 
@@ -97,6 +96,11 @@ Get-AzRouteServerPeerAdvertisedRoute @remotepeer
 # en 
 Get-AzRouteServerPeerLearnedRoute @remotepeer
 ```
+
+1. Controleer de route tabellen voor enkele subnets. Wat valt op?
+   * Controleer ook de spokes
+
+> **NOTE:** Indien de spokes de SD-WAN routes niet kennen, is de VNET peering de schuldige. VNET peerings moeten toegang tot route servers toestaan. Ga naar de hub VNET en pas de peerings aan. Zorg ervoor dat de hub toegang tot de route server/virtual network gateway toe staat en dat de spokes gebruik mogen maken van remote route servers/virtual network gateways.
 
 ### Verwijderen UDRs/load balancer
 
