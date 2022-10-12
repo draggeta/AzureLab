@@ -226,7 +226,7 @@ Dit is in te regelen door traffic manager hierachisch in te richten.
         * Nested profile is [weighted](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) en heeft een gelijke verdeling tussen on-prem en West Europe. On-prem moet als een external endpoint geconfigureerd worden, omdat het 'buiten Azure' draait.
     * Profile 2 gaat naar de Azure firewall (die naar de externe North Europe LB NAT) met een priority van 120
 
-Bezoek de parent `traffic manager` en controleer of je alleen de juiste API locaties ziet.
+Bezoek de API op de FQDN van de parent `traffic manager` en controleer of je alleen de juiste API locaties ziet.
 
 Controleer ook met DNS:
 ```linux
