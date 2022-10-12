@@ -216,7 +216,7 @@ Verbind met de VPN. Welke routes krijg je allemaal mee?
 
 ## (Optioneel) Traffic manager aanpassingen
 
-BY zou graag willen dat 50% van alle API requests naar het datacentrum gaat. De rest moet naar Azure in West Europa. Pas als beide zones niet werken, moet het naar de standby regio in North Europe.
+BY zou graag willen dat 50% van alle API requests naar het datacentrum gaat. De rest moet naar Azure in West Europe. Pas als beide zones niet werken, mag er verkeer naar de standby regio in North Europe.
 
 ![Traffic manager with priority and weight](./data/traffic_manager_nested.svg)
 
