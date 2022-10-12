@@ -37,6 +37,8 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
     * Gebruik `65002` als ASN
 1. Controleer de route tabellen voor enkele subnets. Wat valt op?
 
+> **NOTE:** Indien je ook opdracht 6 wilt doen, is het nu een goed moment om de `VPN gateway` uit te rollen in de hub. Klik hier voor [configuratie](../ex6#vpn-gateway-uitrollen).
+
 ### SD-WAN BGP neighbors
 
 > **NOTE:** Het examen stelt geen vragen over hoe je BGP moet configureren en dus wordt dat hier ook niet gedaan.
