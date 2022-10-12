@@ -21,7 +21,7 @@ Hoe zou de migratie met minimale downtime uitgevoerd kunnen worden?
 
 > <details><summary>Migratie opties</summary>
 >
-> Er zijn veel opties. Het is op te lossen met DNS record aanpassingen, de `AGW` verkeer laten load balancen en door `traffic manager` en `Azure front door`. `NVAs` zijn ook nog een mogelijkheid.
+> Er zijn veel opties. Het is op te lossen met DNS record aanpassingen of de `AGW`, `traffic manager` of `Azure front door` als load balancer in te zetten. `NVAs` zijn ook nog een mogelijkheid.
 
 </details>
 
