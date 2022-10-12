@@ -99,10 +99,7 @@ Get-AzRouteServerPeerAdvertisedRoute @remotepeer
 Get-AzRouteServerPeerLearnedRoute @remotepeer
 ```
 
-1. Controleer de route tabellen voor enkele subnets. Wat valt op?
-   * Controleer ook de spokes
-
-> **NOTE:** Indien de spokes de SD-WAN routes niet kennen, is de VNET peering de schuldige. VNET peerings moeten toegang tot route servers toestaan. Ga naar de hub en spoke VNETs en pas de peerings aan. Zorg ervoor dat de hub toegang tot de route server/virtual network gateway toe staat en dat de spokes gebruik mogen maken van remote route servers/virtual network gateways.
+1. Controleer de route tabellen voor enkele subnets uit de hub.
 
 ### Verwijderen UDRs/load balancer
 
@@ -120,6 +117,8 @@ Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewissel
     > Echter, de default route is de Azure Firewall. Indien hier een allow-any-any is geconfigureerd, kan stateless verkeer mogelijk wel lukken. De AZF zal namelijk verkeer voor deze subnetten ontvangen en doorzetten naar zijn default gateway. Deze kent de BGP routes en stuurt het verkeer door naar de SD-WAN appliance. De SD-WAN appliance kent de API server subnetten door de peering en zal het verkeer direct terugsturen. TCP verkeer faalt (AZF ziet maar een kant van de sessie), maar ICMP zal prima lukken.
 
     </details>
+
+   > **NOTE:** Ga naar de hub en spoke VNETs en pas de peerings aan. Zorg ervoor dat de hub toegang tot de route server/virtual network gateway toe staat en dat de spokes gebruik mogen maken van remote route servers/virtual network gateways.
 1. Pas de VNET peers aan zodat de NICs van de API servers de SD-WAN routes kennen.
     * Verifieer dit met de `Network Watcher` of de `effective routes` functionaliteit van de `NICs`.
 
