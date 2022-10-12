@@ -178,7 +178,7 @@ Als laatst kun je naar de `effective routes` kijken van de spoke VMs
 Wat valt je op als je naar de output van de 'firewall', gateway en `effective routes` kijkt?
 
 > <details><summary>Route servers en gateways</summary>
-> `Route servers` wisselen niet automatisch routes uit met `virtual network gateways`, ook niet `ExpressRoute gateways`. Indien dit gewenst is, moet onder de `route server` > `Configuration`, `Branch-to-branch` aan worden gezet.
+> <code>Route servers</code> wisselen niet automatisch routes uit met <code>virtual network gateways</code>, ook niet <code>ExpressRoute gateways</code>. Indien dit gewenst is, moet onder de <code>route server</code> > <code>Configuration</code>, <code>Branch-to-branch</code> aan worden gezet.
 >
 > Nadat dit gedaan is, zal je alle routes zien op de SD-WAN, gateway en on-prem firewall.
 
