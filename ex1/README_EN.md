@@ -193,35 +193,37 @@ There seem to be issues creating these resources. What and why is this happening
     >
     > Azure `virtual networks` have a [default null route](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) for RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and the RFC6598 prefix (100.64.0.0/10). By adding a prefix to a `VNET`'s `address space`, specific routes are added. These routes override the system defaults.
     >
-    > Directe `VNET peers` voegen elkaars `address spaces` toe. Van een peer geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk.
+    > Direct `VNET peers` add each other's `address spaces` to their system route tables. Routes learned for a peer are not passed on to other peers. This means that spoke A won't learn spoke B routes via the hub peering.
 
     </details>
 
     > <details><summary>Next hop/effective routes</summary>
     >
-    > De [`Next hop`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
+    > The [`Next hop`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) feature of the `Network Watcher` and the `Effective routes` functionality of a `NIC` provide information on the path a packet will take. Use these two tools to verify traffic flows.
 
     </details>
 
-## Logging en archivering
+## Logging and archiving
 
-De Hollandsche Bank eist dat BY verkeer dat langs komt kan analyseren voor 30 dagen en archiveert voor 90 dagen. Hiervoor kan gebruik worden gemaakt van de `Diagnostics settings` en/of de `NSG flow logs` van de `NSGs`. Aangezien dit een lab is, voeren we dit alleen uit voor de primaire regio.
+The Dutch Bank (De Hollandsche Bank, DHB) creates rules that financial institutions need to adhere to. One of the rules states that all traffic flows must be stored for at least 30 days and be archived for 90 days.
 
-1. Deploy een `Storage account`. De `storage account` gaat gebruikt worden voor log archivering.
-    * `Standard` SKU, niet `premium`. 
-    * Redundancy maakt niet uit. `LRS` is voor een lab het beste 
-    * Gebruik geen `private endpoint` of `service endpoint`. De storage account moet vanuit het internet bereikbaar blijven.
-1. Deploy een `Log Analytics Workspace`. De workspace gaat gebruikt worden voor analyse van het verkeer.
-1. Ga naar de aangemaakte `NSGs` en configureer de `NSG` flow logs. 
+This can be done with the `Diagnostics settings` and/or the `NSG flow logs` of `NSGs`. Just attach an NSG to a subnet and enable one or both features and all traffic passing through that subnet will be logged. For this lab, we'll only be configuring this in the primary region.
+
+1. Deploy a `storage account` in the primary region. The `storage account` will be used for log archiving.
+    * `Standard` SKU, **NOT** `premium`. 
+    * Redundancy doesn't matter. `LRS` (locally redundant storage) is good enough for a lab. 
+    * Don't use `private` or `service endpoint`. The `storage account` must remain available from the internet.
+1. Deploy a `Log Analytics Workspace`. The workspace can be used used to analyze and search through recent logs.
+1. Go to the `NSGs` in the primary region and configure the `NSG flow logs`. 
     * Flow Logs version: Version 2
-    * Retention: Conform DHB eis
+    * Retention: according to the demands of the DHB
     * Traffic Analytics status: On
     * Processing interval: Every 10 mins
 
-> **Note:** Over ongeveer 10-15 minuten kan gebruik worden gemaakt van de `Traffic Analytics` functionaliteit van de `Network Watcher`.
+> **Note:** In about 10-15 minutes, information will begin appearing in the `Traffic Analytics` feature of the `Network Watcher`.
 
 ## Opruimen lab
 
-Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).
+If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).
 
-Indien je het lab wilt behouden, kun je de VMs uit zetten. Anders mag het lab worden opgeruimd.
+If you do want to keep the lab, it's possible to minimize costs by shutting down the VMs.
