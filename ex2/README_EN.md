@@ -1,4 +1,4 @@
-# Dag 2 - Firewalling
+# Day 2 - Firewalling
 
 * [Uitrol AZF](#uitrol-azf)
 * [Aanpassen interne routering](#aanpassen-interne-routering)
@@ -9,81 +9,91 @@
 
 ![DNS resolution](./data/dns_inspection.svg)
 
-De security afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met `threat intelligence`/threat detection, wordt hiervoor de `Azure Firewall` gebruikt.
+The security department wants to have `threat intelligence`/threat detection capabilities and want to start by logging and inspecting all DNS queries. For this reason, the `Azure Firewall` will be used as DNS proxy.
 
-> **Note:** Start de VM's nog niet op als ze uit staan. We gaan de DNS instellingen aanpassen. Deze worden alleen bij het (her)starten van een VM meegenomen door DHCP, of na een renew in jouw besturingssysteem.
+> **Note:** Don't start the VMs yet if they aren't running. We're going to change VNET DNS settings. Changes to the VNET DNS settings. VMs in Azure by default use static DHCP and only pick up changes after a reboot or by telling the DHCP client in the OS to renew.
 
-## Uitrol AZF
+## Deploying the Azure firewall
 
-1. Deploy een [`Azure Firewall`](https://learn.microsoft.com/en-us/azure/firewall/overview). De reden hiervoor is dat er meteen een makkelijke NVA aanwezig is die ook als 'custom' DNS server/proxy kan dienen
-    * Let op, een `AZF` heeft nog extra componenten nodig zoals een `subnet`. De subnet moet `AzureFirewallSubnet` heten en voor de deployment worden aangemaakt.
+1. Deploy an [`Azure firewall`](https://learn.microsoft.com/en-us/azure/firewall/overview) in the hub network. It will serve as an NVA with DNS server/proxy capabilities and can perform threat inspection.
+    * Place it in the hub
+    * The `AZF` requires some other resources to function, such as a subnet with the name `AzureFirewallSubnet`. This subnet must exist before you start the firewall deployment.
     * Standard tier
     * Firewall Policy management
-    * Plaats het in de hub
-    * Forced tunneling uit
-1. De configuratie van de meeste instellingen gebeurt in de **`firewall policy`**. Configureer de firewall als [DNS proxy](https://learn.microsoft.com/en-us/azure/firewall/dns-settings).
+    * Turn off forced tunneling
+1. Most of the firewall configuration will happen in the **`firewall policy`**, not on the firewall itself. Configure the firewall as a [DNS proxy](https://learn.microsoft.com/en-us/azure/firewall/dns-settings).
     * DNS > Enabled
     * DNS Proxy > Enabled
-    * DNS Servers > Gebruik Google DNS en Cloudflare DNS als DNS servers in plaats van de VNET default DNS.
-1. Configureer de `AZF` interne/private IP als de [DNS server voor de VNETs](https://learn.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
-    * Per VNET moet dit ingesteld worden.
-    * Kan ook per NIC, maar daar heeft niemand tijd voor.
-1. Configureer de `AZF` `Diagnostics settings`. Dit moet op de firewall zelf. Log alles naar de `Log Analytics Workspace` en `storage account`. Stel een retentie van 90 dagen in.
-1. (Her)Start de VM's of voer de onderstaande commands uit om een renew te doen.
+    * DNS Servers > Use Google DNS and Cloudflare DNS as DNS servers in place of the `VNET` default DNS.
+1. Configure the `AZF` internal/private IP as the [DNS server for the `VNETs`](https://learn.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#change-dns-servers).
+    * This has to be configured per `VNET`
+    * It can be configured on each `NIC`, but ain't nobody got time for that
+1. The firewall now has the capability to see DNS requests, but isn't logging them. Configure the `AZF` `Diagnostics settings`. This has to happen on the firewall, **NOT** the firewall policy. Log everything to the `Log Analytics Workspace` and `storage account`. Configure a retention of 90 days.
+1. (Re)Start the VMs or run the below commands to perform a DHCP renew.
     * linux: `sudo dhclient -r && sudo dhclient`
     * windows: `ipconfig /renew`
-1. Controleer de DNS instellingen die ze via DHCP hebben ontvangen.
+1. Check the DNS settings received by DHCP.
     * linux: `resolvectl status`
     * windows: `Get-DnsClientServerAddress`
-1. Probeer iets te resolven
+1. Try to resolve some addresses.
     * linux: `dig google.com +short`
     * windows: `Resolve-DnsName google.com`
 
-De `AZF` wordt nu gebruikt als DNS server/proxy.
+The `AZF` can now be used as a DNS proxy. Visit some websites on the management server. Then go to the `firewall` > `logs` > `Firewall logs` > `Azure Firewall DNS proxy logs data` > `Run`. Here you can see DNS queries.
 
 > <details><summary>Threat intelligence</summary>
 >
-> Azure `firewall` kan gebruik maken van Microsoft's [`threat intelligence`](https://learn.microsoft.com/en-us/azure/firewall/threat-intel) om FQDNs en DNS queries te inspecteren. Hiervoor is wel nodig dat de firewall alle DNS queries kan onderscheppen. Hierom wordt gebruik gemaakt van de DNS proxy functionaliteit.
+> The Azure `firewall` can make use of Microsoft's [`threat intelligence`](https://learn.microsoft.com/en-us/azure/firewall/threat-intel) capabilities to inspect FQDNs and DNS queries.
 
 </details>
 
-## Aanpassen interne routering
+## Internal routing
 
-Zoals gewoonlijk, veranderen eisen na verloop van tijd. Nu blijkt dat de primaire en secundaire omgevingen met elkaar gegevens moeten kunnen uitwisselen. Een message queue is geen optie. De ontwikkelde communicatie methode is zo geschreven dat data uitwisseling direct tussen de hosts plaats moet vinden (al dan niet gerouteerd).
+As usual, requirements change over time and the network has to support business needs.
 
-BY vindt een full-mesh VNET peering creeeren geen fijn idee (waarom?). Om verkeer tussen de spokes via de hub mogelijk te maken, kan er gebruik worden gemaakt van [`User Defined Routes`](https://learn.microsoft.com/en-us/azure/virtual-network/manage-route-table) en een `Network Virtual Appliance` (NVA): de `AZF`.
+One of the changes is that the API must be able to replicate data between the primary and secondary region. Sadly, a message queue isn't an option. The developed replication method requires that data is directly exchanged between hosts (even if routed).
+
+Creating a full-mesh of VNET peers isn't something that BY wants to do (why?). The solution the architects are gravitating to is to use a `network virtual appliance` and [route tables`](https://learn.microsoft.com/en-us/azure/virtual-network/manage-route-table) to route traffic via the hub.
+The AZF can function as the `NVA` doing the routing.
 
 ![NVA Routing](./data/internal_routing.svg)
 
-> <details><summary>Standaard route tabellen in Azure</summary>
+> <details><summary>Default system route tables in Azure</summary>
 >
-> Azure `virtual networks` hebben [standaard een null route](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) staan voor de RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) en de RFC6598 prefix (100.64.0.0/10). Door een `address space` toe te voegen worden specifiekere routes aangemaakt en de route tabel overschreven.
+> Azure `virtual networks` contain default [null routes](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#default) for RFC1918 prefixes (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and the RFC6598 prefix (100.64.0.0/10). By adding `address spaces` to a `VNET`, more specific routes are added to the default route table.
 >
-> Directe `VNET peers` voegen elkaars `address spaces` toe. Geleerde routes worden echter niet doorgegeven aan andere peers. Dit betekent dat spoke A geen routes leert naar spoke B via het hub netwerk. Zelfs met een `user defined route` werkt dit niet. 
+> Direct `VNET peers` add each other's `address spaces` to their system route tables. Routes learned for a peer are not passed on to other peers. This means that spoke A won't learn spoke B routes via the hub peering.
 
 </details>
 
-1. Maak een `UDR` voor de spoke netwerken aan met als destination jouw superscope (bijv. 10.128.0.0/14) en als next-hop de IP van de `AZF`.
-1. Koppel de `UDR` aan de spoke `subnets`.
-    > <details><summary>Koppelen UDRs</summary>
+1. Create a `route table` with a `UDR` for the spoke networks.
+    * Use the /14 superscope as destination
+    * Use the `AZF` private IP as next-hop
+1. Attach the `route table` to the spoke `subnets`.
+    > <details><summary>Attaching UDRs</summary>
     >
-    > `UDRs` kunnen worden gekoppeld aan meerdere VNETs, maar ze moeten zich in dezelfde regio en subscription bevinden. Je zult dus per regio een spoke `UDR` aan moeten maken. Denk in de toekomst hier aan. Hoe kun je standaard routetables voor alle VNETs aanbieden?
+    > `Route tables` can be attached to multiple VNETs, but the VNETs must be in the same region and subscription as the `route table`. Each region'll require a separate spoke `route table`.
 
     </details>
-1. Controleer hoe de verkeersstromen lopen:
-    * Verkeer tussen spokes en hub
-    * Verkeer tussen spokes
-    * Gebruik de `Effective routes` functionaliteit van een `NIC` of `Next hop` functionaliteit van de `Network Watcher`
+1. Verify the traffic flows:
+    * Traffic between the spokes and hub
+    * Traffic between the spokes
+    * Use the `Effective routes` functionality of `NIC` or `Next hop` functionality of the `Network Watcher`
 
     > <details><summary>Next hop/effective routes</summary>
     >
-    > De [`Next hop`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) functionaliteit van de `Network Watcher` of de `Effective routes` functionaliteit van een `NIC` geeft informatie over waar verkeer van een VM naartoe gaat. Gebruik dit om verkeersstromen te verifieren.
+    > The [`Next hop`](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-next-hop-overview) feature of the `Network Watcher` and the `Effective routes` functionality of a `NIC` provide information on the path a packet will take. Use these two tools to verify traffic flows.
 
     </details>
 
-    > <details><summary>ARP, traceroute en ping</summary>
+    > <details><summary>ARP, traceroute and ping</summary>
     >
-    > Azure virtual networking is geen standaard netwerken. Het is allemaal nep. Layer 1 en 2 bestaan niet. Pakketten worden van de ene `NIC` naar een andere `NIC` gekopieerd. De default gateway bestaat dus niet echt en is alleen aanwezig zodat VMs normaal functioneren.
+    > Azure virtual networking is not real networking. It's basically fake.Layer 1 and 2 don't really exist in a `VNET`. Packets within a host are basically copied from `NIC` to `NIC` after passing SDN policies. 
+    >
+    > There is no real default gateway for example. It's only there so no VM network stacks need to be modified. If you check a system's ARP table
+    
+    
+     Pakketten worden van de ene `NIC` naar een andere `NIC` gekopieerd. De default gateway bestaat dus niet echt en is alleen aanwezig zodat VMs normaal functioneren.
     >
     > Controleer de ARP tabel. Hier zie je dat de MAC-adres van de default gateway opvallend is. De gateway is ook niet te pingen. Verder werkt traceroute niet zoals je verwacht. In een `VNET` laat de traceroute alle default gateways niet zien. `network virtual appliances` zijn wel zichtbaar.
 
@@ -185,13 +195,13 @@ Om de asymmetrische routering te repareren, moet de inbound verkeer via de firew
 
 > **Optioneel:** configureer een [DNS record](https://learn.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
 
-## Opruimen lab
+## Clean up lab resources
 
-Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).
+If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).
 
-Indien je het lab wilt behouden, kun je de onderstaande stappen uitvoeren. Anders mag het lab worden opgeruimd.
-* VMs uitschakelen
-* Azure firewall policy behouden
-* Azure firewall verwijderen
-    * Public IPs behouden
-    * Voor het volgende lab moet de firewall opnieuw uitgerold worden
+In case you do want to keep the lab, it's possible to minimize costs by performing the following steps: 
+* Shut down the VMs
+* Keep the Azure firewall policy
+* Remove the Azure firewall
+    * Keep the public IPs
+    * The firewall has to be redeployed before starting the next lab.

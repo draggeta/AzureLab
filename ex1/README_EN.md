@@ -222,7 +222,7 @@ This can be done with the `Diagnostics settings` and/or the `NSG flow logs` of `
 
 > **Note:** In about 10-15 minutes, information will begin appearing in the `Traffic Analytics` feature of the `Network Watcher`.
 
-## Opruimen lab
+## Clean up lab resources
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).
 
