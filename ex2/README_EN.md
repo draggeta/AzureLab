@@ -90,94 +90,97 @@ The AZF can function as the `NVA` doing the routing.
     >
     > Azure virtual networking is not real networking. It's basically fake.Layer 1 and 2 don't really exist in a `VNET`. Packets within a host are basically copied from `NIC` to `NIC` after passing SDN policies. 
     >
-    > There is no real default gateway for example. It's only there so no VM network stacks need to be modified. If you check a system's ARP table
-    
-    
-     Pakketten worden van de ene `NIC` naar een andere `NIC` gekopieerd. De default gateway bestaat dus niet echt en is alleen aanwezig zodat VMs normaal functioneren.
+    > There is no real default gateway for example. It's only there so no VM network stacks need to be modified. If you check a system's ARP table, the default gateway will have a peculiar mac address.
     >
-    > Controleer de ARP tabel. Hier zie je dat de MAC-adres van de default gateway opvallend is. De gateway is ook niet te pingen. Verder werkt traceroute niet zoals je verwacht. In een `VNET` laat de traceroute alle default gateways niet zien. `network virtual appliances` zijn wel zichtbaar.
+    > The traceroute/tracert command will also not function as expected. As the default gateways are fake, they will be skipped in the outpur. `NVAs` will be visible.
 
     </details>
 
-1. Test het verbinden van een spoke VM naar een andere spoke VM. Werkt dit?
+1. Test the HTTP connection from spoke to spoke server. Does this work?
     * `curl http://<ip>`
 
-    > <details><summary>Antwoord</summary>
+    > <details><summary>Answer</summary>
     >
-    > Dit werkt nog niet, omdat de AZF niet een router, maar een firewall is. Het verkeer moet dus worden toegestaan.
-    > Verkeer van/naar de management server werkt wel, omdat dit de firewall omzeilt.
+    > This doesn't work yet. The `AZF` is a firewall, not a router. The ACLs need to be configured before any traffic is forwarded. 
+    > Traffic between the API servers and the management server works as thos packets don't pass the `Azure firewall`.
 
     </details>
 
-## IP groups en network rules
+## IP groups and network rules
 
-De `Azure Firewall` moet het verkeer van spoke naar spoke toestaan. Bij het aanmaken van regels kunnen IP adressen direct worden ingevoerd, maar het is (soms) handiger om gebruik te maken van `IP groups`. `IP groups` zijn niks anders dan objecten in andere firewalls.
+We need the `Azure firewall` to pass traffic between the spokes. When creating rules, IP-addresses/prefixes can be used as sources and destinations. However, sometimes it's more efficient to use `IP groups`. `IP groups` are basically what is known as objects in most other firewalls
 
-1. Maak voor de spoke VM subnet elk een `IP group`.
-1. Maak een `rule collection group` op de firewall policy aan en maak daar in weer een `network rule collection` in aan die verkeer tussen de spokes toe staan. Dit is standaard L4 firewalling.
-    * Maak gebruik van `IP groups` om de sources en destinations aan te geven.
-    * Verkeer tussen spokes zou nu moeten werken.
+1. Create an `IP group` for each spoke VM subnet.
+1. Create an `IP group` for assigned /14 supernet.
+1. Create a `rule collection group` on the `firewall policy`.
+1. Add a `network rule collection`. This is a L4 firewall solution. 
+    * Allow spoke to spoke traffic.
+    * Use the `IP groups` as source and destination.
 
-    > <details><summary>Rule collection verificatie</summary>
-    >
-    > De `Azure Firewall` heeft geen optie om te controleren of verkeer is toegestaan. Er moet dus in de logs worden gedoken. Als de `diagnostics settings` geconfigureerd zijn met een `Log Analytics Workspace`, kan gebruik worden gemaakt van de [`Logs` functionaliteit](https://learn.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) van een `AZF` om toegestane en gedropte verkeer te bekijken.
-    >
-    > Ten tijde van schrijven is het bekijken van de logs in de `portal` vervelend. Met de integratie met Azure Sentinel krijgt Azure eindelijk een [single pane of glass](https://learn.microsoft.com/en-us/azure/firewall/firewall-workbook) voor netwerk verkeer. Dit valt echter buiten de lab en examen.
+Traffic between spokes should now work. Generate some traffic between the spokes.
 
-    </details>
+> <details><summary>Rule collection verification</summary>
+>
+> The `Azure Firewall` has no option to check if traffic is allowed. The way to check traffic is by inspecting the logs. Use the [`logs` functionality](https://learn.microsoft.com/en-us/azure/firewall/firewall-diagnostics#view-and-analyze-the-activity-log) of a firewall if the `diagnostics settings` are configured with a `log analytics workspace`.
+>
+> The steps are the same as the DNS logs.
+>
+> As of the time of writing, there is no easier way to view the logs in the `portal`. `Azure Sentinel` and `Azure workbooks` provide more of a [single pane of glass](https://learn.microsoft.com/en-us/azure/firewall/firewall-workbook) for network traffic through the Azure firewall. This isn't part of the exam (for now).
 
-## Aanpassing routering richting internet
+</details>
 
-Vanuit het raad van bestuur komt het bericht dat verkeer van en naar het internet geanalyseerd moet worden voor threats. Ook hiervoor kan de `AZF` gebruikt worden.
+## Update internet routing 
+
+A mandate has come down from the board of directors that all traffic to and from the internet must be analyzed for threats. This is a task that can be performed by the `AZF`.
 
 ![Inspecting internet traffic](./data/internet_firewall.svg)
 
-1. Configureer `threat intelligence` zodat het daadwerkelijk verkeer blokkeert.
+1. Configure `threat intelligence` to not only alert, but also block data.
     
     > <details><summary>Threat intelligence</summary>
     >
-    > `Threat intelligence` staat standaard aan op de `firewall policy`, maar in de alerting modus. Dit kan aangepast worden naar `none` of `alert and block`. De alerts worden weggeschreven naar de `Log Analytics Workspace`.
+    > `Threat intelligence` is enabled by default on the `firewall policy`, but in alerting mode. This can be changed to `None`/`Disabled` or `Alert and block`. The logs will be written to the `Log Analytics Workspace`.
 
     </details>
 
-1. Pas de spoke `UDR` aan. Voeg een 0.0.0.0/0 route toe via de `AZF`.
-1. Voeg een nieuwe `network rule collection/network rule` toe zodat outbound verkeer richting het internet toegestaan is vanuit de supernet op de `AZF`. 
-    * Let op dat je niet alle interne verkeer open zet. Mogelijk moeten er meer regels/collections toegevoegd worden.
-1. Controleer de externe IPs van de web servers. Dit zou gelijk moeten zijn aan (een van) de `public IP(s)` gekoppeld aan de firewall
+1. Update the spoke `route table`. Add a 0.0.0.0/0 route via the `AZF`.
+1. Add a new `network rule collection/network rule` to allow outbound traffic to the internet.
+    * Make sure to not allow all internal traffic. It is possible that more `network rule collections` are needed.
+1. Check the external IPs of the API servers. These should be (one of the) IP(s) attached to the firewall.
     * linux: `curl https://api.ipify.org`
     * windows: `irm https://api.ipify.org`
-    > **Note:** Zie Rule collection verificatie voor informatie.
-1. Maak ook een `UDR` aan voor de hub. Deze moet ook een default route richting de `AZF` hebben. Koppel de `UDR` aan de management server `subnet`.
-    * Heb je nog verbinding? Waarom wel/niet?
+    > **Note:** See Rule collection verification for more information.
+1. Add a `route table` to the hub management server subnet. This `route table` should contain a `UDR` with a default route towards the `AZF`.
+1. Do you still have a connection to the management server? Why?
 
-    > <details><summary>Antwoord</summary>
+    > <details><summary>Answer</summary>
     >
-    > Er is sprake van asymmetrische routering. Verkeer komt binnen via de [PIP]('' "Public IP"), maar gaat langs de AZF naar buiten. 
+    > There is assymetric routing happening. Traffic arrives via the management server [PIP]('' "Public IP"), but return traffic is routed via the Azure firewall.
     >
-    > De `AZF` doet [automatisch SNAT](https://learn.microsoft.com/en-us/azure/firewall/snat-private-range) voor destination IPs buiten RFC1918.
+    > The `AZF` performs [automatisch SNAT](https://learn.microsoft.com/en-us/azure/firewall/snat-private-range) for any destination outside the RFC1918 range.
 
     </details>
 
 > <details><summary>Service tags en UDRs</summary>
 >
-> `Service tags` zijn lijsten van IP adressen die een dienst kan gebruiken. De lijst wordt bijgehouden door Microsoft. `Service tags` zijn te gebruiken in `network security groups`, `Azure Firewalls` en sinds kort ook `user defined routes`.
+> `Service tags` are lists of IP addresses for Microsoft services, maintained by Microsoft. `Service tags` can be used in `network security groups`, `Azure Firewalls` and `user defined routes`.
 
 </details>
 
-## Inbound management verkeer repareren
+## Fixing inbound management traffic
 
-Om de asymmetrische routering te repareren, moet de inbound verkeer via de firewall lopen. We gaan dus via de firewall RDP verkeer NATten naar de management server.
+To fix the asymmetric routing, inbound RDP traffic has to pas the firewall. The AZF will be performing NAT to allow traffic arriving at tcp/udp port 3389 to reach the management server.
 
-1. Maak een NAT rule collection op de `AZF` aan voor inbound RDP of SSH (Windows of Linux) richting de management server.
-    * Sta dit toe alleen vanuit jouw lokale IP.
+1. Create a `NAT rule collection` on the `Azure firewall policy` for inbound RDP towards the management server.
+    * Perform the NAT only on traffic originating from your local public IP address towards the firewall `public IP`.
 
     > <details><summary>NAT rule collections</summary>
     >
-    > `NAT rule collections` maken onder water voor elke match een [tijdelijke `network rule` aan](https://learn.microsoft.com/en-us/azure/firewall/rule-processing#nat-rules). Hierdoor is het niet nodig om handmatig `network rules` te genereren.
+    > `NAT rule collections` create a [temporary `network rule`](https://learn.microsoft.com/en-us/azure/firewall/rule-processing#nat-rules) for each match. Because of this, it's not needed to to manually add `network rules`.
 
     </details>
 
-1. Voeg een nieuwe `network rule collection` toe zodat outbound verkeer toegestaan is vanuit de hub. Gebruik hier optioneel een `IP group`.
+1. Add a new `network rule collection` to allow Voeg een nieuwe `network rule collection` toe zodat outbound verkeer toegestaan is vanuit de hub. Gebruik hier optioneel een `IP group`.
 1. Verwijder de publieke IP van de management server.
 1. Controleer of inbound verkeer werkt. Gebruik hiervoor de externe IP van de `AZF`.
     > <details><summary>RDP werkt niet</summary>
