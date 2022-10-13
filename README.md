@@ -1,4 +1,4 @@
-# Lab opdrachten
+# LAB opdrachten
 
 * [Inleiding](#inleiding)
 * [Vereisten](#vereisten)
@@ -30,14 +30,13 @@ ssh <username>@<ip/fqdn>
 ssh admin@10.0.0.1
 ```
 
-## Azure portal navigation
+## Navigatie door de portal
 
 De [Azure portal](https://learn.microsoft.com/en-us/azure/azure-portal/azure-portal-overview) is de tool om [Azure Resource Management](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview) te leren kennen. Er zijn veel opties en instellingen. Gebruik de zoekbalk bovenin voor het vinden van items. Je kan alles vinden door te klikken, maar zoeken is vaak sneller als je niet precies weet waar iets te vinden is.
 
 ## Voorbereiding
 
 ### Naamgeving
-
 De [naamgeving is van belang](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming). Je kan met een goede naamgeving veel informatie in een oogopslag zichtbaar maken.
 
 Bedenk van tevoren een zinnige naamgeving voor je resources. Wat wil je erin verwerkt hebben?

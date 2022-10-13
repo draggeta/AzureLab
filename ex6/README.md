@@ -59,7 +59,7 @@ Het volgende stuk is puur om in Azure een simulatie te maken van een datacenter 
 1. Maak een `NSG` aan:
     * IKE/IPSec in en outbound
     * SSH vanuit jouw eigen publieke IP. 
-    * HTTP om de API ook vanuit het datacenrum beschikbaar te maken.
+    * HTTP om de API ook vanuit het datacentrum beschikbaar te maken.
 1. BGP hoeft niet, dit gebeurt binnen in de tunnel.
 
 ### Uitrollen on-prem firewall
@@ -71,7 +71,9 @@ Wacht totdat de `VGW` uitgerold is en haal zijn publieke IP-adres op.
     * Geef de VM een public IP
     * Gebruik de gegevens uit de [cloud-init](./tf/data/cloud-init.vpn.yml.j2) file in **CUSTOM DATA**, niet **USER DATA**.
       
-      > **NOTE:** pas de `${vgw_peer_1}`, `${vgw_bgp_peer_1}`, `${vgw_peer_2}` en `${vgw_bgp_peer_2}` variabelen aan naar de `VGW` public IPs (vgw_peer) en de `(Secondary) Default Azure BGP peer IP addresses` (vgw_bgp_peer_1) onder `Configuration` bij de `virtual network gateway`.
+      > **NOTE:** pas de `${vgw_peer_1}` en `${vgw_peer_2}` variabelen aan naar de `VGW` public IPs.
+      > 
+      > Pas de `${vgw_bgp_peer_1}` en `${vgw_bgp_peer_2}` variabelen aan naar de `(Secondary) Default Azure BGP peer IP addresses` onder de `virtual network gateway` > `Configuration`.
 
 Er is nu een 'datacentrum' die als remote netwerk gebruikt kan worden. Test voor de zekerheid of je op de 'firewall' in kan loggen.
 
@@ -127,7 +129,7 @@ De VPN verbinding wil niet actief worden. Dit zie je onder de `connection` bij `
 Wacht totdat je een status terug krijgt onder kolom `Troubleshooting status`. Selecteer de `connection` en niet de gateway en controleer onder `Details` het `Action` tabblad.
 
 > <details><summary>Oorzaak en oplossing</summary>
-> ![Connection Action](./data/connection_action.png)
+> <img src="./data/connection_action.png" alt="Connection Action">
 >
 > Het lijkt erop dat de PSK verkeerd is. Na wat aandringen geeft het NOC aan dat ze het laatste karakter niet mee hadden gekopieerd. De correcte PSK is `DitIsEENV4ilugP0sSwerd!`.
 > 
@@ -176,7 +178,7 @@ Als laatst kun je naar de `effective routes` kijken van de spoke VMs
 Wat valt je op als je naar de output van de 'firewall', gateway en `effective routes` kijkt?
 
 > <details><summary>Route servers en gateways</summary>
-> `Route servers` wisselen niet automatisch routes uit met `virtual network gateways`, ook niet `ExpressRoute gateways`. Indien dit gewenst is, moet onder de `route server` > `Configuration`, `Branch-to-branch` aan worden gezet.
+> <code>Route servers</code> wisselen niet automatisch routes uit met <code>virtual network gateways</code>, ook niet <code>ExpressRoute gateways</code>. Indien dit gewenst is, moet onder de <code>route server</code> > <code>Configuration</code>, <code>Branch-to-branch</code> aan worden gezet.
 >
 > Nadat dit gedaan is, zal je alle routes zien op de SD-WAN, gateway en on-prem firewall.
 
@@ -202,7 +204,7 @@ Welke [client/point-to-site VPN](https://learn.microsoft.com/en-us/azure/vpn-gat
     * Audience: [41b23e61-6c1e-4545-b367-cd054e0ed4b4](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
     * Issuer: [https://sts.windows.net/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
 3. Met een Azure AD admin account kan je toegang geven tot AAD authenticatie. Klik hiervoor op `Grant administrator consent for Azure VPN client application` of doe dit zoals in de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication) beschreven.
-    * Vink consent on behalf of your organization aan. Hiermeer zorg je ervoor dat gebruikers deze prompt niet krijgen.
+    * Vink consent on behalf of your organization aan. Hiermee zorg je ervoor dat gebruikers deze prompt niet krijgen.
     ![Azure AD authentication](./data/client_vpn.png)
 4. Klik op 'Save'. De deployment duurt 10+ minuten. Download de VPN client configuratie bovenaan de pagina nadat de wijzigingen doorgevoerd zijn. Pak de ZIP bestanden uit.
 
@@ -214,7 +216,7 @@ Verbind met de VPN. Welke routes krijg je allemaal mee?
 
 ## (Optioneel) Traffic manager aanpassingen
 
-BY zou graag willen dat 50% van alle API requests naar het datacentrum gaat. De rest moet naar Azure in West Europa. Pas als beide zones niet werken, moet het naar de standby regio in North Europe.
+BY zou graag willen dat 50% van alle API requests naar het datacentrum gaat. De rest moet naar Azure in West Europe. Pas als beide zones niet werken, mag er verkeer naar de standby regio in North Europe.
 
 ![Traffic manager with priority and weight](./data/traffic_manager_nested.svg)
 
@@ -224,7 +226,7 @@ Dit is in te regelen door traffic manager hierachisch in te richten.
         * Nested profile is [weighted](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) en heeft een gelijke verdeling tussen on-prem en West Europe. On-prem moet als een external endpoint geconfigureerd worden, omdat het 'buiten Azure' draait.
     * Profile 2 gaat naar de Azure firewall (die naar de externe North Europe LB NAT) met een priority van 120
 
-Bezoek de parent `traffic manager` en controleer of je alleen de juiste API locaties ziet.
+Bezoek de API op de FQDN van de parent `traffic manager` en controleer of je alleen de juiste API locaties ziet.
 
 Controleer ook met DNS:
 ```linux

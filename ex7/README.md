@@ -21,7 +21,7 @@ Hoe zou de migratie met minimale downtime uitgevoerd kunnen worden?
 
 > <details><summary>Migratie opties</summary>
 >
-> Er zijn veel opties. Het is op te lossen met DNS record aanpassingen, de `AGW` verkeer laten load balancen en door `traffic manager` en `Azure front door`. `NVAs` zijn ook nog een mogelijkheid.
+> Er zijn veel opties. Het is op te lossen met DNS record aanpassingen of de `AGW`, `traffic manager` of `Azure front door` als load balancer in te zetten. `NVAs` zijn ook nog een mogelijkheid.
 
 </details>
 
@@ -41,9 +41,9 @@ Blokkeer alle outbound verkeer op de AZF, maar sta east-west verkeer toe. Zorg e
 
 ### Azure functions uitrollen
 
-> **NOTE:** Function apps zijn geen onderdeel van het examen. Het gaat in de opdracht om de service endpoints. `Function apps` hebben altijd een [`App Service Plan`](https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans) en een storage account nodig. Een ASP is een server waar de function op draait. Elke `ASP` kan meerdere functions bevatten.
+> **NOTE:** Function apps zijn geen onderdeel van het examen. Het gaat in de opdracht om de service endpoints. `Function apps` hebben altijd een [`App Service Plan`](https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans) en een storage account nodig. Een `ASP` is een server waar de function op draait. Elke `ASP` kan meerdere functions bevatten.
 
-Rol twee [`function apps`](https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-function-app-portal) uit, een in West Europe en een in North Europe.
+Rol twee [`function apps`](https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-function-app-portal) uit, één in West Europe en één in North Europe.
 * Basics
     * Publish: Code
     * Runtime stack: Python
@@ -128,9 +128,9 @@ Wat gaat er mis? Lukt het wel op de private endpoint IP?
 > ```
 > storageaccount.core.windows.net > storageaccount.privatelink.core.windows.net
 > ```
-> > Extern is de resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door publieke DNS resolving een A record voor externe IP storage account.
+> Extern is de resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door publieke DNS resolving een A record voor het externe IP van de storage account.
 >
-> Intern is de DNS resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door de private DNS zone resolved naar interne IP storage account.
+> Intern is de DNS resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door de private DNS zone resolved naar het interne IP van de storage account.
 >
 > Resources zonder private endpoint hebben geen privatelink CNAME en zullen hierdoor altijd extern benaderd worden.
 

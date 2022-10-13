@@ -11,7 +11,7 @@ Het gaat goed met BY Verzekeringen. Naast Nederland en Ierland, worden nu ook ka
 | Nederland | 10.192.0.0/22 |
 | Ierland | 10.192.4.0/22 |
 | Verenigd Koninkrijk | 10.193.128.0/22 |
-| Ierland | 10.193.132.0/22 |
+| Duitsland | 10.193.132.0/22 |
 
 Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch in een VNET te injecteren, is de [`route server`](https://learn.microsoft.com/en-us/azure/route-server/overview). Lees het stuk over de [beperkingen](https://learn.microsoft.com/en-us/azure/route-server/overview#route-server-limits) goed door.
 
@@ -35,7 +35,10 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
     > **NOTE:** De route server is niet extern benaderbaar en is niet hetgeen wat routeert. Het is een BGP route server. De `public IP` wordt gebruikt voor communicatie met het Azure platform.
 1. Configureer de peering vanuit de `route server` zijde. De SD-WAN appliance (niet de interne load balancer ervoor) kan als peer gebruikt worden.
     * Gebruik `65002` als ASN
-1. Controleer de route tabellen voor enkele subnets. Wat valt op?
+
+> **NOTE:** Indien je na deze opdracht direct door wilt gaan met opdracht 6, is het nu een goed moment om de `VPN gateway` uit te rollen in de hub. Maak, voordat je dit doet, eerst een 'AzureBastionSubnet' aan in de hub waar de `bastion` in terecht komt. Het is niet mogelijk om netwerkaanpassingen te doen terwijl de `VPN gateway` wordt uitgerold. 
+>
+> Rol vervolgens de `VGW` uit volgens deze [configuratie](../ex6#vpn-gateway-uitrollen).
 
 ### SD-WAN BGP neighbors
 
@@ -96,6 +99,8 @@ Get-AzRouteServerPeerAdvertisedRoute @remotepeer
 Get-AzRouteServerPeerLearnedRoute @remotepeer
 ```
 
+1. Controleer de route tabellen voor enkele subnets uit de hub.
+
 ### Verwijderen UDRs/load balancer
 
 Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewisseld, kunnen de onderstaande stappen uitgevoerd worden:
@@ -112,6 +117,8 @@ Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewissel
     > Echter, de default route is de Azure Firewall. Indien hier een allow-any-any is geconfigureerd, kan stateless verkeer mogelijk wel lukken. De AZF zal namelijk verkeer voor deze subnetten ontvangen en doorzetten naar zijn default gateway. Deze kent de BGP routes en stuurt het verkeer door naar de SD-WAN appliance. De SD-WAN appliance kent de API server subnetten door de peering en zal het verkeer direct terugsturen. TCP verkeer faalt (AZF ziet maar een kant van de sessie), maar ICMP zal prima lukken.
 
     </details>
+
+   > **NOTE:** Ga naar de hub en spoke VNETs en pas de peerings aan. Zorg ervoor dat de hub toegang tot de route server/virtual network gateway toe staat en dat de spokes gebruik mogen maken van remote route servers/virtual network gateways.
 1. Pas de VNET peers aan zodat de NICs van de API servers de SD-WAN routes kennen.
     * Verifieer dit met de `Network Watcher` of de `effective routes` functionaliteit van de `NICs`.
 
