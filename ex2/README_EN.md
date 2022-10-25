@@ -180,23 +180,23 @@ To fix the asymmetric routing, inbound RDP traffic has to pas the firewall. The 
 
     </details>
 
-1. Add a new `network rule collection` to allow Voeg een nieuwe `network rule collection` toe zodat outbound verkeer toegestaan is vanuit de hub. Gebruik hier optioneel een `IP group`.
-1. Verwijder de publieke IP van de management server.
-1. Controleer of inbound verkeer werkt. Gebruik hiervoor de externe IP van de `AZF`.
-    > <details><summary>RDP werkt niet</summary>
+1. Add a new `network rule collection` to allow outbound traffic from the hub. Try to use `IP groups` where possible.
+1. Remove the `public IP` from the management server.
+1. Check if inbound RDP traffic is working. Use the external IP of the `AZF` as destination.
+    > <details><summary>If RDP isn't working</summary>
     >
-    > Afhankelijk van de NSG instellinge kan RDP nog steeds niet werken. Indien RDP alleen vanuit jouw IP is toegestaan en al het overige inbound verkeer geblokkeerd wordt, zal dit het geval zijn. De `AZF` doet naast DNAT ook SNAT voor inbound verkeer. De reden hiervoor is simpel: het verkeer moet symmetrisch lopen.
+    > RDP may still not work depending on the `NSGs`' configurations. If RDP is allowed only from your home IP address, all other inbound RDP will be blocked. The `AZF` always performs SNAT for inbound traffic from the internet. The reason is simple: to make sure that traffic isn't flowing assymmetrically. 
     > 
-    > Hierdoor is de source van het verkeer een `AZF` instance IP en niet de load balanced IP. Je zal dus verkeer toe moeten staan van de gehele 'AzureFirewallSubnet' reeks. Het is onmogelijk om te weten vanuit welke instance in dat subnet het verkeer af komt.
+    > Because of the SNAT, the traffic will appear to originate from an `Azure firewall` instance's IP. It will not appear to originate from the load balanced IP. As the instance IP can be any IP in the `AzureFirewallSubnet`, the whole subnet must be allowed as source.
 
     </details>
-1. Controleer de nu gebruikte externe IP.
-1. Test de `threat intelligence` door de volgende website te bezoeken vanuit de management VM:
+1. Check the management server's external IP.
+1. Test the `threat intelligence` feature by visiting the following website from the management server:
     * `https://testmaliciousdomain.eastus.cloudapp.azure.com`
 
-> **Note:** de bovenstaande URL werkt niet meer.
+> **Note:** It seems that the above service doesn't work anymore.
 
-> **Optioneel:** configureer een [DNS record](https://learn.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) op de `public IP` van de firewall.
+> **Optional:** Configure a [DNS record](https://learn.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) on the `public IP` of the firewall.
 
 ## Clean up lab resources
 
