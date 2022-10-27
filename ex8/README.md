@@ -12,6 +12,12 @@ Dit zorg voor een verlaagde retentie op de site doordat consumenten afhaken. Om 
 
 ![Private and service endpoint topology](./data/pe_se.svg)
 
+## Verwijderen Traffic Manager profiles
+
+Verwijder de Traffic Manager profiles. Deze zullen we na de implementatie van Azure Front Door niet meer nodig hebben. Zeker aangezien het [niet werkt door de FQDN](../ex7/README.md#optioneel-traffic-manager-aanpassingen) problemen.
+
+In productie is het prima mogelijk om Azure Front Door voor TM profiles te plaatsen.
+
 ## Azure Front Door
 
 Doordat de function apps en on-prem server compleet andere endpoints hebben, is het voor het lab niet echt mogelijk om verkeer goed over alle drie de endpoints te load balancen. Voor de front door oefening negeren we de on-prem website.
