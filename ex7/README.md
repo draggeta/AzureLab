@@ -126,11 +126,11 @@ Wat gaat er mis? Lukt het wel op de private endpoint IP?
 >
 > Er gebeurt hierna iets 'magisch'. Resource met een private link krijgen automatisch een privatelink CNAME. 
 > ```
-> storageaccount.core.windows.net > storageaccount.privatelink.core.windows.net
+> functionapp.azurewebsites.net > functionapp.privatelink.azurewebsites.net
 > ```
-> Extern is de resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door publieke DNS resolving een A record voor het externe IP van de storage account.
+> Extern is de resolving als volgt: `<functionapp>.azurewebsites.net` > dit is een CNAME voor `<functionapp>.privatelink.azurewebsites.net` > uiteindelijk door publieke DNS resolving een A record voor het externe IP van de function app.
 >
-> Intern is de DNS resolving als volgt: `<storageaccount>.core.windows.net` > dit is een CNAME voor `<storageaccount>.privatelink.core.windows.net` > uiteindelijk door de private DNS zone resolved naar het interne IP van de storage account.
+> Intern is de DNS resolving als volgt: `<functionapp>.azurewebsites.net` > dit is een CNAME voor `<functionapp>.privatelink.azurewebsites.net` > uiteindelijk door de private DNS zone resolved naar het interne IP van de function app.
 >
 > Resources zonder private endpoint hebben geen privatelink CNAME en zullen hierdoor altijd extern benaderd worden.
 
