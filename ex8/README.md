@@ -6,26 +6,28 @@
 * [(Optioneel) Traffic manager aanpassingen](#optioneel-traffic-manager-aanpassingen)
 * [Opruimen lab](#opruimen-lab)
 
-BY merkt op dat mensen buiten Nederland en Ierland een slechtere ervaring hebben bij het gebruik maken van hun diensten. Het grootste probleem zit het in het ophalen van statische resources. Zeker de instructievideos willen nog wel eens bufferen. Ook geeft de Hollandsche Bank aan dat financiele instellingen al hun externe diensten via IPv6 aan moeten gaan bieden.
+De nieuwe regelgeving van De Hollandsche Bank eist dat financiele instellingen al hun externe diensten via IPv6 aan moeten gaan bieden.
 
-Dit zorg voor een verlaagde retentie op de site doordat consumenten afhaken. Om deze reden wil BY verzekeringen dichter bij gebruikers cachen. Dit kan met CDN, maar de architecten vinden het gebruik van Azure Front Door fijner. Het betekent namelijk dat er minder beheerd hoeft te worden in Azure.
+Ook merkt BY verzekeringen op dat gebruikers buiten Nederland en Ierland een slechtere ervaring hebben bij het gebruik maken van hun diensten. Het grootste probleem zit het in het ophalen van statische resources. Zeker de instructievideos willen nog wel eens bufferen. Dit zorg voor een verlaagde retentie op de site doordat consumenten afhaken. 
 
-![Private and service endpoint topology](./data/pe_se.svg)
+Om deze redenen wil BY data dichter bij gebruikers cachen. Dit kan met een CDN, maar de architecten vinden het gebruik van Azure Front Door een beter idee, omdat ze dan ook meteen aan de DHB eisen voldoen. Ook hoeven er minder losse resources beheerd te worden in Azure.
+
+![Azure Front Door topology](./data/front_door.svg)
 
 ## Verwijderen Traffic Manager profiles
 
-Verwijder de Traffic Manager profiles. Deze zullen we na de implementatie van Azure Front Door niet meer nodig hebben. Zeker aangezien het [niet werkt door de FQDN](../ex7/README.md#optioneel-traffic-manager-aanpassingen) problemen.
+Verwijder de Traffic Manager profiles. Deze zullen we na de implementatie van Azure Front Door niet meer nodig hebben. Zeker aangezien het [niet werkt met de function apps door de FQDN](../ex7/README.md#optioneel-traffic-manager-aanpassingen) problemen.
 
 In productie is het prima mogelijk om Azure Front Door voor TM profiles te plaatsen.
 
 ## Azure Front Door
 
-Doordat de function apps en on-prem server compleet andere endpoints hebben, is het voor het lab niet echt mogelijk om verkeer goed over alle drie de endpoints te load balancen. Voor de front door oefening negeren we de on-prem website.
+Doordat de function apps en on-prem server compleet andere endpoints hebben, is het voor het lab niet echt mogelijk om verkeer goed over alle drie de endpoints te load balancen. Voor de front door oefening splitsen we de twee typen endpoints (function app en on-prem webservers).
 
-Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek in de Azure portal naar Front Door and CDN profiles. Kies hier voor Front Door en custom settings. Configureer de settings als volgt:
+Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek in de Azure portal naar `Front Door and CDN profiles`. Kies hier voor Front Door en custom settings. Configureer de settings als volgt:
 * Secrets: voer hier niks in. Dit is handig als je je eigen domein gaat gebruiken waar eigen certs bij horen. Deze hebben we niet.
 * Endpoint: 
-    * Kies een naam voor de FQDN
+    * Kies een naam voor de FQDN van de front door
     * Voeg een route toe voor de function apps
         * Patterns to match: '/*' dit is de catch-all
         * Voeg een origin group toe met beide function apps als origin (gebruik app service als type. Verdeel het verkeer 50/50).
@@ -51,10 +53,9 @@ Dit zou resultaat terug moeten geven. Probeer ook de FQDN te resolven, welke soo
 * linux: `dig <front door fqdn> +short`
 * windows: `Resolve-DnsName <front door fqdn>`
 
-
 ## Onbehandelde items
 
-Er zijn wat items die in het examen mogelijk terug komen, maar niet behandeld zijn. De redenen ervoor zijn verschillend maar in de meeste gevallen komt het neer op kosten of het feit dat het niet mogelijk is om ze volledig uit te rollen. Probeer nu deze items uit.
+Er zijn wat items die in het examen mogelijk terug komen, maar niet behandeld zijn. De redenen ervoor zijn verschillend maar in de meeste gevallen komt het neer op kosten of het feit dat het niet mogelijk is om ze volledig uit te rollen in een test omgeving. Probeer deze items uit.
 
 ### (Optioneel) IPv6
 
