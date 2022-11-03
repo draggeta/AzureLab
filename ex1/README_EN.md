@@ -90,7 +90,7 @@ Each application will consist of two spokes attached to a the hub/management net
 
 1. Deploy the spoke A `virtual network` in West Europe, with a /16 address space.
 1. Deploy the spoke B `virtual network` in North Europe, with a /16 address space.
-1. Select `Peering` each newly created `virtual network`. [Add a peering](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) to couple the spokes to the hub `VNET`.  
+1. Go to `Peering` for each newly created `virtual network`. [Add a peering](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#create-a-peering) to couple the spokes to the hub `VNET`.  
     * Allow traffic to remote networks. 
     * Allow traffic from remote networks.
 
