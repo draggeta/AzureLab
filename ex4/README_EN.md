@@ -62,104 +62,105 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 
 ![Load balancing](./data/load_balancing.svg)
 
-> **NOTE:** We gaan geen WAF fuctionaliteit hier gebruiken. Het opzetten hiervan is wat ingewikkelder, is duurder en kan wat tijd kosten.
+> **NOTE:** No WAF functionality will be configured or used here. The setup isn't straightforward and may consume time. Also, `AGWs` with WAF functionality are more expensive.
 
-> **NOTE:** Hoe de AGW geplaatst wordt is afhankelijk van wat de organisatie wil. In dit lab gaan we de [AGW en AZF parallel](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) naast elkaar draaien. Dit is een van de makkelijkere opties. Lees de gelinkte documentatie door voor andere architecturen. Het is in deze opzet mogelijk om de AGW in de hub neer te zetten, indien het in meerdere VNETs gebruikt zal worden.
+> **NOTE:** The location for `AGWs` is dependent on the organization and architecture. For this lab we've chosen to run [AGW and AZF parallel](https://learn.microsoft.com/en-us/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel) to each other. This is one of the easier solutions with fewer downsides. Read the linked documentation to see other architectural options. In the parallel option its possible to deploy the gateway centrally for usage in multiple VNETs.
 
-1. Configureer de `application gateway`.
-    * Bepaal waar je de AGW uit wilt rollen. Hub of spoke A.
-    * Kies voor een v2 application gateway
-    * Controleer de frontend IP configuration
-    * Maak een *listener* en *backend pool* aan. Zet de spoke A VM(s) in de backend pool.
-1. (Optioneel) Na het uitrollen van de gateway, kan ook een custom health probe worden aangemaakt.
-    * Maak een uitgebreidere health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint die een `HTTP 200 OK` teruggeeft met bericht `{"health": "ok"}`. 
+1. Configure the `application gateway`.
+    * Determine where you want to deploy the `AGW`. Hub or spoke A, both are valid options.
+    * Select a v2 application gateway
+    * Check the *frontend IP configuration*
+    * Create a *listener* and *backend pool*. Add the spoke A VM(s) into the backend pool.
+1. (Optional) After deploying the gateway, a custom health probe can be created. This isn't needed, but allows for more accurate health checks.
+    * Create a custom health probe to check the server health. There is a health check on the server's `/health/` API endpoint which returns a `HTTP 200 OK` with the following content `{"health": "ok"}`. 
         * protocol: Http
         * pick host name from backend http settings: true
         * path: `/health/`
-        > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
-    * Koppel de health probe aan de HTTP setting
+        > **NOTE:** If you've chosen the *HTTP* health check, the trailing '/' is required.
+    * Attach the health probe to the *HTTP setting*.
 
-1. Configureer `diagnostics settings` conform de DHB standaarden.
-1. Bezoek de webserver/API via de management server. Gebruik hiervoor de DNS naam die bij de `public IP` van de `AGW` hoort.
-    * Afhankelijk van de gekozen type session persistence kan je verschillende hosts tegen komen of steeds dezelfde.
-1. Maak handmatig een DNS CNAME record aan in de `private DNS zone` voor de `AGW` A record.
-    * Deze CNAME is niet extern te resolven, alleen binnen in het netwerk.
-1. Test de interne werking op basis van IP en DNS
+1. Configure the `diagnostics settings` according to the DHB standards.
+1. Visit the webserver/API through the management server. Use the FQDN attached to the `public IP` of the `AGW`.
+    > **NOTE:** Depending on the chosen type of *session persistence*, you may encounter only one or different hosts. As we have only one VM, you'll always encounter the single host.
+1. Create a DNS CNAME record in the `private DNS zone` for the `AGW` A record.
+    > **NOTE:** This CNAME cannot be resolved outside of the virtual network. Its only resolveable within the network.
+1. Test the spoke A API server via AGW by using the AGWs IP and (custom) DNS record.
     > <details><summary>Health probe status</summary>
     >
-    > Voor de `application gateway` is het een stuk makkelijker om de health probe statussen te zien van de servers in een pool. Er is een sectie genaamd `Backend health` die een overzicht terug geeft.
+    > It's easier to view the `application gateway`'s health probe statusses of servers in pools. There is a section named `Backend health` that displays an overview of statusses.
 
     </details>
 
-1. Wat is het verschil tussen inbound en outbound verkeer vanaf de spoke A webserver?
+1. What is the difference between inbound and outbound internet traffic to and from the spoke A webserver?
 
 ## Load Balancing
 
-De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways zijn duur en die als standby hebben draaien kost teveel. Voor de backup site is daarom gekozen voor een publieke load balancer. Een [`load balancer`](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) moet de load kunnen verdelen en bij uitval moet de uitgevallen server uit de pool gehaald worden.
+The application in spoke B has to be made redundant as well. `Application Gateways` are expensive and having those running while idle is not a cost BY is willing to incur. For this reason an external `public load balancer` was chosen for external inbound connectivity. The configured [`load balancer`](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) must be configured to divide the load and to remove a server from the pool if the application isn't healthy.
 
-1. [Rol](https://learn.microsoft.com/en-us/azure/load-balancer/quickstart-load-balancer-standard-public-portal#create-load-balancer) een `load balancer` uit.
+1. [Deploy](https://learn.microsoft.com/en-us/azure/load-balancer/quickstart-load-balancer-standard-public-portal#create-load-balancer) a `load balancer`.
     * Type: Public
-    * SKU: Standard (Basic kan niet, want de VMs maken geen gebruik van een `availability set`)
+    * SKU: Standard (Basic cannot be used as the VMs use `availability zones`)
     * IP address assignment: Dynamic
-1. Configureer de `load balancer`.
-    * Controleer de frontend IP configuration
-    * Maak een backend pool aan. Zet de VMs erin
-    * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint.
-    > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
-    * Maak een load balancing rule aan.
-    * Session persistance: naar eigen keus
+1. Configure the `load balancer`.
+    * Check the frontend IP configuration settings
+    * Create a backend pool. Add the spoke B VM(s) to it.
+    * Create a sensible health probe for the server. The server has a health check on the `/health/` API endpoint.
+    > **NOTE:** If you've chosen the *HTTP* health check, the trailing '/' is required.
+    * Create a load balancing rule.
+    * Session persistence: [Any](https://learn.microsoft.com/en-us/azure/load-balancer/distribution-mode-concepts)
 
-1. Configureer `diagnostics settings` conform de DHB standaarden.
-1. Bezoek de webserver/API via de management server. Lukt dit? Waarom wel/niet?
+1. Configure the `diagnostics settings` according to the DHB standards.
+1. Try to visit the webserver/API via the management server. Does it succeed? Can you think of why this is the case?
     > <details><summary>External load balancers</summary>
     >
-    > De Azure ELB's doen aan DNAT, maar geen SNAT. De reden hiervoor is dat het, in tegenstelling tot de AGW, geen interne IP-adres heeft. Wanneer jouw server dit verkeer ontvangt, zal het dus het antwoord terugsturen via zijn beste route. In dit geval, is dat de default route via de Azure Firewall. Dit is duidelijk een voorbeeld van asymmetrisch verkeer.
+    > The Azure ELB's perform DNAT, but no SNAT. In contrast to the `AGW`, it has no internal IP address and isn't attached to your internal network. When the server receives this traffic, it will respond to the original source, using its best path. In this case, the used route is the default route via the Azure Firewall. This causes asymmetric traffic which are blocked by firewals.
     > 
-    > Het is op te lossen [door het verkeer als volgt](https://learn.microsoft.com/en-us/azure/firewall/integrate-lb#public-load-balancer) te laten lopen: 
+    > This can be solved by routing traffic in the [following way](https://learn.microsoft.com/en-us/azure/firewall/integrate-lb#public-load-balancer): 
     > * Azure Firewall PIP
-    > * DNAT richting ELB PIP
-    > * ELB load balancet verkeer naar server
-    > * Server heeft UDR voor AZF PIP direct naar het internet
-    >   * Azure SDN SNAT de server IP terug naar LB IP
-    >   * AZF SNAT het weer naar zijn IP en stuurt het door naar de client
+    > * DNAT to ELB PIP
+    > * ELB load balances traffic to the server
+    > * Server has UDR for AZF PIP directly to the internet instead 
+    >   * Azure SDN SNAT the server IP back to the ELB IP
+    >   * AZF SNATs the IP and forwards it to the client
     > 
-    > Dit is best onzinnig om verschillende redenen.
+    > This is somewhat silly and I cannot think of a reason to ever deploy them like this.
 
     </details>
 
-Kies een van de twee opties om het op te lossen:
-1. Richt het verkeer in conform de microsoft documentatie.
-1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver.
-1. Verwijder de ELB en NAT verkeer vanuit de AZF richting een interne load balancer waar de spoke B webserver achter hangt.
+Choose one of the below options to solve the issue:
+1. Perform the steps as outlined in the Microsoft documentation.
+1. Remove the ELB and NAT traffic from the AZF to the internal IP of the spoke B webserver.
+1. Remove the ELB and NAT traffic from the AZF towards an internal load balancer fronting the spoke B webserver.
 
 ## Traffic Manager
 
-[`Traffic Manager`](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal verkeer kan afhandelen. Het is vooral handig voor load balancing tussen datacentra. BY wil dat verkeer altijd in `West Europe` binnenkomt, tenzij er een probleem is in deze regio. In die gevallen moet het verkeer naar `North Europe`. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer over de regio's verdeelt.
+BY wants all traffic to enter the `West Europe` API servers, unless there an outage in the region or traffic needs to be failed over from the primary region. In those cases, traffic needs to be directed to `North Europe`. The best solution for this is to use `Traffic Manager profiles`.
+[`Traffic Manager`](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is a DNS `load balancer` that can load balance clients on a global scale. `TM` does not route the traffic. It only points clients to an endpoint. It is quite handy for load balancing between datacentra. 
 
-1. Maak een nieuwe `Traffic Manager profile` aan.
+1. Create a new `Traffic Manager profile`.
     * [Routing method](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods): Priority
-    * Zet de probing interval op 10 secondes (scheelt met testen).
+    * Reduce the *probing interval* to 10 seconds (makes testing easier).
     > <details><summary>Routing Methods</summary>
     >
-    > De routing methods bepalen wie op welke instance terecht komt.
-    >    * priority: voor een active/passive of primary/backup setup
-    >    * weighted: verkeer proportioneel verdelen op basis van weight
-    >    * performance: verkeer sturen naar best presterende server, vanaf een gebruikersperspectief bekeken
-    >    * geographic: gebruikers vanuit specifieke regio's naar een specifieke endpoint sturen
-    >    * multivalue: stuurt meerdere endpoints terug in plaats van één enkele
-    >    * subnet: verkeer verdelen op basis van source subnet
+    > The routing methods determine which client contact which endpoint.
+    >    * priority: for an active/passive or primary/backup setup
+    >    * weighted: divides the traffic based on the ratio of the weight
+    >    * performance: sends traffic to the best performing server, as seen from the user's perspective.
+    >    * geographic: sends clients from specific regions to specific endpoints.
+    >    * multivalue: returns multiple endpoints instead of a single one.
+    >    * subnet: sends clients from specific (public) subnets to specific subnets.
 
     </details>
-1. Ga naar Traffic Manager > Endpoints en voeg een nieuwe endpoint toe.
-    * Gebruik Azure endpoints en kies de AGW IP.
-1. Herhaal dit voor de AZF PIP.
-    * Geef het een hogere metric dan de AGW IP. Hierdoor is de AGW preferred.
-1. Test nu het browsen naar de website vanuit een externe client door gebruik te maken van jouw DNS name, te vinden bij 'Overview'.
-    * Schakel de VM in spoke A uit en controleer of je in spoke B uit komt.
-1. Optioneel: Speel met de routing method. Gebruik eventueel web proxies om verkeer vanuit andere regio's te laten komen.
+1. Go to Traffic Manager > Endpoints and add a new endpoint.
+    * Use Azure endpoints and choose the AGW IP.
+1. Repeat this for the AZF PIP.
+    * Make sure the to assign it a higher metric than the AGW IP. This makes the AGW more preferred.
+1. Test the browsing to the website from an external client by using the `Traffic managers` DNS name, visibile under 'Overview'.
+    * Turn off the VM in spoke A and check if traffic gets redirected to spoke B.
+1. Optional: Play around with the routing method. If need be, use web proxies to generate traffic from other regions.
 
-> **NOTE:** Onder normale omstandigheden maak je gebruik van een CNAME die naar de traffic manager FQDN verwijst en ga je niet direct naar de TM FQDN. Voor het lab is geen externe DNS zone beschikbaar.
+> **NOTE:** Under normal circumstances a CNAME is created in your domain referencing the `Traffic manager` FQDN and the `TM` FQDN isn't directly accessed. 
 
-## Opruimen lab
+## Clean up lab resources
 
-Het is het gemakkelijkst en goedkoopst om het lab z.s.m. op te ruimen wanneer het niet meer nodig is en [opnieuw uit te rollen](../README.md#lab-checkpoints) via de bijgevoegde [Terraform bestanden](./tf/).
+If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).

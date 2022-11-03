@@ -106,7 +106,7 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
     * Maak een zinnige health probe om te controleren of de server werkt. De server heeft een healthcheck op de `/health/` API endpoint.
     > **NOTE:** Indien voor de HTTP health check is gekozen, is de '/' aan het eind nodig.
     * Maak een load balancing rule aan.
-    * Session persistance: naar eigen keus
+    * Session persistence: [elke willekeurige](https://learn.microsoft.com/en-us/azure/load-balancer/distribution-mode-concepts)
 
 1. Configureer `diagnostics settings` conform de DHB standaarden.
 1. Bezoek de webserver/API via de management server. Lukt dit? Waarom wel/niet?
@@ -126,14 +126,14 @@ De applicatie in spoke B moet redundant worden uitgevoerd. Application Gateways 
 
     </details>
 
-Kies een van de twee opties om het op te lossen:
-1. Richt het verkeer in conform de microsoft documentatie.
-1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting de spoke B webserver.
+Kies een van de opties om het op te lossen:
+1. Richt het verkeer in conform de Microsoft documentatie.
+1. Verwijder de ELB en NAT verkeer vanuit de AZF direct richting het interne IP-adres van de spoke B webserver.
 1. Verwijder de ELB en NAT verkeer vanuit de AZF richting een interne load balancer waar de spoke B webserver achter hangt.
 
 ## Traffic Manager
 
-[`Traffic Manager`](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal verkeer kan afhandelen. Het is vooral handig voor load balancing tussen datacentra. BY wil dat verkeer altijd in `West Europe` binnenkomt, tenzij er een probleem is in deze regio. In die gevallen moet het verkeer naar `North Europe`. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer over de regio's verdeelt.
+[`Traffic Manager`](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview) is een DNS `load balancer` dat op wereldwijde schaal clients kan load balancen. `TM` ziet het verkeer niet. Het load balancet clients over endpoints. Het is vooral handig voor load balancing tussen datacentra. BY wil dat verkeer altijd in `West Europe` binnenkomt, tenzij er een probleem is in deze regio. In die gevallen moet het verkeer naar `North Europe`. We gaan in deze opdracht een `Traffic Manager profile` aanmaken dat verkeer over de regio's verdeelt.
 
 1. Maak een nieuwe `Traffic Manager profile` aan.
     * [Routing method](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods): Priority

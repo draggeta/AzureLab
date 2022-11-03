@@ -76,6 +76,14 @@ Verkeer tussen on-prem en de spokes gaat niet langs de Azure firewall. Dit is st
 * Maak firewall regels aan die verkeer toe staan
 * Gebruik de log analytics om de logs te bekijken
 
+### (Optioneel) Global load balancer
+
+De global load balancer is voor L4 wat Azure Front door is voor L7. Het is gebruikt een anycast public IP en kan verkeer load balancer naar externe publieke load balancers. Rol twee externe load balancers uit en zet daar een global load balancer voor.
+
+* Kan het met een basic SKU?
+* Welke regio's ondersteunen de GLB?
+* Wat is het gevolg als de regio waar de GLB gehost wordt down gaat?
+
 ### (Optioneel) Security/WAF policies
 
 Security policies kunnen gebruikt worden om verkeer te filteren op applicatie niveau. Deze policies kunnen op meerdere plekken gebruikt worden, waaronder de Front Door.
