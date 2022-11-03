@@ -60,7 +60,7 @@ Nadat de `functions` succesvol uitgerold zijn, gaan we de API deployen. Ga naar 
 4. Klik op save
 5. (Optioneel) Controleer bij tabblad Logs de deployment. Dit kan even duren. Bij status 'Success (Active)' is het gelukt.
 6. Probeer de API op `https://<fqdn>/api/info` en `https://<fqdn>/api/health` (dit keer zonder '/' aan het eind)
-7. Probeer ook de API vanuit de management server. Dit zou niet moeten lukken.
+7. Probeer ook de API vanuit de management server te bereiken. Dit zou niet moeten lukken.
 
 > **NOTE:** De onderstaande opdrachten zijn puur lab opdrachten om de mogelijkheden en beperkingen van de diensten te leren kennen. 
 >
@@ -71,7 +71,7 @@ Nadat de `functions` succesvol uitgerold zijn, gaan we de API deployen. Ga naar 
 Het is niet mogelijk om vanuit de management server de APIs te benaderen. Het is wel gewenst, maar Security wil niet dat de management server het internet op kan. 
 [`Service endpoints`](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) hebben niet meer de voorkeur, maar ze kunnen prima gebruikt worden. `Service endpoints` voegen een directe route over de Microsoft backbone toe richting bepaalde PaaS diensten. Het verkeer gaat niet over het internet en apparaten die gebruik hiervan maken hoeven geen internet verbinding te hebben. In de meeste gevallen omzeilt dit verkeer ook een NVA.
 
-Een nadeel is dat alleen apparaten die in een subnet met een `service endpoint` zitten, gebruik kunnen maken van deze `service endpoints`. Andere subnetten en vanuit on-prem kunnen niet een willekeurige `service endpoint` gebruiken.
+Een nadeel is dat alleen apparaten die in een subnet met een `service endpoint` zitten, gebruik kunnen maken van deze `service endpoints`. Andere subnetten en vanuit on-prem kan een willekeurige `service endpoint` niet gebruikt worden.
 
 Service endpoints zijn voor een beperkte set resources beschikbaar.
 
