@@ -153,11 +153,13 @@ Test nadat de uitrol gelukt is de onderstaande punten:
 * de DNS resolving
 * bereikbaarheid van de spoke B API vanuit de management server
 * bereikbaarheid van de spoke B API vanuit de SD-WAN appliance
-    * Wat gaat hier mis?
+    * Waarom kan de appliance bij de private endpoint?
 
 > <details><summary>Private endpoints en NSGs</summary>
 >
-> `Private endpoints` [negeren standaard](https://learn.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy?tabs=network-policy-portal) `NSGs` en `UDRs`. UDRs worden alleen gebruikt voor return traffic. NSGs worden alleen gebruikt voor inbound verkeer. De link geeft aan hoe dit kan indien je dit niet zelf uit wilt zoeken.
+> `Private endpoints` [negeren standaard](https://learn.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy?tabs=network-policy-portal) `NSGs` en `UDRs`. Het is mogelijk om endpoints de network policies te laten respecteren. De link geeft aan hoe dit kan indien je dit niet zelf uit wilt zoeken. 
+>
+> UDRs worden alleen gebruikt voor return traffic. NSGs worden alleen gebruikt voor inbound verkeer. 
 
 </details>
 
@@ -169,7 +171,7 @@ Test ook of de website vanuit extern te benaderen is.
 >
 > `App services` en `function apps` zijn [niet meer extern te benaderen](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview#network-security-of-private-endpoints) wanneer een `private endpoint` gekoppeld wordt. Dit zijn de enige type resources waar dit het geval is. 
 >
-> De API server moet echter wel vanuit het internet te benaderen zijn. Dit is op te lossen onder de `function app` > Networking > Access Restrictions (preview). Hier kan toegang vanuit het internet toegestaan worden.
+> De API server moet echter wel vanuit het internet te benaderen zijn. Dit is op te lossen onder de `function app` > Networking > Access Restrictions (preview) item. Hier kan toegang vanuit het internet toegestaan worden.
 
 </details>
 
