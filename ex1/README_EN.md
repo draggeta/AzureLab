@@ -34,9 +34,9 @@ There is no client VPN solution available yet and it isn't a business priority d
 1. Create a hub `virtual network` with a /16 `address space`.
 
 1. Create an `NSG` for the management subnet. It's better to configure your security before creating the workload.
-    * Allow inbound RDP from your public IP. We'll use this for management of the environment.
+    * Allow inbound RDP **ONLY** from your public IP. We'll use this for management of the environment.
     * Deny all other inbound traffic from the internet
-    * **DO NOT** block internal inbound traffic.
+    * Allow all other internal traffic (except for inbound RDP)
     > <details><summary>Network Security Groups</summary>
     >
     > NSG rules can make us of `tags` to specify sources and destinations. One of the more interesting tags is the `VirtualNetwork` tag. This tag doesn't only contain the VNET address space, but also all directly peered networks' address spaces and any network advertised by `virtual network gateways` or `route servers`.
