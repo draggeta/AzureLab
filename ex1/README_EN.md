@@ -114,7 +114,7 @@ Inbound SSH will always only be allowed from the management server.
 1. Deploy two Ubuntu 22.04 VMs as the API servers, one in each of the spokes. The spoke A server must be placed in `West Europe`. The spoke B server in `North Europe`. 
     * Place the VMs in `availability zones`.
     * **DO NOT** assign the VMs `public IPs`.
-    * **DO NOT** assign the VMs `network security groups`. We'll one later.
+    * **DO NOT** assign the VMs `network security groups`. We'll add one later.
     * Turn on `Auto-shutdown` and configure it to shutdown the server at 00:00 local time.
     * A script for the initial deployment can be provided to configure the VMs. On the `Advanced` tab, paste the bash script below in the **USER DATA** field, not **CUSTOM DATA**.
       * Custom scripts can be used to bootstrap a lot of devices, even network appliances.
