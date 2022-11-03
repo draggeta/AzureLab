@@ -29,9 +29,9 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
 1. Bouw een hub `virtual network` met een /16 `address space`.
 
 1. Maak een `NSG` voor management. Het is belangrijk eerst verkeer te limiteren voordat je een dienst uitrolt.
-    * Sta inbound RDP vanuit jouw publieke IP adres toe. Dit gaan we gebruiken voor management.
+    * Sta inbound RDP **ALLEEN** vanuit jouw publieke IP adres toe. Dit gaan we gebruiken voor management.
     * Overig inbound internet verkeer mag niet.
-    * Blokkeer interne inbound verkeer niet!
+    * Blokkeer interne inbound verkeer (behalve RDP) niet!
     > <details><summary>Network Security Groups</summary>
     >
     > NSG rules kunnen gebruik maken van `tags` om bepaalde sources en destinations aan te duiden. Een van de interessante tags is de `VirtualNetwork` tag. Deze tag staat niet alleen verkeer vanuit jouw `VNET` toe, maar ook alle direct gepeerde `VNETs` en alle netwerken die door een `VPN gateway`, `ExpressRoute gateway` of `route server` worden geleerd.
