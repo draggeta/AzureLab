@@ -1,11 +1,11 @@
 # Day 2 - Firewalling
 
-* [Uitrol AZF](#uitrol-azf)
-* [Aanpassen interne routering](#aanpassen-interne-routering)
-* [IP groups en network rules](#ip-groups-en-network-rules)
-* [Aanpassing routering richting internet](#aanpassing-routering-richting-internet)
-* [Inbound management verkeer repareren](#inbound-management-verkeer-repareren)
-* [Opruimen lab](#opruimen-lab)
+* [Azure firewall deployment](#azure-firewall-deployment)
+* [Internal routing change](#internal-routing-change)
+* [IP groups and network rules](#ip-groups-and-network-rules)
+* [Internet routing update](#internet-routing-update)
+* [Inbound management traffic repair](#inbound-management-traffic-repair)
+* [Lab clean-up](#lab-clean-up)
 
 ![DNS resolution](./data/dns_inspection.svg)
 
@@ -13,7 +13,7 @@ The security department wants to have `threat intelligence`/threat detection cap
 
 > **Note:** Don't start the VMs yet if they aren't running. We're going to change VNET DNS settings. Changes to the VNET DNS settings. VMs in Azure by default use static DHCP and only pick up changes after a reboot or by telling the DHCP client in the OS to renew.
 
-## Deploying the Azure firewall
+## Azure firewall deployment
 
 1. Deploy an [`Azure firewall`](https://learn.microsoft.com/en-us/azure/firewall/overview) in the hub network. It will serve as an NVA with DNS server/proxy capabilities and can perform threat inspection.
     * Place it in the hub
@@ -47,7 +47,7 @@ The `AZF` can now be used as a DNS proxy. Visit some websites on the management 
 
 </details>
 
-## Internal routing
+## Internal routing change
 
 As usual, requirements change over time and the network has to support business needs.
 
@@ -129,7 +129,7 @@ Traffic between spokes should now work. Generate some traffic between the spokes
 
 </details>
 
-## Update internet routing 
+## Internet routing update
 
 A mandate has come down from the board of directors that all traffic to and from the internet must be analyzed for threats. This is a task that can be performed by the `AZF`.
 
@@ -167,7 +167,7 @@ A mandate has come down from the board of directors that all traffic to and from
 
 </details>
 
-## Fixing inbound management traffic
+## Inbound management traffic repair
 
 To fix the asymmetric routing, inbound RDP traffic has to pas the firewall. The AZF will be performing NAT to allow traffic arriving at tcp/udp port 3389 to reach the management server.
 
@@ -198,7 +198,7 @@ To fix the asymmetric routing, inbound RDP traffic has to pas the firewall. The 
 
 > **Optional:** Configure a [DNS record](https://learn.microsoft.com/en-us/azure/virtual-network/public-ip-addresses#dns-hostname-resolution) on the `public IP` of the firewall.
 
-## Clean up lab resources
+## Lab clean-up
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).
 

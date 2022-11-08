@@ -1,17 +1,17 @@
-# Dag 4 - Load balancing and DNS
+# Day 4 - Load balancing and DNS
 
-* [Private DNS Zones](#private-dns-zones)
-* [Application Gateway](#application-gateway)
-* [Load Balancing](#load-balancing)
+* [Private DNS zones](#private-dns-zones)
+* [Application gateway](#application-gateway)
+* [Load balancing](#load-balancing)
 * [Traffic Manager](#traffic-manager)
-* [Opruimen lab](#opruimen-lab)
+* [Lab clean-up](#lab-clean-up)
 
 The environment is getting more expansive and having to remember IP addresses is getting harder. A solution for this DNS. 
 ![Private DNS resolving](./data/private_dns.svg)
 
 The API servers must also be made available externally. For the primary environment, an `application gateway` (`AGW`) will be used. The secondary environment will use an `Azure load balancer` for inbound external connectivity.
 
-## Private DNS Zones
+## Private DNS zones
 
 The architects have chosen to use [private DNS zone`](https://learn.microsoft.com/en-us/azure/dns/private-dns-privatednszone) to host their internal DNS zones. The zone should register all deployed VMs automatically to reduce the risk of configuration errors. All DNS requests have to continue going through the `AZF` for inspection.
 
@@ -50,7 +50,7 @@ The zone will be named `by.cloud`.
 
 6. Edit the `AZF` DNS settings so private DNS resolving works. **Don't** change the the `VNET` DNS settings.
 
-## Application Gateway
+## Application gateway
 
 The application in spoke A, the primary region, has to be made available externally. There are a few options:
 * Public IP attached to the instance(s)
@@ -93,9 +93,9 @@ De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen 
 
 1. What is the difference between inbound and outbound internet traffic to and from the spoke A webserver?
 
-## Load Balancing
+## Load balancing
 
-The application in spoke B has to be made redundant as well. `Application Gateways` are expensive and having those running while idle is not a cost BY is willing to incur. For this reason an external `public load balancer` was chosen for external inbound connectivity. The configured [`load balancer`](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) must be configured to divide the load and to remove a server from the pool if the application isn't healthy.
+The application in spoke B has to be made redundant as well. `Application gateways` are expensive and having those running while idle is not a cost BY is willing to incur. For this reason an external `public load balancer` was chosen for external inbound connectivity. The configured [`load balancer`](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview) must be configured to divide the load and to remove a server from the pool if the application isn't healthy.
 
 1. [Deploy](https://learn.microsoft.com/en-us/azure/load-balancer/quickstart-load-balancer-standard-public-portal#create-load-balancer) a `load balancer`.
     * Type: Public
@@ -161,6 +161,6 @@ BY wants all traffic to enter the `West Europe` API servers, unless there an out
 
 > **NOTE:** Under normal circumstances a CNAME is created in your domain referencing the `Traffic manager` FQDN and the `TM` FQDN isn't directly accessed. 
 
-## Clean up lab resources
+## Lab clean-up
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).

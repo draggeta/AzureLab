@@ -1,11 +1,11 @@
 # Day 1 - Networking basics
 
-* [Uitrollen hub/management netwerk](#uitrollen-hub/management-netwerk)
-* [Uitrollen spoke/applicatie netwerken](#uitrollen-spoke/applicatie-netwerken)
-* [Uitrollen applicatie server](#uitrollen-applicatie-server)
+* [Management/hub network deployment](#managementhub-network-deployment)
+* [Spoke/application networks deployment](#spokeapplication-networks-deployment)
+* [Application servers deployment](#application-servers-deployment)
 * [NSG/ASG](#nsg/asg)
-* [Logging en archivering](#logging-en-archivering)
-* [Opruimen lab](#opruimen-lab)
+* [Logging and archiving](#logging-and-archivering)
+* [Lab clean-up](#lab-clean-up)
 
 BY wants to run some REST APIs (and other services) in the cloud. These applications must be geographically redundant. The insurer does want a central management (hub) `virtual network` from which all management can be performed
 
@@ -19,7 +19,7 @@ It allows for a central management/hub network connected that can communicate wi
 
 It's an architecture that fits most use cases, even for cloud-native workloads.
 
-## Deploying the management/hub network
+## Management/hub network deployment
 
 > **NOTE:** Deploy each `virtual network` in a separate `resource group`. This helps with your overview of the resources.
 
@@ -80,7 +80,7 @@ The VM can now access the internet directly. The public IP is however, not neede
 
 </details>
 
-## Deploying the spoke/application networks
+## Spoke/application networks deployment
 
 One of the design decisions is that all applications should use (within reason) the redundancy capabilities provided by Azure. When possible, use `availability zones` and spread workloads over two `regions`. The secondary region should be on standby.
 
@@ -101,7 +101,7 @@ Each application will consist of two spokes attached to a the hub/management net
 
 </details>
 
-## Create the application servers
+## Application servers deployment
 
 In each spoke, one application server will be created. These servers provide the API for financial information and risk assessments. These will be public APIs, but during development they should only be available from the internal network.
 
@@ -222,7 +222,7 @@ This can be done with the `Diagnostics settings` and/or the `NSG flow logs` of `
 
 > **Note:** In about 10-15 minutes, information will begin appearing in the `Traffic Analytics` feature of the `Network Watcher`.
 
-## Clean up lab resources
+## Lab clean-up
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).
 

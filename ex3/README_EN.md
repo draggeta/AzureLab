@@ -1,11 +1,11 @@
 
-# Dag 3 - SD-WAN implementatie en NAT Gateway
+# Day 3 - SD-WAN implementatie en NAT gateway
 
-* [NVA uitrollen](#nva-uitrollen)
-* [Load balancing voor HA](#load-balancing-voor-ha)
-* [NAT Gateway](#nat-gateway)
-* [Routeren richting SD-WAN LB](#routeren-richting-sd-wan-lb)
-* [Opruimen lab](#opruimen-lab)
+* [NVA deployment](#nva-deployment)
+* [Load balancing for high availability](#load-balancing-for-high-availability)
+* [NAT gateway deployment](#nat-gateway-deployment)
+* [Route traffic to the SD-WAN load balancer](#route-traffic-to-the-sd-wan-load-balancer)
+* [Lab clean-up](#lab-clean-up)
 
 BY Health Insurances has deployed an SD-WAN solution in the intervening weeks. All branch offices are now connected to the SD-WAN. Their chosen solution cannot integrate (yet) with `Azure Virtual WAN`. For this reason, a `network virtual appliance` (`NVA`) will be deployed in the hub network. The prefixes listed below must be routed to and from the SD-WAN `NVA`.
 
@@ -118,9 +118,9 @@ Its important to enabled `diagnostics settings` for load balancers. Without `dia
 
 </details>
 
-## NAT Gateway
+## NAT gateway deployment
 
-We will deploy a `NAT Gateway` (`NGW`) and attach it to the SD-WAN subnet. `NGWs` have the [benefit](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) of creating NAT translation entries based on:
+We will deploy a `NAT gateway` (`NGW`) and attach it to the SD-WAN subnet. `NGWs` have the [benefit](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) of creating NAT translation entries based on:
 * source IP
 * destination IP
 * source port
@@ -154,6 +154,6 @@ To fix the `HA` configuration, perform the following steps:
 
 </details>
 
-## Clean up lab resources
+## Lab clean-up
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/).
