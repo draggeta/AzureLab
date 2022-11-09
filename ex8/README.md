@@ -1,9 +1,14 @@
 # Dag 8 - Azure Front Door en overige
-* [Azure Functions](#azure-functions)
-* [Service endpoint](#service-endpoint)
-* [Private endpoint](#private-endpoint)
-* [VNET integration](#vnet-integration)
-* [(Optioneel) Traffic manager aanpassingen](#optioneel-traffic-manager-aanpassingen)
+
+* [Verwijderen Traffic Manager profiles](#verwijderen-traffic-manager-profiles)
+* [Azure Front Door](#azure-front-door)
+* [Onbehandelde items](#onbehandelde-items)
+* [(Optioneel) IPv6](#optioneel-ipv6)
+* [(Optioneel) Forceer verkeer door de Azure firewall](#optioneel-forceer-verkeer-door-de-azure-firewall)
+* [(Optioneel) Global load balancer](#optioneel-global-load-balancer)
+* [(Optioneel) Security/WAF policies](#optioneel-securitywaf-policies)
+* [(Optioneel) ExpressRoute](#optioneel-expressroute)
+* [(Optioneel) Virtual WAN](#optioneel-virtual-wan)
 * [Opruimen lab](#opruimen-lab)
 
 De nieuwe regelgeving van De Hollandsche Bank eist dat financiele instellingen al hun externe diensten via IPv6 aan moeten gaan bieden.
