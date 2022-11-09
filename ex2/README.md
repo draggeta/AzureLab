@@ -9,7 +9,7 @@
 
 ![DNS resolution](./data/dns_inspection.svg)
 
-De afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met `threat intelligence`/threat detection, wordt hiervoor de `Azure Firewall` gebruikt.
+De security afdeling wil alle DNS queries gelogd hebben. Omdat er misschien later nog wat gedaan gaat worden met `threat intelligence`/threat detection, wordt hiervoor de `Azure Firewall` gebruikt.
 
 > **Note:** Start de VM's nog niet op als ze uit staan. We gaan de DNS instellingen aanpassen. Deze worden alleen bij het (her)starten van een VM meegenomen door DHCP, of na een renew in jouw besturingssysteem.
 

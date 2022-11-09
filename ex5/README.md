@@ -44,7 +44,7 @@ Continu route-tabellen aanpassen is niet fijn. Een manier om routes automatisch 
 
 > **NOTE:** Het examen stelt geen vragen over hoe je BGP moet configureren en dus wordt dat hier ook niet gedaan.
 
-De SD-WAN appliance(s) moeten worden gekoppeld aan de `route server` zodat IP-adressen uitgewisseld kunnen worden. Er zijn enkele migratie strategieen mogelijk voor de migratie: 
+De SD-WAN appliance(s) moeten worden gekoppeld aan de `route server` zodat routes uitgewisseld kunnen worden. Er zijn enkele migratie strategieen mogelijk voor de migratie: 
 
 1. BGP configureren > UDR routes verwijderen > interne load balancer verwijderen
 1. Interne load balancer verwijderen > UDR routes verwijderen > BGP configureren
@@ -58,7 +58,7 @@ Welke heeft de voorkeur?
 
 Log in op de SD-WAN appliance en tik `sudo vtysh` in de terminal. Dit zorgt ervoor dat je in [Free Range Routing](https://frrouting.org/)'s CLI terecht komt. Dit is een echte Cisco Like Interface.
 
-De route server heeft twee IP adressen (zie tab `Overview`) die als neighbors gebruikt moeten worden. Elke peer zal een peering sessie naar beide instances op moeten zetten en naar beide instances dezelfde adressen moeten adverteren.
+De route server heeft twee IP adressen (zie tab `Overview`) die als neighbors gebruikt moeten worden. Elke peer zal een peering sessie naar [beide instances](https://learn.microsoft.com/en-us/azure/route-server/troubleshoot-route-server#the-bgp-peering-between-my-nva-and-azure-route-server-is-up-i-can-see-routes-exchanged-correctly-between-them-why-arent-the-nva-routes-in-the-effective-routing-table-of-my-vm) op moeten zetten en naar beide instances dezelfde adressen moeten adverteren.
 
 Plak hier de volgende command-blok (na vervanging van de `route server` en default gateway van de SD-WAN IP-adressen):
 
@@ -86,7 +86,7 @@ show bgp ipv4 neighbors <rs_peer> advertised-routes
 show bgp ipv4 neighbors <rs_peer> received-routes
 ```
 
-Vanuit de `route server` zijde kunnen de[ geleerde en geadverteerde routes](https://learn.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-powershell#troubleshooting) via PowerShell achterhaald worden (in bijvoorbeelde de [`Cloud Shell`](https://learn.microsoft.com/en-us/azure/cloud-shell/overview)). De output van de commands kan even op zich laten wachten.
+Vanuit de `route server` zijde kunnen de [geleerde en geadverteerde routes](https://learn.microsoft.com/en-us/azure/route-server/quickstart-configure-route-server-powershell#troubleshooting) via PowerShell achterhaald worden (in bijvoorbeelde de [`Cloud Shell`](https://learn.microsoft.com/en-us/azure/cloud-shell/overview)). De output van de commands kan even op zich laten wachten.
 
 ```powershell
 $remotepeer = @{

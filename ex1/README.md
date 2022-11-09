@@ -18,20 +18,32 @@ Voor een nieuwe startup een architectuur die past bij cloud-native workloads.
 
 ## Uitrollen hub/management netwerk
 
-> **NOTE:** Elke `virtual network` komt in een eigen resource group terecht. Dit helpt met het overzicht.
+> **NOTE:** Elke `virtual network` komt in een eigen `resource group` terecht. Dit helpt met het overzicht.
+
+Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders servers benaderen en beheren. Vervolgens rollen we een kleine kleine management server uit. De server moet vanuit het internet bereikbaar zijn, maar alleen voor werknemers. Er is nog geen client VPN oplossing aanwezig en het heeft geen prioriteit vanuit de business. Daarnaast moeten de kosten gedrukt worden. Schakel apparaten automatisch uit wanneer ze niet nodig zijn.
 
 > **NOTE:** Gebruik `Standard_SSD` of `Standard_HDD` schijven. Gebruik geen `premium` disks.
 
 > **NOTE:** Kies voor de size van de management server `Standard_B2ms`.
 
-Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders servers benaderen en beheren. Vervolgens rollen we een kleine kleine management server uit. De server moet vanuit het internet bereikbaar zijn, maar alleen voor werknemers. Er is nog geen client VPN oplossing aanwezig en het heeft geen prioriteit vanuit de business. Daarnaast moeten de kosten gedrukt worden. Schakel apparaten automatisch uit wanneer ze niet nodig zijn.
+1. Bouw een hub `virtual network` met een /16 `address space`.
 
-1. Bouw een core `virtual network` met een /16 IP.
+1. Maak een `NSG` voor management. Het is belangrijk eerst verkeer te limiteren voordat je een dienst uitrolt.
+    * Sta inbound RDP **ALLEEN** vanuit jouw publieke IP adres toe. Dit gaan we gebruiken voor management.
+    * Overig inbound internet verkeer mag niet.
+    * Blokkeer interne inbound verkeer (behalve RDP) niet!
+    > <details><summary>Network Security Groups</summary>
+    >
+    > NSG rules kunnen gebruik maken van `tags` om bepaalde sources en destinations aan te duiden. Een van de interessante tags is de `VirtualNetwork` tag. Deze tag staat niet alleen verkeer vanuit jouw `VNET` toe, maar ook alle direct gepeerde `VNETs` en alle netwerken die door een `VPN gateway`, `ExpressRoute gateway` of `route server` worden geleerd.
+
+    </details>  
+
+1. Koppel de `NSG` aan het subnet.
 
 1. Deploy een Windows Server 2022 management server. 
     * Maak geen gebruik van `availability zones` of `availability sets`.
     * Geef de VM geen `public IP`. Deze gaan we handmatig toevoegen.
-    * Geef de VM geen `network security group`. Deze gaan we handmatig toevoegen. 
+    * Geef de VM geen `network security group`. Er is al een gekoppeld aan het subnet waar de VM in uitgerold wordt. 
     * Schakel `Auto-shutdown` in en zet deze op 00:00 in jouw lokale tijdzone. Dit kan ook nadat de VM is aangemaakt.
     > <details><summary>B-serie VMs</summary>
     >
@@ -39,28 +51,15 @@ Als eerst wordt het management netwerk opgezet. Vanuit hier kunnen beheerders se
 
     </details>
 
+1. Maak een `public IP` en koppel deze aan de NIC van de management VM.
+    * Basic SKU
+    * Dynamic assignment (IP wisselt bij deallocaten VM).
+    * Geef het een DNS label. Hierdoor is het intikken van een IP niet meer nodig.
     > <details><summary>Availability</summary>
     >
     > Basic SKU IPs werken alleen met resources die niet `zone  redundant` zijn. Dit is de reden waarom de VM geen gebruik maakt van `availability zones`. Basic IPs werken wel met `availability sets`. Echter hebben `availability sets` weinig nut (en zelfs  nadelen) als je maar één VM hebt draaien. Hetzelfde geldt voor `zones`.
     
     </details>
-
-1. Maak een `NSG` voor management.
-    * Sta inbound RDP vanuit jouw publieke IP adres toe. Dit gaan we gebruiken voor management.
-    * Overig inbound internet verkeer mag niet.
-    * Blokkeer interne inbound verkeer niet!
-    > <details><summary>Network Security Groups</summary>
-    >
-    > NSG rules kunnen gebruik maken van `tags` om bepaalde sources en destinations aan te duiden. Een van de interessante tags is de `VirtualNetwork` tag. Deze tag staat niet alleen verkeer vanuit jouw `VNET` toe, maar ook alle direct gepeerde `VNETs` en alle netwerken die door een `virtual network gateway`, `ExpressRoute gateway` of `route server` worden geleerd.
-
-    </details>  
-
-1. Koppel de `NSG` aan het subnet.
-1. Maak een `public IP` en koppel deze aan de NIC van de management VM.
-    * Basic SKU
-    * Dynamic assignment (IP wisselt bij deallocaten VM).
-    * Geef het een DNS label. Hierdoor is het intikken van een IP niet meer nodig.
-  
   De VM heeft nu een rechtstreekse internet verbinding. Ook zonder de publieke IP zou outbound internet verkeer mogelijk zijn. [Verbind](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/connect-logon) met de management VM.
 * De publieke IP is te achterhalen: 
     * linux: `curl https://api.ipify.org`
