@@ -32,6 +32,8 @@ Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek
         * Patterns to match: '/*' dit is de catch-all
         * Voeg een origin group toe met beide function apps als origin (gebruik app service als type. Verdeel het verkeer 50/50).
         * Health probe interval: 10 secondes
+        * Accepted Protocols: HTTP en HTTPS
+        * Redirect: Aanvinken
         * Schakel caching in.
             > <details><summary>Query string behavior</summary>
             >
@@ -40,8 +42,24 @@ Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek
             </details>
     * Voeg een route toe voor de on-prem omgeving
         * Patterns to match: `/on-prem` en `/on-prem/*`
-        * Voeg een origin group toe met de on-prem firewall/API service als **custom** destination.
+        * Voeg een origin group toe met de on-prem firewall/API service als **custom** destination en HTTP voor de backend
+        * Health probe interval: 10 secondes
+        * Accepted Protocols: HTTP en HTTPS
+        * Redirect: Aanvinken
         * Origin path: `/`
+            > <details><summary>Origin Path</summary>
+            >
+            > De origin path kan gebruikt worden voor URL rewrites. Zonder path, wordt het pad zoals het binnenkomt doorgegeven aan de backend server. Met path, wordt het deel in de pattern match vervangen door de origin path. Hieronder een stuk tekst uit de [documentatie](https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-configure-route#create-a-new-azure-front-door-standardpremium-route):
+            >
+            >	This path is used to rewrite the URL that Azure Front Door will use when constructing the request forwarded to the origin. By default, this path isn't provided. As such, Azure Front Door will use the incoming URL path in the request to the origin. You can also specify a wildcard path, which will copy any matching part of the incoming path to the request path to the origin. Origin path is case sensitive.
+            >
+            > Pattern to match: /foo/*  
+            > Origin path: /fwd/  
+            >
+            > Incoming URL path: /foo/a/b/c/  
+            > URL from Azure Front Door to origin: fwd/a/b/c.  
+   
+            </details>
     * Security policy: Geen nodig
 
 Het kan meer dan twee minuten duren voordat de front door configuratie doorgevoerd is. Dit is omdat de configuratie over alle edges en regions verspreid moet worden. Onder het kopje Front Door Manager kun je de provisioning state bekijken.
