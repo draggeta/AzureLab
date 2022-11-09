@@ -102,7 +102,7 @@ Hoe loopt het verkeer vanuit de on-prem firewall richting de function app?
 
 ## Private endpoint
 
-Het is nog steeds niet mogelijk om vanuit de management server de API in Spoke B te benaderen. De door Microsoft aangerade oplossing om diensten intern te ontsluiten is om [`private endpoints`](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview) te gebruiken. Voor het lab wordt de 'West Europe' `function app` met een `private endpoint` gekoppeld aan de spoke B `VNET`.
+Het is nog steeds niet mogelijk om vanuit de management server de API in Spoke B te benaderen. De door Microsoft aangerade oplossing om diensten intern te ontsluiten is om [`private endpoints`](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview) te gebruiken. Voor het lab wordt de 'North Europe' `function app` met een `private endpoint` gekoppeld aan de spoke B `VNET`.
 
 ### Uitrollen private endpoint
 
