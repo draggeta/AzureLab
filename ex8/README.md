@@ -41,9 +41,10 @@ Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek
     * Voeg een route toe voor de on-prem omgeving
         * Patterns to match: `/on-prem` en `/on-prem/*`
         * Voeg een origin group toe met de on-prem firewall/API service als **custom** destination.
+        * Origin path: `/`
     * Security policy: Geen nodig
 
-Het kan ongeveer twee minuten duren voordat de front door configuratie doorgevoerd is. Dit is omdat de configuratie over alle edges en regions verspreid moet worden. Onder het kopje Front Door Manager kun je de provisioning state bekijken.
+Het kan meer dan twee minuten duren voordat de front door configuratie doorgevoerd is. Dit is omdat de configuratie over alle edges en regions verspreid moet worden. Onder het kopje Front Door Manager kun je de provisioning state bekijken.
 
 Bezoek nu de API services op:
 * `https://<front door fqdn>/api/info`  # azure functions
