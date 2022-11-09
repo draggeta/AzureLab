@@ -34,7 +34,7 @@ Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek
 * Endpoint: 
     * Kies een naam voor de FQDN van de front door
     * Voeg een route toe voor de function apps
-        * Patterns to match: '/*' dit is de catch-all
+        * Patterns to match: `/*` dit is de catch-all
         * Voeg een origin group toe met beide function apps als origin (gebruik app service als type. Verdeel het verkeer 50/50).
         * Health probe interval: 10 secondes
         * Accepted Protocols: HTTP en HTTPS
