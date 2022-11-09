@@ -51,13 +51,13 @@ Het uitrollen van Azure Front Door kan naast de huidige bestaande omgeving. Zoek
             >
             > De origin path kan gebruikt worden voor URL rewrites. Zonder path, wordt het pad zoals het binnenkomt doorgegeven aan de backend server. Met path, wordt het deel in de pattern match vervangen door de origin path. Hieronder een stuk tekst uit de [documentatie](https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-configure-route#create-a-new-azure-front-door-standardpremium-route):
             >
-            >	This path is used to rewrite the URL that Azure Front Door will use when constructing the request forwarded to the origin. By default, this path isn't provided. As such, Azure Front Door will use the incoming URL path in the request to the origin. You can also specify a wildcard path, which will copy any matching part of the incoming path to the request path to the origin. Origin path is case sensitive.
+            >	*This path is used to rewrite the URL that Azure Front Door will use when constructing the request forwarded to the origin. By default, this path isn't provided. As such, Azure Front Door will use the incoming URL path in the request to the origin. You can also specify a wildcard path, which will copy any matching part of the incoming path to the request path to the origin. Origin path is case sensitive.*
             >
-            > Pattern to match: /foo/*  
-            > Origin path: /fwd/  
+            > *Pattern to match: /foo/**  
+            > *Origin path: /fwd/*  
             >
-            > Incoming URL path: /foo/a/b/c/  
-            > URL from Azure Front Door to origin: fwd/a/b/c.  
+            > *Incoming URL path: /foo/a/b/c/*  
+            > *URL from Azure Front Door to origin: fwd/a/b/c.**  
    
             </details>
     * Security policy: Geen nodig
