@@ -1,5 +1,5 @@
 
-# Day 3 - SD-WAN implementatie en NAT gateway
+# Day 3 - SD-WAN implementatie and NAT gateway
 
 * [NVA deployment](#nva-deployment)
 * [Load balancing for high availability](#load-balancing-for-high-availability)

@@ -58,7 +58,7 @@ The application in spoke A, the primary region, has to be made available externa
 * Use an external/public `load balancer`
 * Use an `application gateway` (`AGW`)
 
-De applicatie moet zo veilig mogelijk uitgerold worden en BY wil graag beginnen met het testdraaien van de [`AGW`](https://learn.microsoft.com/en-us/azure/application-gateway/overview) en zijn L7 (WAF) beveiliging.
+The application must be deployed in a secure manner and the BY security team wants to pilot with the [`AGW`](https://learn.microsoft.com/en-us/azure/application-gateway/overview) and the L7 (WAF) security.
 
 ![Load balancing](./data/load_balancing.svg)
 
