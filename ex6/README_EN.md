@@ -78,6 +78,32 @@ Wait until the `VGW` is deployed en retrieve the public IP addresses.
 
 We've just built a 'datacenter' and 'firewall' to be used as remote network. Try to log in to the 'firewall' to make sure you have connectivity.
 
+## VPN configuration in Azure
+
+A VPN connection in Azure consists of three resources:
+1. `VPN gateway`, the VPN device/concentrator.
+2. `Local network gateway`, information about the remote device (as seen from the perspective of the `VPN gateway`).
+3. `Connection`, attaches a `VPN gateway` to a `local network gateway` and specifies the connection parameters.
+
+### Local network gateway
+
+The on-prem firewall has to be defined as an `LNG`. Create it.
+* Endpoint: Both options are possible. Choose which you find easier.
+* Address Spaces: Keep these fields empty. BGP is used, so 'static routes' don't need to be added.
+    * If you won't be using BGP, all networks to begind the `LNG` need to be specified here.
+* Enable BGP under the advanced tab.
+
+The datacenter NOC has provided the following BGP connections settings.
+* ASN: 65003
+* BGP peer address: 10.64.255.255
+
+Which details must be provided to the NOC?
+
+> <details><summary>VPN gateway BGP config</summary>
+>
+> These details can be found under `virtual network gateway` > Configuration'.
+</details>
+
 >
 > Het is ook niet mogelijk om dit te doen met een combinatie van Virtual Network Gateways en route servers.
 
