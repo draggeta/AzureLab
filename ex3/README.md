@@ -118,6 +118,8 @@ Het is belangrijk om diagnostics in te schakelen voor load balancers. Zonder dia
 
 ## NAT Gateway
 
+> **NOTE:** De NAT gateway is zonal en niet zone redundant. Dit betekent dat het wel HA is, maar niet tegen de uitval van de zone kan waar het in zit. Er wordt aan zone redundancy gewerkt. 
+
 We gaan een NAT Gateway (NGW) uitrollen en deze koppelen aan de SD-WAN subnet. `NGWs` hebben het [voordeel](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) dat ze NAT translaties aanmaken op basis van source en destination IPs en poorten, en protocol. Hierdoor kan per `public IP` meer dan de verwachtte 65535 translaties/sessies worden opgezet.
 
 Het is simpel om een gateway bij elkaar te klikken, maar indien nodig kan naar de [documentatie](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/quickstart-create-nat-gateway-portal) gerefereerd worden. 
