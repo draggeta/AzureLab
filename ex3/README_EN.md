@@ -120,7 +120,7 @@ Its important to enabled `diagnostics settings` for load balancers. Without `dia
 
 ## NAT gateway deployment
 
-> **Note:** The NAT gateway is a zonal resource. This means that each NGW is deployed in a single zone. For actual zone failure tolerance, you may need to [deploy multiple NGWs](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-availability-zones).
+> **NOTE:** The NAT gateway is a zonal resource. This means that each NGW is deployed in a single zone. For actual zone failure tolerance, you may need to [deploy multiple NGWs](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-availability-zones).
 
 We will deploy a `NAT gateway` (`NGW`) and attach it to the SD-WAN subnet. `NGWs` have the [benefit](https://learn.microsoft.com/en-us/azure/virtual-network/nat-gateway/nat-gateway-resource) of creating NAT translation entries based on:
 * source IP
