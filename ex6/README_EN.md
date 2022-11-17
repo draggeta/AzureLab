@@ -1,11 +1,11 @@
 # Dag 6 - VPN Gateway
 
 * [VPN Gateway](#vpn-gateway)
-* [On-prem firewall uitrollen](#on-prem-firewall-uitrollen)
-* [VPN configureren in Azure](#vpn-configureren-in-azure)
-* [(Optioneel) Client VPN](#optioneel-client-vpn)
-* [(Optioneel) Traffic manager aanpassingen](#optioneel-traffic-manager-aanpassingen)
-* [Overig](#overig)
+* [On-prem firewall deployment](#on-prem-firewall-deployment)
+* [VPN configuration in Azure](#vpn-configuration-in-azure)
+* [(Optional) Client VPN](#optional-client-vpn)
+* [(Optional) Traffic manager changes](#optional-traffic-manager-changes)
+* [Miscellaneous](#miscellaneous)
 * [Lab clean-up](#lab-clean-up)
 
 As BY Health Insurances is growing fast, cloud costs are starting to rise. The company has a high constant load and the variance in load isn't a lot. This means that the flexibility of the cloud is outweighed by the costs being incurred by the steady state. For this reason, part of the workload will be migrated to an on-premises datacenter. This is not a full migration back to on-premises, but their hybrid cloud strategy. Part of the production workload, dev/test environments and scale out will still be performed in Azure.
@@ -200,7 +200,7 @@ BY developers working from home want a solution to connect to the development en
 
 Which [client/point-to-site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/point-to-site-about#protocol) passes all the requirements?
 
-### Configureren client VPN
+### Configuring the client VPN
 
 1. Go to the `VPN gateway` and open the `Point-to-site configuration`. Configure the client VPN as follows:
     * Address pool: 10.96.0.0/24
@@ -242,9 +242,35 @@ Deploy a new `VNET` for spoke C with the `10.131.0.0/16` address space. Peer it 
 
 </details>
 
-## (Optioneel) Traffic manager changes
+## (Optional) Traffic manager changes
 
-By wants 50% of all (global) clients to connect to the datacenter. The rest should go to Azure in West Europe. 
+BY wants 50% of all (global) clients to connect to the datacenter. The rest should go to Azure in West Europe. Failover to North Europe should only happen in case both other regions fail.
+
+![Traffic manager with priority and weight](./data/traffic_manager_nested.svg)
+
+This is possible by creating nested traffic manager profiles.
+* A global profile with [priority](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) balancing.
+    * Profile 1 points to a [nested profile](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-nested-profiles) with a priority of 100
+        * Nested profile is using the [weighted](https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-routing-methods) routing method and has a 50/50 split between 'on-prem' nd West Europe. Configure 'on-prem' as an external endpoint as 'it doesn't run in Azure'.
+    * Profile 2 points to the Azure firewall (which forwards traffic to the North Europe LB NAT) with a priority of 120.
+
+Visit the API on the FQDN of the parent `traffic manager` and check if only the correct API locations are returned.
+
+Also check the returned DNS values:
+```linux
+dig @1.1.1.1 <fqdn> +short
+```
+
+```windows
+Resolve-DnsName <fqdn> -Server 1.1.1.1
+```
+
+## Miscellaneous
+
+What we've built here is comparable with an Azure Virtual WAN with Virtual Hub roting. The main difference is that these solutions remove a lot of the manual labour. There is less you have to do, but the architecture is a bit less flexible.
+
+Filtering of BGP routes in Azure isn't possible (with the exception of Virtual WAN). The filtering needs to happen on NVA's/on-prem. For site-to-site connections this has to happen based on routes. When the connection is an `ExpressRoute`, it's possible to use (VNET) [BGP communities](https://learn.microsoft.com/en-us/azure/expressroute/how-to-configure-custom-bgp-communities-portal) to filter and manipulate routes.
+
 ## Lab clean-up
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/)
