@@ -141,9 +141,9 @@ Wacht totdat je een status terug krijgt onder kolom `Troubleshooting status`. Se
 
 Controleer of de verbinding actief wordt. Dit kan op de `connection` resource, maar ook op de 'firewall':
 ```bash
-sudo swanctl --list-conns
+sudo swanctl --list-sas
 ```
-
+<!--
 ```
 azure_primary: IKEv2, no reauthentication, rekeying every 14400s, dpd delay 30s
   local:  10.10.0.4
@@ -162,6 +162,7 @@ azure_secondary: IKEv2, no reauthentication, rekeying every 14400s, dpd delay 30
     local:  0.0.0.0/0
     remote: 0.0.0.0/0
 ```
+-->
 
 ### Controleren BGP sessies en routes
 
@@ -200,10 +201,10 @@ Welke [client/point-to-site VPN](https://learn.microsoft.com/en-us/azure/vpn-gat
     * Authentication type: Azure Active Directory
     * Public IP address: Doordat we active/active draaien, is een load balanced client VPN IP-adres nodig. Maak een nieuwe of gebruik een beschikbare bestaande. Gebruik niet die van de NAT gateway.
 2. Configureer de Azure Active Directory instellingen. Let op dat je de tenant identifier gebruikt en niet de tenant domein naam:
-    * Tenant: [https://login.microsoftonline.com/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
-    * Audience: [41b23e61-6c1e-4545-b367-cd054e0ed4b4](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
-    * Issuer: [https://sts.windows.net/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#configure-point-to-site-settings)
-3. Met een Azure AD admin account kan je toegang geven tot AAD authenticatie. Klik hiervoor op `Grant administrator consent for Azure VPN client application` of doe dit zoals in de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication) beschreven.
+    * Tenant: [https://login.microsoftonline.com/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication)
+    * Audience: [41b23e61-6c1e-4545-b367-cd054e0ed4b4](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication)
+    * Issuer: [https://sts.windows.net/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication)
+3. Met een Azure AD admin account kan je toegang geven tot AAD authenticatie. Klik hiervoor op `Grant administrator consent for Azure VPN client application` of doe dit zoals in de [handleiding](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#authorize-the-application) beschreven.
     * Vink consent on behalf of your organization aan. Hiermee zorg je ervoor dat gebruikers deze prompt niet krijgen.
     ![Azure AD authentication](./data/client_vpn.png)
 4. Klik op 'Save'. De deployment duurt 10+ minuten. Download de VPN client configuratie bovenaan de pagina nadat de wijzigingen doorgevoerd zijn. Pak de ZIP bestanden uit.

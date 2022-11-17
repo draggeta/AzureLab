@@ -104,9 +104,147 @@ Which details must be provided to the NOC?
 > These details can be found under `virtual network gateway` > Configuration'.
 </details>
 
->
-> Het is ook niet mogelijk om dit te doen met een combinatie van Virtual Network Gateways en route servers.
+### Connection
 
+It's time to exchange VPN configurationinformation with the DC NOC. The following information has been received from the NOC:
+* PSK: `DitIsEENV4ilugP0sSwerd`
+* Phase 1:
+    * Encryption: GCMAES128
+    * Integrity: SHA256
+    * DH Group: DH20 (ECP384)
+* Phase 2:
+    * Encryption: GCMAES128
+    * Integrity: GCMAES128
+    * DH Group: DH20 (ECP384)
+* IPsec SA lifetime KB: 102400000
+* IPsec SA lifetime s: 3600
+
+Create a `connection` and with the above configuration. Also configure the following settings:
+* Connection type: Site-to-site (IPsec)
+* Enable BGP: check
+
+### Troubleshooten VPN verbinding
+
+It seems that there is something wrong with the VPN connection. It fails to connect as can be seen under the `connection` > `Overview`. Use the `VPN troubleshoot` option to troubleshoot the VPN. Send the output to the log/`network watcher` `storage account`. The troubleshooting step can take up to five minutes.
+
+Wait until a status is returned under the `Troubleshooting status` column. Select the `connection` and not the gateway and open under `Details` the `Action` tab. 
+
+Wacht totdat je een status terug krijgt onder kolom `Troubleshooting status`. Selecteer de `connection` en niet de gateway en controleer onder `Details` het `Action` tabblad.
+
+> <details><summary>Cause and solution</summary>
+> <img src="./data/connection_action.png" alt="Connection Action">
+>
+> It seems that there is a PSK mismatch. After some pushing, the NOC admits that they forgot to copy the last character of the string. The correct PSK is `DitIsEENV4ilugP0sSwerd!`.
+> 
+> Replace the PSK in the `connection`.
+>
+> The zip file written to the `storage account` contains detailed logs returned by the gateway. These can be viewed if needed. More troubleshooting information can be found in the [Microsoft documentation](https://learn.microsoft.com/en-us/azure/vpn-gateway/reset-gateway?WT.mc_id=Portal-Microsoft_Azure_HybridNetworking).
+
+</details>
+
+Verify that the connection is/will become active. This can be done on the `connection` resource, but also on the 'on-prem firewall':
+```bash
+sudo swanctl --list-sas
+```
+
+<!---
+```
+azure_primary: IKEv2, no reauthentication, rekeying every 14400s, dpd delay 30s
+  local:  10.10.0.4
+  remote: 20.8.124.18
+  local pre-shared key authentication:
+  remote pre-shared key authentication:
+  route_vpn_primary: TUNNEL, rekeying every 3600s or 1024000000 bytes, dpd action is clear
+    local:  0.0.0.0/0
+    remote: 0.0.0.0/0
+azure_secondary: IKEv2, no reauthentication, rekeying every 14400s, dpd delay 30s
+  local:  10.10.0.4
+  remote: 20.8.124.107
+  local pre-shared key authentication:
+  remote pre-shared key authentication:
+  route_vpn_secondary: TUNNEL, rekeying every 3600s or 1024000000 bytes, dpd action is clear
+    local:  0.0.0.0/0
+    remote: 0.0.0.0/0
+```
+-->
+
+### Verify BGP sessions and routes
+
+The BGP sessions'll have become active if everything went well and routes should be exchanged too. On the 'on-prem firewall' open the vtysh with `sudo vtysh` to manage the FRR daemon and type the below commands.
+
+```cisco
+show bgp summary
+show ip route 
+```
+
+It's also possible to view the peerings and learned routes via the `virtual network gateway` > `BGP peers` option.
+Another option is to use the `effective routes` option of a VM.
+
+What do you notice if you look at the routes output of the 'on-prem firewall', gateway and `effective routes`?
+
+> <details><summary>Route servers and gateways</summary>
+> <code>Route servers</code> don't automatically exchange routes with <code>virtual network gateways</code>, not even <code>ExpressRoute gateways</code>. This means that thr route server won't learn/advertise <code>VNG</code> learned routes and vice versa. In case this is desired, turn on <code>Branch-to-branch</code> under the <code>route server</code> > <code>Configuration</code>.
+>
+> After turning on the options, the routes should be learned on the SD-WAN, gateway and 'on-prem firewall'.
+
+</details>
+
+## (Optional) Client VPN
+
+> **NOTE:** In case you don't have 'global admin' access to a (free) Azure AD tenant (or are a user in one where users are allowed to register Azure AD applications), the exercise will be theoretical. 
+
+BY developers working from home want a solution to connect to the development environment. BY wants to use the `point-to-site` functionality of the `VGW`. BY has the following requirements for the type of `P2S` to use:
+* It has to use TCP/443 to have the best possibility of working from various networks.
+* It has to use Azure AD authentication as that is all the organization has for identity.
+* It has to support Windows, MacOS and Ubuntu/Fedora clients.
+
+Which [client/point-to-site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/point-to-site-about#protocol) passes all the requirements?
+
+### Configureren client VPN
+
+1. Go to the `VPN gateway` and open the `Point-to-site configuration`. Configure the client VPN as follows:
+    * Address pool: 10.96.0.0/24
+    * Tunnel type: OpenVPN (SSL)
+    * Authentication type: Azure Active Directory
+    * Public IP address: As we're running active/active, a third, load balanced client VPN IP address is needed. Create a new one or use an existing. **DO NOT** use the `Public IP` of the `NAT gateway`
+2. Configure the Azure Active Directory settings. Make sure to use the tenant identifier and not the tenant domain name:
+    * Tenant: [https://login.microsoftonline.com/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication)
+    * Audience: [41b23e61-6c1e-4545-b367-cd054e0ed4b4](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication)
+    * Issuer: [https://sts.windows.net/{tenantId}/](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#enable-authentication)
+    > <details><summary>Get tenant id</summary>
+    > Use the following commands via the [cloud shell](https://shell.azure.com/) to get the tenant id:
+    > <ul>
+    > <li>powershell: <code>Get-AzTenant</code></li>
+    > <li>bash: <code>az account list</code></li>
+    > </ul>
+
+    </details>
+
+3. An Azure AD administrator account can be used to grant your tenant access to the `VGW` authentication app. Click on `Grant administrator consent for Azure VPN client application` or perform the steps as described in the [documentation](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-tenant#authorize-the-application) beschreven.
+    * Make sure to check the 'Consent on behalf of your organization' box. The accepts the authentication for all of the organization.
+    ![Azure AD authentication](./data/client_vpn.png)
+4. Click 'Save'. The deployment can take around 10 minutes. After the update has completed, download the VPN client configuration. Extract the ZIP files.
+
+### Log in to the client VPN
+
+Install the 'Azure VPN Client' as described in the [manual](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-client). After the installation, import the azurevpnconfig.xml.
+
+Connect to the VPN. Which routes do you see?
+
+### Deploy another peered network
+
+Deploy a new `VNET` for spoke C with the `10.131.0.0/16` address space. Peer it to the hub (allow gateway usage). Reconnect to the VPN. Which routes do you see?
+
+> <details><summary>Point-to-site VPN and routes</summary>
+> Point-to-site VPNs know all routes that are the VNET knows about. This means peered networks and what is learned from <code>route servers</code> and <code>virtual network gateways</code> (only if running BGP over the VPN).
+>
+> When it comes to IKEv2 VPN types, it becomes a bit more difficult. Windows clients won't learn any BGP routes by default. This means these routes need to be added as custom routes. Also, Windows clients won't learn about updates to the network as well. To apply the updates, the client must be <a href="https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-point-to-site-routing">redownloaded and installed</a>.
+
+</details>
+
+## (Optioneel) Traffic manager changes
+
+By wants 50% of all (global) clients to connect to the datacenter. The rest should go to Azure in West Europe. 
 ## Lab clean-up
 
 If you're not continuing to the next exercises, it's easier and cheaper to delete the lab when done. The end state of this lab can be [redeployed](../README_EN.md#lab-checkpoints) via the included [Terraform files](./tf/)

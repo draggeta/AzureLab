@@ -1,5 +1,5 @@
 
-# Day 3 - SD-WAN implementatie and NAT gateway
+# Day 3 - SD-WAN implementation and NAT gateway
 
 * [NVA deployment](#nva-deployment)
 * [Load balancing for high availability](#load-balancing-for-high-availability)
@@ -38,7 +38,7 @@ You are tasked with an SD-WAN NVA in the hub network. This'll be an active/passi
     * Don't attach a `public IP`.
     * Turn on `Auto-shutdown` and configure it for 00:00 local time.
     * Provide a custom script in the `Advanced`. Copy the contents of the [cloud init file](./tf/data/cloud-init.yml.j2) in to the **CUSTOM DATA** field, not the **USER DATA** field.
-1. Edit all `UDRs` to route the SD-WAN subnets to the `SD-WAN NVA` appliance.
+1. Edit all `UDRs` to route the SD-WAN subnets to the `SD-WAN NVA` appliance. **ONLY** The SD-WAN subnets should be changed. All other traffic should still be routed via the `AZF`.
 1. Try to ping SD-WAN IP addresses from the management server.
     > <details><summary>IP Forwarding</summary>
     >
