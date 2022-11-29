@@ -110,6 +110,34 @@ It's (still) not possible to access the API server in spoke B from the managemen
 
 `Private endpoints` can be deployed in subnets together with other resources. Make sure that `VNET` B has a subnet available for the `private endpoint`. Create an `NSG` (if it doesn't already exist) that only allows inbound HTTP(S) from the management server. Attach the `NSG` to the subnet. Also attach the `spoke` B route table to the subnet to make sure return traffic is able to find its way back.
 
+Go to the spoke B `function app` > Networking > `Private endpoints` and add an endpoint.
+* Integrate with private DNS zone: No
+    * We'll be doing this manually
+
+Wait until the endpoint is finished deploying. From the management server visit `https://<fqdn>` to view the default `function app` webpage. Also try to perform an API call to one of the endpoints. Resolve the FQDN as well:
+
+```powershell
+Resolve-DnsName <fqdn>
+```
+
+Why isn't it succeeding? Does it succeed on the `private endpoint` IP?
+
+> <details><summary>Private endpoints and DNS</summary>
+>
+> The DNS query returns an external IP address, which the management server isn't allowed to access. The `private endpoint` does have an internal IP, but no DNS record is pointing to it. Accessing the `function app`/`app service` on its internal IP won't work either, as they require [SNI](https://en.wikipedia.org/wiki/Server_Name_Indication). To get it working, a [privatelink.* DNS zone](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns#azure-services-dns-zone-configuration) must be created for the specific resource type and attached to the VNET where DNS resolution happens. The `private endpoint` must register itself into this `private DNS zone`.
+>
+> All resources with a private link get a privatelink CNAME. This is always the case and the FQDN always resolves to the privatelink CNAME.
+> ```
+> functionapp.azurewebsites.net > functionapp.privatelink.azurewebsites.net
+> ```
+> Externally, the DNS resolution happens as follows: `<functionapp>.azurewebsites.net` > this is a CNAME for `<functionapp>.privatelink.azurewebsites.net` > eventually resolved by public DNS to the external IP of the `function app`.
+>
+> Internally, the DNS resolution happens as follows: `<functionapp>.azurewebsites.net` > this is a CNAME for `<functionapp>.privatelink.azurewebsites.net` > resolved by the `private DNS zone` to the interne IP of the `function app`.
+>
+> Resources without a privatelink CNAME are always reached via the internet.
+
+</details>
+
 
 ## Lab clean-up
 
