@@ -99,13 +99,13 @@ Get-AzRouteServerPeerAdvertisedRoute @remotepeer
 Get-AzRouteServerPeerLearnedRoute @remotepeer
 ```
 
-1. Controleer de route tabellen voor enkele subnets uit de hub.
+1. Controleer de effective routes voor de management server in de hub.
 
 ### Verwijderen UDRs/load balancer
 
 Wacht eerst totdat de routes uitgewisseld zijn. Nadat de routes zijn uitgewisseld, kunnen de onderstaande stappen uitgevoerd worden:
 
-1. Verwijder de SD-WAN routes uit de `route tables` 
+1. Verwijder de SD-WAN routes uit alle `route tables` 
 1. Verwijder de interne load balancer
 1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden vanuit de management server
 1. Controleer of IP adressen achter de SD-WAN gepingd kunnen worden vanuit de API servers. Er is een kans dat dit niet lukt. Kan je bedenken waarom?
@@ -149,8 +149,8 @@ Er zal aardig wat niet werken. In de oude situatie mocht beheer alleen vanuit de
 ### Verwijderen externe beheertoegang
 
 Ruim de regels op die niet meer nodig zijn nu beheer toegang door de Bastion wordt geregeld:
-1. NSG en AZF ACEs en NAT regels die RDP vanaf het internet naar de management server faciliteren
-1. Zorg ervoor dat de management server nog steeds op beheer poorten kan verbinden
+1. NSG en AZF ACEs en NAT regels die RDP vanaf het internet naar de management server faciliteren.
+1. Zorg ervoor dat beheer vanuit de management server nog steeds mogelijk is.
 1. Controleer dat de management server niet meer benaderbaar is vanaf het internet.
 
 ## Opruimen lab

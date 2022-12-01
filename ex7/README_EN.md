@@ -138,6 +138,112 @@ Why isn't it succeeding? Does it succeed on the `private endpoint` IP?
 
 </details>
 
+### Private DNS repareren.
+
+We're going to set up the internal DNS so that it always returns an internal IP address if a `private link` exists for the `function apps`/`app services`. The function app needs to register itself into the internal DNS.
+1. Create a `private DNS zone` with the [correct name](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns#azure-services-dns-zone-configuration) for the type.
+    * `Function apps` use the same type/name as `app services`. 
+1. Attach the zone to the hub `VNET`
+    * Auto registration can be disabled.
+1. Go to the `function app` `private endpoint` > DNS configuration and click on 'Add configuration'.
+    * Select the correct `Private DNS zone`
+    * Zone group can remain 'default'. This is mostly handy for automation, to help view groups of records.
+    * Name the registration sensibly
+    * Click on add.
+
+Test the following points after the successful deployment:
+* DNS resolving
+* reachability of the spoke B API from the management server
+* reachability of the spoke B API from the SD-WAN appliance
+    * Why is the SD-WAN appliance able to access the private endpoint?
+
+
+> <details><summary>Private endpoints and NSGs</summary>
+>
+> `Private endpoints` [by default ignore](https://learn.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy?tabs=network-policy-portal) `NSGs` and `RTs`. It's possible to have the endpoints respect the policies and routes. The link describes how to enable this setting. 
+>
+> Route tables are only used for return traffic. NSGs are only used for inbound traffic.
+
+</details>
+
+Turn the support for network policies on for the `subnet` containing the `private endpoint`.
+
+Test if the website is available from outside the `VNET`.
+
+> <details><summary>Private endpoints and app services/function apps</summary>
+>
+> `App services` and `function apps` [stop being available externally](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview#network-security-of-private-endpoints) when a `private endpoint` is attached. These are the only resource types where this is the case.
+>
+> It is a requirement that the API server is reachable from the internet. This requirement can be met by going to the `function app` > Networking > Access Restrictions (preview) item. From here, access from the internet can be allowed.
+
+</details>
+
+Fix the external access to the spoke B API server. It is a public service.
+
+## VNET integration
+
+The `function apps` are now reachable from inside the `VNETs`/`subnets`. The apps however, cannot access internal resources. Private and service endpoints only facilitate traffic inbound towards the endpoint. For outbound traffic from the app towards resources in the a `VNET`, [`VNET integration`](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration) is the recommended option. The `VI` service claims a subnet for itself. 
+
+The [size of the subnet](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#subnet-requirements) determines the capacity for the app to scale out (horizontally). The `VNET` also cannot contain anything other than the `VNET integration`. All traffic originating from the service is sourced from a random IP in the subnet and as such the whole subnet range needs to be used in ACLs.
+
+![VNET integration](./data/vnet_integration.svg)
+
+> **NOTE:** To save time, we'll be deploying the `VNET integration` only for the spoke A function.
+> The integration deployment takes little time, but it can take up to two minutes before the function is restarted and begins using the **VNET configured DNS**.
+
+### Deploying the VNET integration
+
+> **NOTE:** The function app has an endpoint (`/api/getweb`) that is able to fetch websites. It is a crappy, self written proxy to test the `VNET integration` functionality.
+
+> **NOTE:** restart the function app after each change. This propagates the changes faster.
+
+Configure the `VNET integration`:
+1. Create a subnet in spoke A for the `VNET integration`.
+1. Go to the `function app` > Networking > VNET integration and add a new integration.
+    * Select the correct VNET and subnet.
+    * Make sure that `Route All` is disabled after configuring the VNET integration.
+1. Visit the following websites from a browser (the location doesn't matter).
+    * `https://<func a endpoint>/api/getweb?url=https://dilbert.com`
+    * `https://<func a endpoint>/api/getweb?url=http://sdwan01.by.cloud`
+    * `https://<func a endpoint>/api/getweb?url=http://10.32.1.1` # 'on-prem' datacenter
+    * `https://<func a endpoint>/api/getweb?url=https://<func b endpoint>/api/info`
+
+Which websites work and which don't? Why?
+
+> <details><summary>VNET Integration and routing</summary>
+>
+> [VI routing is quite complicated](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#routes). Long story short:
+> 1. Route All off, routes only RFC1918 addresses into the netwerk. This traffic is affected by `NSGs`/`route tables`
+> 1. Route All on, has the capability to route all traffic into the network. Which traffic is routed into the network is dependent on the attached `route table`. All internally routed traffic is also affected by `NSGs`.
+> 
+> The spoke B API isn't reachable because the VI subnet has no route to this network. The routes for the SD-WAN and on-prem DC are automatically learned. Traffic to Dilbert is directly sent to the internet.
+
+</details>
+
+1. Attach the spoke A `route table` to the VI subnet.
+1. Visit the following websites from a browser (the location doesn't matter).
+    * `https://<func a endpoint>/api/getweb?url=https://dilbert.com`
+    * `https://<func a endpoint>/api/getweb?url=http://sdwan01.by.cloud`
+    * `https://<func a endpoint>/api/getweb?url=http://10.32.1.1` # 'on-prem' datacenter
+    * `https://<func a endpoint>/api/getweb?url=https://<func b endpoint>/api/info`
+
+All pages, including the spoke B API are now reachable. Why?
+
+1. Configure the `VNET integration`: turn `Route All` on.
+1. Visit the following websites from a browser (the location doesn't matter).
+    * `https://<func a endpoint>/api/getweb?url=https://dilbert.com`
+    * `https://<func a endpoint>/api/getweb?url=http://sdwan01.by.cloud`
+    * `https://<func a endpoint>/api/getweb?url=http://10.32.1.1` # 'on-prem' datacenter
+    * `https://<func a endpoint>/api/getweb?url=https://<func b endpoint>/api/info`
+
+Dilbert has stopped working. Why?
+
+## (Optional) Traffic manager changes
+
+Fix `traffic manager`. Traffic should be equally split between West Europe and North Europe. Due to the changes between the function apps and on-prem, it's better to leave the on-prem environment out of the `TM` policies.
+
+> **NOTE:** The health checks will succeed, but the API won't be reachable via the TM FQDN. The reason for this is that function apps check the SNI to know which instance to access.
+> To get this working, you'd need your own DNS zone and configure the desired FQDN on the `function app` and set it up as a CNAME for the traffic manager FQDN.
 
 ## Lab clean-up
 

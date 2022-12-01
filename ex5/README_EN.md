@@ -55,7 +55,7 @@ The SD-WAN appliance must be peered to the `route servers` to exchange routes. M
 
 Log in to the SD-WAN appliance (from the management server) and type `sudo vtysh` into the terminal. This places you in [Free Range Routing](https://frrouting.org/)'s CLI. It's a Cisco Like Interface.
 
-The `route server` has two IP addresses (see the `Overview` tab) that have to be used as BGP peers. Each individual NVA peer must set up [Widentical peerings](https://learn.microsoft.com/en-us/azure/route-server/troubleshoot-route-server#the-bgp-peering-between-my-nva-and-azure-route-server-is-up-i-can-see-routes-exchanged-correctly-between-them-why-arent-the-nva-routes-in-the-effective-routing-table-of-my-vm) to each of the route server IPs.
+The `route server` has two IP addresses (see the `Overview` tab) that have to be used as BGP peers. Each individual NVA peer must set up [identical peerings](https://learn.microsoft.com/en-us/azure/route-server/troubleshoot-route-server#the-bgp-peering-between-my-nva-and-azure-route-server-is-up-i-can-see-routes-exchanged-correctly-between-them-why-arent-the-nva-routes-in-the-effective-routing-table-of-my-vm) to each of the route server IPs.
 
 Paste the below command block into the FRR CLI (after changing the `route server` IP addresses and the SD-WAN NVA's default gateway:
 
@@ -97,13 +97,13 @@ Get-AzRouteServerPeerAdvertisedRoute @remotepeer
 Get-AzRouteServerPeerLearnedRoute @remotepeer
 ```
 
-1. Check the route tables of some of the subnets in the hub. Ignore the spokes for now.
+1. Check the route tables (effective routes) of the management VM in the hub. Ignore the spokes for now.
 
 ### Route table/load balancer removal
 
 Perform the below steps to clean up the route tables and `load balancer` after the routes are exchanged:
 
-1. Remove the SD-WAN routes from the `route tables` 
+1. Remove the SD-WAN routes from all the `route tables` 
 1. Remove the internal `load balancer`
 1. Check if the IP addresses behind the SD-WAN can be pinged from the management server.
 1. Check if the SD-WAN branch IP addresses can be pinged from the spoke API servers. Also check the effective routes of the servers. Why are the pings succeeding/failing? Does the intranet page work behind the SD-WAN?
@@ -150,8 +150,8 @@ Quite a lot of the `bastion` connections are blocked. In the old situation, mana
 
 ### External management access removal
 
-Clean up unneeded rules now that `bastion` allows for management access.:
-1. NSG and AZF ACEs and NAT rules  that allow RDP from the internet to the management server.
+Clean up unneeded rules now that `bastion` allows for management access.
+1. NSG and AZF ACEs and NAT rules that allow RDP from the internet to the management server.
 1. Ensure that the management server is still able to manage the environment.
 1. Ensure that the management server isn't accessible from the internet.
 

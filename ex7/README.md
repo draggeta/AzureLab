@@ -181,7 +181,7 @@ Repareer de externe toegang tot de spoke B API. Iedereen moet erbij kunnen.
 
 De `function apps` in Azure zijn nu benaderbaar vanuit de VNET. De apps kunnen echter niet bij interne bronnen. Private en service endpoints faciliteren alleen verkeer richting de dienst, niet omgekeerd. Voor outbound verkeer vanuit de app services richting de VNET, kan gebruik worden gemaakt van [`VNET integration`](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration) (VI). De dienst zorgt ervoor dat een app service/function app een subnet toegewezen krijgt waar vandaan het verkeer kan sturen.
 
-De[ grootte van het subnet](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#subnet-requirements) bepaalt in welke mate de function app horizontaal kan schalen. Ook kan het subnet niks anders bevatten dan de VNET integration. Verder kan elk IP in de subnet als source dienen voor verkeer dat van de function app af komt.
+De [grootte van het subnet](https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration#subnet-requirements) bepaalt in welke mate de function app horizontaal kan schalen. Ook kan het subnet niks anders bevatten dan de VNET integration. Verder kan elk IP in de subnet als source dienen voor verkeer dat van de function app af komt.
 
 ![VNET integration](./data/vnet_integration.svg)
 
