@@ -32,8 +32,8 @@ How could the migration be performed with a minimal amount of downtime?
 Remove the following resources and related resources:
 * spoke A webserver (and `disk`, `NIC`)
 * spoke B webserver (and `disk`, `NIC`)
-* `application gateway` (and `disk`, `NIC`)
-* `external load balancer` (and `disk`, `NIC`)
+* `application gateway` (and `public IP`, `subnet`)
+* `external load balancer` (and `public IP`)
 * VM and `AGW` subnets
 * keep the `NSGs` and `route tables`
 
