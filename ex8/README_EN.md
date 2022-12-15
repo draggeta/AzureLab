@@ -3,12 +3,12 @@
 * [Remove Traffic Manager profiles](#remove-traffic-manager-profiles)
 * [Azure Front Door](#azure-front-door)
 * [Uncovered items](#uncovered-items)
-* [(Optioneel) IPv6](#optioneel-ipv6)
-* [(Optioneel) Forceer verkeer door de Azure firewall](#optioneel-forceer-verkeer-door-de-azure-firewall)
-* [(Optioneel) Global load balancer](#optioneel-global-load-balancer)
-* [(Optioneel) Security/WAF policies](#optioneel-securitywaf-policies)
-* [(Optioneel) ExpressRoute](#optioneel-expressroute)
-* [(Optioneel) Virtual WAN](#optioneel-virtual-wan)
+* [(Optional) IPv6](#optional-ipv6)
+* [(Optional) Forceer traffic through the Azure firewall](#optional-force-traffic-through-the-azure-firewall)
+* [(Optional) Global/Cross regional load balancer](#optional-globalcross-regional-load-balancer)
+* [(Optional) Security/WAF policies](#optional-securitywaf-policies)
+* [(Optional) ExpressRoute](#optional-expressroute)
+* [(Optional) Virtual WAN](#optional-virtual-wan)
 * [Lab clean-up](#lab-clean-up)
 
 With the new regulations imposed by De Hollandsche Bank, BY has to start offering all external services via IPv6.
@@ -21,7 +21,7 @@ BY wants a solution to cache data closer to users. A CDN can be used, but the ar
 
 ## Remove Traffic Manager profiles
 
-Remove the `Traffic Manager` profiles. These resources won't be needed after implementing Azure `front door`. Especially as the TM profiles are broken [due to the `function app`/FQDN](../ex7/README.md#optioneel-traffic-manager-aanpassingen) issues.
+Remove the `Traffic Manager` profiles. These resources won't be needed after implementing Azure `front door`. Especially as the TM profiles are broken [due to the `function app`/FQDN](../ex7/README_EN.md#optional-traffic-manager-changes) issues.
 
 > **NOTE:** In production it's a valid architecture to use `AFD` and `TM` profiles side by side or `AFD` in front of `TM`.
 
@@ -80,57 +80,59 @@ Also try to resolve the FQDNs. Both IPv4 and IPv6 addresses should be returned.
 
 ## Uncovered items
 
-This is the end of the lab. However, there are some items not covered by this lab but can come up in the exam. The reasons for the omissions are varied, but mostly come down to the fact that these are expensive resources or that the deployments of these resources aren't lab friendly.
+This is the end of the lab. However, there are some items not covered by this lab that can come up in the exam. The reasons for the omissions are varied, but mostly come down to the fact that these are expensive resources or that the deployments of these resources aren't lab friendly.
 
-### (Optioneel) IPv6
+### (Optional) IPv6
 
-Toevallig zorgt Front Door ervoor dat je diensten (publiekelijk) ook via IPv6 te benaderen zijn. Dat scheelt. Het werkt ook voor diensten die geen IPv6 ondersteunen zoals de Azure functions.
+Front door makes all services (externally) available on IPv6. This may ease the burden of deploying IPv6 internally in your organization. It even works for Azure resources that don't support IPv6, such as Azure functions.
 
-IPv6 is voor [VNETs en VMs](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/ipv6-overview) breed beschikbaar, maar aardig wat PaaS diensten [ondersteunen](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/ipv6-overview#limitations) het [nog niet](https://msandbu.org/ipv6-support-in-microsoft-azure/).
+IPv6 is GA for [VNETs and VMs](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/ipv6-overview), but quite a lot of PaaS services don't yet [support](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/ipv6-overview#limitations) the [address family](https://msandbu.org/ipv6-support-in-microsoft-azure/).
 
-* Probeer IPv6 in de on-prem VNET uit te rollen.
-* Koppel ook een publiek IPv6 adres aan de 'firewall'.
-* Pas NSG regels aan, kunnen IPv4 en IPv6 regels gecombineerd worden?
+* Deploy IPv6 in the 'on-prem VNET'.
+* Attach a public IPv6 address to the 'on-prem firewall'.
+* Edit NSGs. Can IPv4 and IPv6 sources and destinations be combined in the same rule? 
 
-### (Optioneel) Forceer verkeer door de Azure firewall
+### (Optional) Force traffic through the Azure firewall
 
-Verkeer tussen on-prem en de spokes gaat niet langs de Azure firewall. Dit is standaard het geval en is in bepaalde gevallen ongewenst. Door route tables aan te passen, kan verkeer tussen spokes en on-prem altijd door de firewall.
+Traffic between 'on-prem' and the spokes don't traverse the Azure firewall. This is the default scenario and may not be desired. By editing route tables, traffic between 'on-prem'and spokes can be forced through the `AZF`.
 
-* Pas de UDRs aan
-* Configureer een UDR op de VGW subnet
-* Maak firewall regels aan die verkeer toe staan
-* Gebruik de log analytics om de logs te bekijken
+* [Edit](https://learn.microsoft.com/en-us/azure/virtual-network/manage-route-table#create-a-route-table) the UDR [propagation settings](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview#border-gateway-protocol).
+* Configure a UDR on the VGW subnet.
+* Create firewall rules allowing the traffic between the locations.
+* Use the log analytics workspace to view the logs.
 
-### (Optioneel) Global load balancer
+### (Optional) Global/Cross Regional load balancer
 
-De global load balancer is voor L4 wat Azure Front door is voor L7. Het is gebruikt een anycast public IP en kan verkeer load balancer naar externe publieke load balancers. Rol twee externe load balancers uit en zet daar een global load balancer voor.
+De cross regional load balancer is for L4 what Azure front door is for L7 traffic. It uses an anycast public IP address and is able to load balance traffic over external load balancers. Try to deploy two external load balancers fronted by a cross regional load balancer. 
 
-* Kan het met een basic SKU?
-* Welke regio's ondersteunen de GLB?
-* Wat is het gevolg als de regio waar de GLB gehost wordt down gaat?
+* Which SKU must be used to deploy a CRLB?
+* Which regions support the CRLB?
+* What happens when the region hosting the CRLB goes becomes unavailable?
 
-### (Optioneel) Security/WAF policies
+### (Optional) Security/WAF policies
 
-Security policies kunnen gebruikt worden om verkeer te filteren op applicatie niveau. Deze policies kunnen op meerdere plekken gebruikt worden, waaronder de Front Door.
+Security policies can be used to filter traffic on the application level. These policies can be used in multiple resources, including `front door` and `application gateway`.
 
-* Configureer op de Azure Front Door security policies die verkeer vanuit niet Europese landen blokkeert
+* Create a policy blocking traffic from non-European countries.
+* Apply the policy to the `front door`.
+* Test the policy (maybe using a web proxy or for example from a VM in the US.)
 
-### (Optioneel) ExpressRoute
+### (Optional) ExpressRoute
 
-Een volledige ExpressRoute configureren kan niet, maar we kunnen wel een eind komen. 
+Its not possible to configure a working ExpressRoute, but it's possible to get a good idea of the initial configuration.
 
-* Rol een ExpressRoute circuit uit.
-* Rol een ExpressRoute gateway uit.
-* Vind de service key voor de ExpressRoute circuit. Deze key moet normaal gesproken aan de provider zijde ingevoerd worden.
-* De connection tussen de circuit en gateway kan niet gemaakt worden omdat de circuit niet actief kan worden.
+* Deploy an ExpressRoute circuit.
+* Deploy an ExpressRoute gateway. This gateway can be deployed side-by-side with the `VPN gateway`.
+* Find the service key for the ExpressRout circuit. This key has to be entered on the provider side.
+* The connection between the circuit and the gateway cannot be made as there is no way to get the circuit running without an actual contract with a provider.
 
-### (Optioneel) Virtual WAN
+### (Optional) Virtual WAN
 
-Azure VWAN is een oplossing om vele locaties binnen een regio op een (wat makkelijkere) wijze aan elkaar te koppelen. Het uitrollen en verwijderen van deze oplossing kan redelijk wat tijd kosten.
+Azure VWAN is a solution to connect multiple locations within a region on a somewhat easier way. The deployment and cleanup of VWAN can take a lot of time and the resource is billed by the hour, making it expensive.
 
-* Rol een Virtual WAN uit en controleer de instellingen.
-* Met welke providers integreert het?
-* Maak van de Virtual WAN een secure hub.
+* Deploy a virtual WAN and take not of the settings along the way.
+* Which providers integrate with the VWAN?
+* Transform the virtual hub into a secure hub.
 
 ## Lab clean-up
 
