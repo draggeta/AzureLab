@@ -79,7 +79,7 @@ Er is nu een 'datacentrum' die als remote netwerk gebruikt kan worden. Test voor
 
 ## VPN configureren in Azure
 
-Een VPN verbinding in Azure bestaat uit drie delen:
+Een VPN verbinding in Azure bestaat uit drie losse objecten:
 1. `VPN gateway`, het apparaat dat de verbinding op zet
 2. `Local network gateway`, informatie over het remote apparaat (vanuit het perspectief van de `VPN gateway`) 
 3. `Connection`, koppelt een `VPN gateway` aan een `local network gateway` en specificeert de instellingen.
