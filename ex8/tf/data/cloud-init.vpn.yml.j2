@@ -1,0 +1,296 @@
+## template: jinja
+#cloud-config
+
+{%  set vgw_peer_1 = '${vgw_peer_1}' -%}
+{%- set vgw_bgp_peer_1 = '${vgw_bgp_peer_1}' -%}
+{%- set vgw_peer_2 = '${vgw_peer_2}' -%}
+{%- set vgw_bgp_peer_2 = '${vgw_bgp_peer_2}' -%}
+
+snap:
+  commands:
+    00: snap install frr
+    01: snap connect frr:network-control core:network-control
+    02: snap alias frr.vtysh vtysh
+
+package_upgrade: true
+
+packages:
+  - nginx
+  - strongswan
+  - strongswan-swanctl
+
+write_files:
+  # Enable ipv4 forwarding, required on CIS hardened machines
+  - path: /etc/sysctl.d/enabled_ipv4_forwarding.conf
+    content: |
+      net.ipv4.ip_forward=1
+      net.ipv6.conf.all.forwarding=1
+      net.ipv4.conf.all.accept_redirects=0
+      net.ipv4.conf.all.send_redirects=0
+  # Web API
+  - path: /var/www/html/index.html
+    content: |
+      {"service": "Finance API", "location": "dc-ams-01", "server": "web03"}
+  - path: /var/www/html/health/index.html
+    content: |
+      {"health": "ok"}
+  # configure addresses on loopback interface to simulate hosts on SD-wan
+  - path: /etc/netplan/10-loopback.yaml
+    permissions: "0644"
+    content: |
+      network:
+        version: 2
+        ethernets:
+          lo:
+            addresses:
+              - 10.32.0.1/16
+              - 10.33.0.1/16
+              - 10.34.0.1/16
+              - 10.35.0.1/16
+              - 10.64.255.255/32
+  # configure xfrm interface
+  - path: /etc/systemd/network/10-tunnel.network
+    permissions: "0644"
+    # https://serverfault.com/questions/1088201/how-to-setup-xfrm-tunnel-on-boot-for-fedora-redhat-centos
+    # https://systemd.network/systemd.network.html#
+    content: |
+      [Match]
+      Name=lo
+
+      [Network]
+      Xfrm=xfrm0
+      Xfrm=xfrm1
+  - path: /etc/systemd/network/20-tunnel.netdev
+    permissions: "0644"
+    # https://serverfault.com/questions/1088201/how-to-setup-xfrm-tunnel-on-boot-for-fedora-redhat-centos
+    # https://systemd.network/systemd.netdev.html
+    content: |
+      [NetDev]
+      Name=xfrm0
+      Kind=xfrm
+
+      [Xfrm]
+      InterfaceId=10
+      Independent=yes
+  - path: /etc/systemd/network/21-tunnel.netdev
+    permissions: "0644"
+    # https://serverfault.com/questions/1088201/how-to-setup-xfrm-tunnel-on-boot-for-fedora-redhat-centos
+    # https://systemd.network/systemd.netdev.html
+    content: |
+      [NetDev]
+      Name=xfrm1
+      Kind=xfrm
+
+      [Xfrm]
+      InterfaceId=11
+      Independent=yes
+  - path: /etc/netplan/20-tunnel.yaml
+    permissions: "0644"
+    # https://serverfault.com/questions/1088201/how-to-setup-xfrm-tunnel-on-boot-for-fedora-redhat-centos
+    content: |
+      network:
+        version: 2
+        ethernets:
+          xfrm0:
+            dhcp4: false
+            dhcp6: false
+            # addresses:
+            #   - 10.64.255.255/32
+            routes:
+              - to: {{ vgw_bgp_peer_1 }}/32
+          xfrm1:
+            dhcp4: false
+            dhcp6: false
+            # addresses:
+            #   - 10.64.255.255/32
+            routes:
+              - to: {{ vgw_bgp_peer_2 }}/32
+  # Configure the VPN:
+  - path: /etc/swanctl/conf.d/azure.conf
+    permissions: "0644"
+    # https://cloudinit.readthedocs.io/en/latest/topics/instancedata.html
+    content: |
+      # https://docs.strongswan.org/docs/5.9/swanctl/swanctlConf.html
+      # https://www.strongswan.org/testing/testresults/ikev2/net2net-psk/moon.swanctl.conf
+      connections {
+          # Section for an IKE connection named <conn>.
+          azure_primary {
+              # IKE major version to use for connection.
+              version = 2
+
+              # Local address(es) to use for IKE communication, comma separated.
+              local_addrs = {{ ds.meta_data.imds.network.interface[0].ipv4.ipAddress[0].privateIpAddress }}
+
+              # Remote address(es) to use for IKE communication, comma separated.
+              remote_addrs = {{ vgw_peer_1 }}
+
+              aggressive = no
+
+              dpd_delay = 30s
+
+              # Default inbound XFRM interface ID for children.
+              if_id_in = 10
+
+              # Default outbound XFRM interface ID for children.
+              if_id_out = 10
+
+              # Section for a local authentication round.
+              local {
+                  auth = psk
+              }
+
+              # Section for a remote authentication round.
+              remote {
+                  auth = psk
+              }
+
+              proposals = aes128gcm16-sha256-ecp384
+
+              children {
+                  # CHILD_SA configuration sub-section.
+                  route_vpn_primary {
+                      # Local traffic selectors to include in CHILD_SA.
+                      local_ts = 0.0.0.0/0
+
+                      # Remote selectors to include in CHILD_SA.
+                      remote_ts = 0.0.0.0/0
+
+                      life_time = 3600
+
+                      rekey_bytes = 1024000000
+
+                      esp_proposals = aes128gcm16-aes128gmac-ecp384
+
+                      start_action = start
+                  }
+              }
+          }
+
+          azure_secondary {
+              # IKE major version to use for connection.
+              version = 2
+
+              # Local address(es) to use for IKE communication, comma separated.
+              local_addrs = {{ ds.meta_data.imds.network.interface[0].ipv4.ipAddress[0].privateIpAddress }}
+
+              # Remote address(es) to use for IKE communication, comma separated.
+              remote_addrs = {{ vgw_peer_2 }}
+
+              aggressive = no
+
+              dpd_delay = 30s
+
+              # Default inbound XFRM interface ID for children.
+              if_id_in = 11
+
+              # Default outbound XFRM interface ID for children.
+              if_id_out = 11
+
+              # Section for a local authentication round.
+              local {
+                  auth = psk
+              }
+
+              # Section for a remote authentication round.
+              remote {
+                  auth = psk
+              }
+
+              proposals = aes128gcm16-sha256-ecp384
+
+              children {
+                  # CHILD_SA configuration sub-section.
+                  route_vpn_secondary {
+                      # Local traffic selectors to include in CHILD_SA.
+                      local_ts = 0.0.0.0/0
+
+                      # Remote selectors to include in CHILD_SA.
+                      remote_ts = 0.0.0.0/0
+
+                      life_time = 3600
+
+                      rekey_bytes = 1024000000
+
+                      esp_proposals = aes128gcm16-aes128gmac-ecp384
+
+                      start_action = start
+                  }
+              }
+          }
+      }
+
+      secrets {
+         ike-1 {
+            secret = "DitIsEENV4ilugP0sSwerd!"
+         }
+      }
+  # configures frr to simulate an SD-WAN box with BGP
+  - path: /tmp/frr.conf
+    permissions: "0644"
+    content: |
+      configure terminal
+      frr defaults traditional
+      log syslog informational
+      ip forwarding
+      no ipv6 forwarding
+      !
+      ip prefix-list AZURE-PL-OUT seq 10 permit 10.32.0.0/14 ge 16
+      ip prefix-list AZURE-PL-IN seq 10 permit 10.128.0.0/14 ge 16
+      ip prefix-list AZURE-PL-IN seq 20 permit 10.194.0.0/21 ge 24
+      ip prefix-list AZURE-PL-IN seq 30 permit 10.193.128.0/21 ge 24
+      ip prefix-list REDIS-PL-IN seq 10 permit 10.32.0.0/14 ge 16
+      !
+      route-map AZURE-RM-OUT permit 1
+        match ip address prefix-list AZURE-PL-OUT
+      !
+      route-map AZURE-RM-OUT deny 2
+      !
+      route-map AZURE-RM-IN permit 1
+        match ip address prefix-list AZURE-PL-IN
+      !
+      route-map AZURE-RM-IN deny 2
+      !
+      route-map REDIS-RM permit 1
+        match ip address prefix-list REDIS-PL-IN
+      !
+      router bgp 65003
+        neighbor AZURE peer-group
+        neighbor AZURE remote-as 65515
+        neighbor AZURE ebgp-multihop 5
+        neighbor AZURE update-source 10.64.255.255
+        neighbor AZURE advertisement-interval 0
+        neighbor AZURE timers 10 30
+        neighbor {{ vgw_bgp_peer_1 }} peer-group AZURE
+        neighbor {{ vgw_bgp_peer_2 }} peer-group AZURE
+        !
+        address-family ipv4 unicast
+        redistribute connected route-map REDIS-RM
+        neighbor AZURE route-map AZURE-RM-IN in
+        neighbor AZURE route-map AZURE-RM-OUT out
+        neighbor AZURE soft-reconfiguration inbound
+        exit-address-family
+      exit
+      !
+      exit
+      !
+      write memory
+
+  - path: /var/lib/cloud/scripts/per-boot/swan.sh
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      swanctl --load-all
+
+runcmd:
+  - frr.vtysh --echo --command "$(cat /tmp/frr.conf)"
+  - frr.vtysh --writeconfig
+  # - netplan --debug apply
+  # - swanctl --load-all
+
+power_state:
+  delay: now
+  mode: reboot
+  message: rebooting
+  timeout: 120
+  condition: true
+
